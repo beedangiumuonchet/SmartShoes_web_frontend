@@ -4,6 +4,15 @@ export const routes = [
     component: () => import('./HomeView.vue'),
     meta: {
       requiresAuth: true,
+      layout: 'topbar',
+    },
+  },
+  {
+    path: '/manager',
+    component: () => import('./HomeViewManager.vue'),
+    meta: {
+      requiresAuth: true,
+      layout: 'default',
     },
   },
   {

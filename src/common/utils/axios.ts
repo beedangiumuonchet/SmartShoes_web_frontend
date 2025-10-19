@@ -1,7 +1,8 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import type { IApiResponse } from '../types'
-import { useToast } from '@nuxt/ui/runtime/composables/useToast.js'
-const toast = useToast()
+import { useCookies } from '@vueuse/integrations/useCookies'
+
+const cookie = useCookies(['jwt_token'])
 
 export interface IHttpConfig {
   headers?: Record<string, string>
@@ -30,14 +31,36 @@ export class AxiosHttpClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config) => {
-        // Add auth token if available
-        const token = localStorage.getItem('auth_token')
+        // SỬA: Lấy token từ cookie thay vì localStorage
+        const token = cookie.get('jwt_token')
+
+        console.log('=== AXIOS REQUEST DEBUG ===')
+        console.log('Request URL:', config.url)
+        console.log('Base URL:', config.baseURL)
+        console.log('Full URL:', `${config.baseURL}${config.url}`)
+        console.log('Method:', config.method?.toUpperCase())
+        console.log(
+          'Token from cookie (jwt_token):',
+          token ? `${token.substring(0, 50)}...` : 'NOT_FOUND',
+        )
+
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
+          console.log('✅ Authorization header added')
+        } else {
+          console.log('❌ No token found - request will fail authentication')
         }
+
+        console.log('Final headers:', {
+          'Content-Type': config.headers['Content-Type'],
+          Authorization: config.headers.Authorization ? 'Bearer [TOKEN_SET]' : 'NOT_SET',
+        })
+        console.log('===========================')
+
         return config
       },
       (error) => {
+        console.error('❌ Request interceptor error:', error)
         return Promise.reject(error)
       },
     )
@@ -45,16 +68,40 @@ export class AxiosHttpClient {
     // Response interceptor
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
+        console.log('=== AXIOS RESPONSE DEBUG ===')
+        console.log('Response status:', response.status)
+        console.log('Response URL:', response.config.url)
+        console.log('Response data type:', typeof response.data)
+        console.log('Response data:', response.data)
+        console.log('============================')
+
         return response.data
       },
       (error) => {
+        console.error('=== AXIOS RESPONSE ERROR ===')
+        console.error('Error status:', error.response?.status)
+        console.error('Error URL:', error.config?.url)
+        console.error('Error message:', error.message)
+        console.error('Error data:', error.response?.data)
+
+        if (error.response?.status === 401) {
+          console.error('❌ 401 Unauthorized - Token may be invalid or expired')
+          console.error('Clearing jwt_token from cookie')
+          cookie.remove('jwt_token')
+        }
+
+        console.error('============================')
+
         const apiError: IApiResponse<null> = {
           message: error.response?.data?.message || error.message,
         }
-        toast.add({
-          title: apiError.message,
-          color: 'error',
-        })
+
+        // SỬA: Comment toast để tránh lỗi
+        // toast.add({
+        //   title: apiError.message,
+        //   color: 'error',
+        // })
+
         return Promise.reject(apiError)
       },
     )

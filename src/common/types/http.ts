@@ -21,4 +21,5 @@ export interface IBaseEntity {
 export interface IApiResponse<TData> {
   result?: TData
   message?: string
+  success?: string
 }

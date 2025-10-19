@@ -45,29 +45,75 @@
       <!-- Spacer to push User Section to bottom -->
       <div class="flex-1"></div>
 
-      <!-- User Section -->
+      <!-- User Section - SỬA: Dùng cách simple hơn -->
       <div class="p-4 border-t border-gray-200 bg-white flex-shrink-0">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-              <span class="text-base font-medium text-white">
-                {{
-                  currentUser?.user?.firstName && currentUser?.user?.lastName
-                    ? currentUser?.user?.firstName.charAt(0) + currentUser?.user?.lastName.charAt(0)
-                    : '!'
-                }}
-              </span>
+        <div class="relative">
+          <!-- User Info Button -->
+          <button
+            @click="showUserMenu = !showUserMenu"
+            class="flex items-center w-full cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors duration-200"
+            :class="{ 'bg-gray-100': showUserMenu }"
+          >
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                <span class="text-base font-medium text-white">
+                  {{
+                    currentUser?.firstName && currentUser?.lastName
+                      ? currentUser?.firstName.charAt(0) + currentUser?.lastName.charAt(0)
+                      : '!'
+                  }}
+                </span>
+              </div>
             </div>
-          </div>
-          <div v-if="!isCollapsed" class="ml-4 flex-1">
-            <p class="text-sm font-medium text-gray-900">
-              {{
-                currentUser?.user?.firstName && currentUser?.user?.lastName
-                  ? currentUser?.user?.firstName + ' ' + currentUser?.user?.lastName
-                  : 'Not Found'
-              }}
-            </p>
-            <p class="text-xs text-gray-500">{{ currentUser?.user.email || 'Not Found' }}</p>
+            <div v-if="!isCollapsed" class="ml-4 flex-1 text-left">
+              <p class="text-sm font-medium text-gray-900">
+                {{
+                  currentUser?.firstName && currentUser?.lastName
+                    ? currentUser?.firstName + ' ' + currentUser?.lastName
+                    : 'Not Found'
+                }}
+              </p>
+              <p class="text-xs text-gray-500">{{ currentUser?.email || 'Not Found' }}</p>
+            </div>
+            <div v-if="!isCollapsed" class="ml-2">
+              <UIcon
+                name="i-heroicons-chevron-up"
+                class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                :class="{ 'rotate-180': showUserMenu }"
+              />
+            </div>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div
+            v-if="showUserMenu"
+            class="absolute bottom-full left-0 w-full mb-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+          >
+            <div class="py-1">
+              <!-- Profile Item -->
+              <button
+                @click="handleProfileClick"
+                class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+              >
+                <UIcon name="i-heroicons-user" class="w-4 h-4 mr-3 text-gray-400" />
+                <span>Thông tin cá nhân</span>
+              </button>
+
+              <!-- Divider -->
+              <div class="border-t border-gray-100 my-1"></div>
+
+              <!-- Logout Item -->
+              <button
+                @click="handleLogout"
+                class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+              >
+                <UIcon
+                  name="i-heroicons-arrow-right-on-rectangle"
+                  class="w-4 h-4 mr-3 text-red-500"
+                />
+                <span>Đăng xuất</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -86,7 +132,7 @@
               icon="i-heroicons-bars-3"
               class="mr-3"
             />
-            <h1 class="text-lg font-semibold text-gray-900">{{ 'Dashboard' }}</h1>
+            <h1 class="text-lg font-semibold text-gray-900">Dashboard</h1>
           </div>
           <div class="flex items-center space-x-4">
             <div id="pageNavAction" class="flex justify-between items-center"></div>
@@ -107,14 +153,19 @@
 
 <script setup lang="ts">
 import { useSidebarStore } from '@/common/store/sidebar.store'
-import { getCurrentUser } from '@/common/guards/roleGuard.guard'
+import { getCurrentUser, removeToken } from '@/common/guards/roleGuard.guard'
 import type { NavigationMenuItem } from '@nuxt/ui'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const sidebarStore = useSidebarStore()
 const { isCollapsed } = storeToRefs(sidebarStore)
 const { toggleSidebar } = sidebarStore
+
+// Local state for user menu
+const showUserMenu = ref(false)
 
 // Navigation items
 const navigationItems = ref<NavigationMenuItem[][]>([
@@ -126,23 +177,69 @@ const navigationItems = ref<NavigationMenuItem[][]>([
     },
     {
       label: 'Đơn Hàng',
-      to: '/orders',
+      to: '/manager/orders',
       icon: 'i-heroicons-shopping-cart',
     },
     {
       label: 'Báo Cáo',
-      to: '/reports',
+      to: '/manager/reports',
       icon: 'i-heroicons-chart-bar',
     },
     {
       label: 'Cài Đặt',
-      to: '/settings',
+      to: '/manager/settings',
       icon: 'i-heroicons-cog-6-tooth',
     },
   ],
 ])
 
 const currentUser = computed(() => getCurrentUser())
+
+// Handle profile click
+function handleProfileClick() {
+  showUserMenu.value = false
+  console.log('Navigate to profile')
+  // router.push('/profile')
+}
+
+// Logout function - chỉ xóa token ở FE
+function handleLogout() {
+  try {
+    showUserMenu.value = false
+
+    // Xóa token từ client storage
+    removeToken()
+
+    console.log('Đăng xuất thành công!')
+
+    // Redirect về login page
+    router.push('/login')
+  } catch (error) {
+    console.error('Logout error:', error)
+
+    // Vẫn cố gắng xóa token và redirect
+    removeToken()
+    router.push('/login')
+  }
+}
+
+// Close menu when clicking outside
+import { onMounted, onUnmounted } from 'vue'
+
+function handleClickOutside(event: Event) {
+  const target = event.target as Element
+  if (!target.closest('.relative')) {
+    showUserMenu.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <style scoped>

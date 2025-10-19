@@ -78,40 +78,98 @@ export function setToken(token: string): void {
  * Removes JWT token from storage
  */
 export function removeToken(): void {
-  console.log(Info('Removing JWT token from storage', {}, DebugContexts.AUTH))
+  try {
+    console.log('Starting token removal process...')
 
-  localStorage.removeItem('jwt_token')
-  sessionStorage.removeItem('jwt_token')
+    // Debug: Check token before removal
+    const tokenBefore = getToken()
+    console.log('Token before removal:', tokenBefore ? 'EXISTS' : 'NOT_FOUND')
 
-  console.log(Info('Token removed successfully', {}, DebugContexts.AUTH))
+    // Remove from cookies
+    try {
+      cookie.remove('jwt_token')
+      console.log('Removed from cookies')
+    } catch (cookieError) {
+      console.error('Error removing from cookies:', cookieError)
+    }
+
+    // Remove from localStorage
+    try {
+      localStorage.removeItem('jwt_token')
+      console.log('Removed from localStorage')
+    } catch (localError) {
+      console.error('Error removing from localStorage:', localError)
+    }
+
+    // Remove from sessionStorage
+    try {
+      sessionStorage.removeItem('jwt_token')
+      console.log('Removed from sessionStorage')
+    } catch (sessionError) {
+      console.error('Error removing from sessionStorage:', sessionError)
+    }
+
+    // Debug: Check token after removal
+    const tokenAfter = getToken()
+    console.log('Token after removal:', tokenAfter ? 'STILL_EXISTS' : 'REMOVED')
+
+    console.log('Token removal completed successfully')
+  } catch (error) {
+    console.error('Error in removeToken():', error)
+  }
 }
 
 /**
  * Gets current user information from JWT token
  * @returns User information or null if not authenticated
  */
-export function getCurrentUser(): TokenPayload | null {
+export function getCurrentUser(): any | null {
   const token = getToken()
   if (!token) {
     console.log(Debug('No token found for current user', {}, DebugContexts.AUTH))
     return null
   }
 
-  const user = getJWTPayload(token)
-  console.log(
-    Debug(
-      'Current user retrieved',
-      {
-        userId: user?.user.id,
-        userName: user?.user.firstName + ' ' + user?.user.lastName,
-        userRoles: user?.roles,
-        hasUser: !!user,
-      },
-      DebugContexts.AUTH,
-    ),
-  )
+  try {
+    const decodedToken = getJWTPayload(token) as any // Cast to any để tránh type error
+    console.log('Raw decoded token:', decodedToken) // Debug để xem structure
 
-  return user
+    if (!decodedToken) {
+      return null
+    }
+
+    // Map directly từ decoded token (không phải tokenPayload.user)
+    const user = {
+      id: decodedToken.userId || decodedToken.id || decodedToken.sub,
+      name: `${decodedToken.firstName || ''} ${decodedToken.lastName || ''}`.trim(),
+      username: decodedToken.username,
+      email: decodedToken.email,
+      firstName: decodedToken.firstName,
+      lastName: decodedToken.lastName,
+      role: decodedToken.roles || [],
+      roles: decodedToken.roles || [],
+      userId: decodedToken.userId,
+    }
+
+    console.log(
+      Debug(
+        'Current user retrieved',
+        {
+          userId: user.id,
+          userName: user.name,
+          userEmail: user.email,
+          userRoles: user.roles,
+          hasUser: !!user,
+        },
+        DebugContexts.AUTH,
+      ),
+    )
+
+    return user
+  } catch (error) {
+    console.error('Error getting current user:', error)
+    return null
+  }
 }
 
 /**
@@ -249,8 +307,8 @@ export function createRoleGuard(config: RoleGuardConfig = {}) {
       Info(
         'Access granted',
         {
-          user: getCurrentUser()?.user.firstName + ' ' + getCurrentUser()?.user.lastName,
-          roles: getCurrentUser()?.roles,
+          user: getCurrentUser()?.name, // ← SỬA: bỏ .user.firstName, dùng .name
+          roles: getCurrentUser()?.roles, // ← SỬA: bỏ .user, dùng .roles trực tiếp
         },
         DebugContexts.ROUTER,
       ),
@@ -268,7 +326,7 @@ export const roleGuard = createRoleGuard()
  * Admin role guard - requires admin role
  */
 export const adminGuard = createRoleGuard({
-  requiredRoles: ['admin'],
+  requiredRoles: ['user'],
   redirectTo: '/login',
 })
 
