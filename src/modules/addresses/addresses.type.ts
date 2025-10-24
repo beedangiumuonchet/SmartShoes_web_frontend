@@ -38,6 +38,7 @@ export class AddressForm {
 }
 
 // Response types
-export interface CreateAddressResponse extends Address {}
-export interface UpdateAddressResponse extends Address {}
-export interface GetUserAddressesResponse extends Address {}
+export type CreateAddressResponse = Address
+export type UpdateAddressResponse = Address
+export type GetUserAddressesResponse = Address[] // Mảng addresses, không phải single
+export type DeleteAddressResponse = void
