@@ -133,12 +133,37 @@ const login = async () => {
       loginForm.value.password,
       loginForm.value.rememberMe,
     )
+    console.log('Login form data being sent:', loginFormData)
 
     // Call API
     const response = await loginAPI(loginFormData)
 
+    console.log('Full API Response:', response)
+    console.log('Response data:', response.data)
+    console.log('Response result:', response.result)
+    console.log('Token:', response.result?.token)
+    console.log('User:', response.result?.user)
+
+    // Debug: Kiểm tra response
+    console.log('API Response:', response)
+
+    // Kiểm tra response structure trước khi setToken
+    if (!response.result?.token) {
+      throw new Error('Token not found in response')
+    }
     // Use rememberMe to determine storage type (session vs local)
     setToken(response.result?.token ?? '')
+
+    // Debug: Kiểm tra token đã được set chưa
+    try {
+      const currentUser = getCurrentUser()
+      console.log('Current user after setToken:', currentUser)
+      console.log('User ID:', currentUser?.id)
+      console.log('User name:', currentUser?.name)
+    } catch (getUserError) {
+      console.error('Error getting current user (non-blocking):', getUserError)
+      // Don't throw error here, just log it
+    }
 
     console.log(
       Info(
@@ -151,7 +176,9 @@ const login = async () => {
       ),
     )
 
-    router.push('/')
+    await router.push('/')
+    // Debug: Kiểm tra sau khi navigate
+    console.log('Navigation completed, current route:', router.currentRoute.value)
   } catch (err) {
     console.log(ErrorLog('Login failed with exception', err, DebugContexts.AUTH))
     error.value = 'Đăng nhập thất bại: ' + (err as Error).message
@@ -179,7 +206,7 @@ const useFakeToken = () => {
         DebugContexts.AUTH,
       ),
     )
-    router.push('/')
+    router.push('/manager')
   } catch (err) {
     console.log(ErrorLog('Fake token login failed', err, DebugContexts.AUTH))
     error.value = 'Không thể sử dụng token giả: ' + (err as Error).message

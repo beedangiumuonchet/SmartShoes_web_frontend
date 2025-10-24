@@ -9,6 +9,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import BlankLayout from '@/layouts/BlankLayout.vue'
+import DefaultTopbarLayout from '@/layouts/DefaultTopbarLayout.vue'
 
 const route = useRoute()
 
@@ -16,6 +17,7 @@ const route = useRoute()
 const layouts = {
   default: DefaultLayout,
   blank: BlankLayout,
+  topbar: DefaultTopbarLayout,
 }
 
 // Get layout from route meta, default to 'default'

@@ -1,12 +1,14 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { roleGuard } from '@/common/guards/roleGuard.guard'
 import { loginScreenRoutes } from '@/modules/LoginScreen/LoginScreen.routes'
+import { usersRoutes } from '@/modules/users/users.routes'
 import { routes } from '@/modules/common/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     ...loginScreenRoutes,
+    ...usersRoutes,
     ...routes,
     {
       path: '/:pathMatch(.*)*',
