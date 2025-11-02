@@ -8,7 +8,7 @@
           <div class="flex items-center">
             <div class="flex-shrink-0 flex items-center">
               <div
-                class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center cursor-pointer"
+                class="w-10 h-10 bg-gradient-to-r from-rose-500 to-pink-500 rounded-lg flex items-center justify-center cursor-pointer"
                 @click="handleLogoClick"
               >
                 <svg
@@ -26,7 +26,7 @@
                 </svg>
               </div>
               <h1
-                class="ml-3 text-xl font-bold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                class="ml-3 text-xl font-bold text-gray-900 cursor-pointer hover:text-rose-600 transition-colors"
                 @click="handleLogoClick"
               >
                 SMARTSHOES
@@ -41,7 +41,7 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Tìm kiếm giày thể thao..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                 @keyup.enter="handleSearch"
               />
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -64,9 +64,9 @@
 
           <!-- Right Actions -->
           <div class="flex items-center space-x-4">
-            <!-- Cart -->
+            <!-- Cart Button - Chuyển sang trang cart -->
             <button
-              @click="showCart = true"
+              @click="goToCart"
               class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,11 +77,12 @@
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6H19"
                 />
               </svg>
+              <!-- Cart Count Badge với màu pastel -->
               <span
                 v-if="cartItemsCount > 0"
-                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                class="absolute -top-1 -right-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-bounce"
               >
-                {{ cartItemsCount }}
+                {{ cartItemsCount > 99 ? '99+' : cartItemsCount }}
               </span>
             </button>
 
@@ -93,7 +94,7 @@
               >
                 <!-- User Avatar -->
                 <div
-                  class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center"
+                  class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center"
                 >
                   <span class="text-sm font-medium text-white">
                     {{ getUserInitials() }}
@@ -184,37 +185,10 @@
       </div>
     </header>
 
-    <!-- Main Content Area - This is where RouterView will render -->
+    <!-- Main Content Area -->
     <main class="flex-1">
       <slot />
     </main>
-
-    <!-- Shopping Cart Sidebar -->
-    <div v-if="showCart" class="fixed inset-0 z-50 overflow-hidden" @click="showCart = false">
-      <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-      <div
-        class="absolute right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform"
-        @click.stop
-      >
-        <div class="flex items-center justify-between p-4 border-b">
-          <h2 class="text-lg font-semibold">Giỏ hàng</h2>
-          <button @click="showCart = false" class="p-2 hover:bg-gray-100 rounded">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <div class="p-4">
-          <p class="text-gray-500 text-center py-8">Giỏ hàng trống</p>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -222,6 +196,8 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getCurrentUser, removeToken } from '@/common/guards/roleGuard.guard'
+import { getUserCart, getCartItemCount } from '@/modules/carts/carts.api'
+import type { Cart } from '@/modules/carts/carts.type'
 
 // Router
 const router = useRouter()
@@ -230,9 +206,6 @@ const route = useRoute()
 // State
 const searchQuery = ref('')
 const showUserMenu = ref(false)
-const showCart = ref(false)
-
-// Mock cart items count
 const cartItemsCount = ref(0)
 
 // Computed
@@ -282,6 +255,25 @@ const handleLogout = () => {
   }
 }
 
+// Chuyển sang trang cart thay vì popup
+const goToCart = () => {
+  router.push('/cart')
+}
+
+const updateCartCount = async () => {
+  if (!currentUser.value?.userId) {
+    cartItemsCount.value = 0
+    return
+  }
+
+  try {
+    const cart = await getUserCart(currentUser.value.userId)
+    cartItemsCount.value = cart ? getCartItemCount(cart) : 0
+  } catch (error) {
+    cartItemsCount.value = 0
+  }
+}
+
 // Close dropdowns when clicking outside
 const handleClickOutside = (event: Event) => {
   const target = event.target as Element
@@ -290,30 +282,49 @@ const handleClickOutside = (event: Event) => {
   }
 }
 
+// Listen for cart updates
+const handleCartUpdate = () => {
+  updateCartCount()
+}
+
 // Lifecycle
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('cart-updated', handleCartUpdate)
+
+  // Load initial cart count
+  updateCartCount()
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('cart-updated', handleCartUpdate)
 })
 </script>
 
 <style scoped>
-/* Animation cho dropdown */
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.2s ease;
+/* Custom animations */
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%,
+  43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
 }
 
-.slide-down-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
+.animate-bounce {
+  animation: bounce 1s infinite;
 }
 </style>

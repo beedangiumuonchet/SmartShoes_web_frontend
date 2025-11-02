@@ -8,6 +8,7 @@ export const productRoutes: RouteRecordRaw[] = [
     meta: {
       title: 'Product Detail',
       requiresAuth: false,
+      layout: 'topbar',
     },
   },
 ]
