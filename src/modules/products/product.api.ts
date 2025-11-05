@@ -10,26 +10,54 @@
   /**
    * 🟢 Lấy danh sách tất cả sản phẩm (có filter & phân trang)
    */
-  export const getAllProductsApi = async (params?: ProductFilter) => {
-    console.log('=== GET ALL PRODUCTS ===')
-    console.log('Token exists:', !!cookie.get('jwt_token'))
-    console.log('Params:', params)
-    console.log('Full URL:', `${import.meta.env.VITE_API_URL}/products`)
-    console.log('========================')
+  // export const getAllProductsApi = async (params?: ProductFilter) => {
+  //   console.log('=== GET ALL PRODUCTS ===')
+  //   console.log('Token exists:', !!cookie.get('jwt_token'))
+  //   console.log('Params:', params)
+  //   console.log('Full URL:', `${import.meta.env.VITE_API_URL}/products`)
+  //   console.log('========================')
 
-    try {
-      const response = await axiosHttpClient.get<IApiResponse<PaginationResponse<Product>>>(
-        '/products',
-        { params },
-      )
-      console.log('✅ Get all products success:', response)
-      return response
-    } catch (error) {
-      console.error('❌ Get all products error:', error)
-      throw error
+  //   try {
+  //     const response = await axiosHttpClient.get<IApiResponse<PaginationResponse<Product>>>(
+  //       '/products',
+  //       { params },
+  //     )
+  //     console.log('✅ Get all products success:', response)
+  //     return response
+  //   } catch (error) {
+  //     console.error('❌ Get all products error:', error)
+  //     throw error
+  //   }
+  // }
+export const getAllProductsApi = async (params?: ProductFilter) => {
+  console.log('=== GET ALL PRODUCTS ===')
+  console.log('Token exists:', !!cookie.get('jwt_token'))
+  console.log('Params (raw):', params)
+  console.log('Full URL:', `${import.meta.env.VITE_API_URL}/products`)
+  console.log('========================')
+
+  // 🧩 Lọc bỏ các field trống để tránh lỗi "Property must not be null or empty"
+  const cleanParams: Record<string, any> = {}
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      cleanParams[key] = value
     }
-  }
+  })
 
+  console.log('Cleaned params:', cleanParams)
+
+  try {
+    const response = await axiosHttpClient.get<
+      IApiResponse<PaginationResponse<Product>>
+    >('/products', { params: cleanParams })
+
+    console.log('✅ Get all products success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Get all products error:', error)
+    throw error
+  }
+}
   /**
    * 🟢 Lấy chi tiết sản phẩm theo ID
    */

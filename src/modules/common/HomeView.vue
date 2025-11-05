@@ -105,7 +105,7 @@
     </section>
 
     <!-- Featured Products -->
-    <section class="bg-white py-16">
+    <section data-section="featured-products" class="bg-white py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center mb-12">
           <div>
@@ -335,6 +335,10 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCurrentUser, removeToken } from '@/common/guards/roleGuard.guard'
+import { getAllProductsApi } from '../products/product.api'
+import { getAllBrandsApi } from '../brand/brand.api'
+import { getAllCategoriesApi } from '../category/category.api'
+
 
 const router = useRouter()
 
@@ -371,67 +375,14 @@ const heroSlides = ref([
   },
 ])
 
-// Categories (mock data)
-const categories = ref([
-  { id: 1, name: 'Giày chạy bộ', description: 'Dành cho runners' },
-  { id: 2, name: 'Giày bóng đá', description: 'Chuyên nghiệp' },
-  { id: 3, name: 'Giày thời trang', description: 'Phong cách đường phố' },
-  { id: 4, name: 'Giày tập gym', description: 'Tập luyện hiệu quả' },
-])
+// Categories and
+const categories = ref<any[]>([])
+const brands = ref<any[]>([])
+
 
 // Featured Products (mock data)
-const featuredProducts = ref([
-  {
-    id: 1,
-    name: 'Nike Air Max 270',
-    brand: 'Nike',
-    price: 2500000,
-    originalPrice: 3000000,
-    discount: 17,
-    rating: 4.8,
-    mainImage: '/api/placeholder/300/300',
-    isWishlisted: false,
-  },
-  {
-    id: 2,
-    name: 'Adidas Ultraboost 22',
-    brand: 'Adidas',
-    price: 2800000,
-    rating: 4.9,
-    mainImage: '/api/placeholder/300/300',
-    isWishlisted: true,
-  },
-  {
-    id: 3,
-    name: 'Puma RS-X',
-    brand: 'Puma',
-    price: 1800000,
-    originalPrice: 2200000,
-    discount: 18,
-    rating: 4.6,
-    mainImage: '/api/placeholder/300/300',
-    isWishlisted: false,
-  },
-  {
-    id: 4,
-    name: 'New Balance 990v5',
-    brand: 'New Balance',
-    price: 3200000,
-    rating: 4.7,
-    mainImage: '/api/placeholder/300/300',
-    isWishlisted: false,
-  },
-])
+const featuredProducts = ref<any[]>([])
 
-// Brands (mock data)
-const brands = ref([
-  { id: 1, name: 'Nike', logo: '/api/placeholder/120/60' },
-  { id: 2, name: 'Adidas', logo: '/api/placeholder/120/60' },
-  { id: 3, name: 'Puma', logo: '/api/placeholder/120/60' },
-  { id: 4, name: 'New Balance', logo: '/api/placeholder/120/60' },
-  { id: 5, name: 'Vans', logo: '/api/placeholder/120/60' },
-  { id: 6, name: 'Converse', logo: '/api/placeholder/120/60' },
-])
 
 // Cart
 const cartItems = ref([
@@ -455,11 +406,24 @@ const cartTotal = computed(() =>
 // Slide auto-play
 let slideInterval: NodeJS.Timeout
 
+// onMounted(() => {
+//   slideInterval = setInterval(() => {
+//     nextSlide()
+//   }, 5000)
+// })
 onMounted(() => {
+  // Lắng nghe click ngoài vùng popup
+  document.addEventListener('click', handleClickOutside)
+
+  // Gọi API lấy danh sách sản phẩm nổi bật
+  fetchFeaturedProducts()
+
+  // Tự động đổi slide mỗi 5 giây
   slideInterval = setInterval(() => {
     nextSlide()
   }, 5000)
 })
+
 
 onUnmounted(() => {
   if (slideInterval) {
@@ -468,6 +432,54 @@ onUnmounted(() => {
 })
 
 // Methods
+
+const fetchFeaturedProducts = async () => {
+  try {
+    const response = await getAllProductsApi({
+      page: 1,
+      size: 8,
+      status: 'ACTIVE',
+    })
+    const data = response.content || []
+
+    featuredProducts.value = data.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      brand: p.brandName,
+      price: p.variants?.[0]?.price || 0,
+      originalPrice: p.variants?.[0]?.originalPrice || null,
+      discount: p.variants?.[0]?.discount || null,
+      rating: p.rating || 4.5,
+      mainImage: p.variants?.[0]?.images?.[0]?.url || '/api/placeholder/300/300',
+      isWishlisted: false,
+    }))
+  } catch (error) {
+    console.error('Lỗi khi tải sản phẩm nổi bật:', error)
+  }
+}
+
+const fetchBrands = async () => {
+  try {
+    const response = await getAllBrandsApi()
+    // Nếu API trả về { data: [...] } hoặc { content: [...] } thì tuỳ backend bạn mà đổi chỗ này:
+    brands.value = response.data || response.content || response || []
+  } catch (error) {
+    console.error('Lỗi khi tải thương hiệu:', error)
+  }
+}
+
+const fetchCategories = async () => {
+  try {
+    const response = await getAllCategoriesApi()
+    // Nếu API trả về { data: [...] } hoặc { content: [...] } thì tuỳ backend bạn mà đổi chỗ này:
+    categories.value = response.data || response.content || response || []
+  } catch (error) {
+    console.error('Lỗi khi tải thương hiệu:', error)
+  }
+}
+
+
+
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
 }
@@ -564,6 +576,12 @@ const handleClickOutside = (event: Event) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+    fetchFeaturedProducts()
+    fetchBrands()
+    fetchCategories()
+  slideInterval = setInterval(() => {
+    nextSlide()
+  }, 5000)
 })
 
 onUnmounted(() => {

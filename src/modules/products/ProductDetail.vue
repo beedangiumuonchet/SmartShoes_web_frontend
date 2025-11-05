@@ -34,9 +34,31 @@
 
       <!-- Thương hiệu + phân loại -->
       <p class="text-gray-500 mb-4">
+        <RouterLink
+          v-if="product.brand"
+          :to="`/brand/${product.brand.id}`"
+          class="text-blue-600 hover:underline"
+        >
+          {{ product.brand.name }}
+        </RouterLink>
+        <span v-else>{{ product.brand?.name || product.brandName || 'Không rõ thương hiệu' }}</span>
+
+        ·
+
+        <RouterLink
+          v-if="product.category"
+          :to="`/category/${product.category.id}`"
+          class="text-blue-600 hover:underline"
+        >
+          {{ product.category.name }}
+        </RouterLink>
+        <span v-else>{{ product.category?.name || product.categoryName || 'Không rõ phân loại' }}</span>
+      </p>
+
+      <!-- <p class="text-gray-500 mb-4">
         {{ product.brand?.name || product.brandName || 'Không rõ thương hiệu' }} ·
         {{ product.category?.name || product.categoryName || 'Không rõ phân loại' }}
-      </p>
+      </p> -->
 
       <!-- Giá và tồn kho -->
       <div v-if="currentVariant" class="flex items-center space-x-3 mb-6">
@@ -242,12 +264,17 @@ const normalize = (str: string) =>
     ?.toLowerCase()
     ?.trim()
 
-const availableSizes = computed(() => [
-  ...new Set(product.value?.variants?.map((v) => v.size) || []),
-])
-const availableColors = computed(() => [
-  ...new Set(product.value?.variants?.map((v) => v.colorName) || []),
-])
+// const availableSizes = computed(() => [...new Set(product.value?.variants?.map((v) => v.size) || [])])
+const availableSizes = computed(() => {
+  const sizes = [...new Set(product.value?.variants?.map(v => v.size) || [])]
+  // Nếu toàn là số, sắp xếp theo số; nếu có chữ, sắp xếp theo thứ tự chữ
+  const allNumeric = sizes.every(s => !isNaN(Number(s)))
+  return allNumeric
+    ? sizes.sort((a, b) => Number(a) - Number(b))
+    : sizes.sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }))
+})
+
+const availableColors = computed(() => [...new Set(product.value?.variants?.map((v) => v.colorName) || [])])
 
 const currentVariant = computed(() => {
   const size = unref(selectedSize)
