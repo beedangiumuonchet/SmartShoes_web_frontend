@@ -205,7 +205,6 @@
             <!-- Left: Bulk Actions -->
             <div class="flex items-center gap-6">
               <div class="flex items-center gap-2">
-                <!-- ✅ Fix: Thêm :checked và :indeterminate cho checkbox footer -->
                 <input
                   type="checkbox"
                   class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
@@ -213,9 +212,9 @@
                   :indeterminate="isIndeterminate"
                   @change="selectAllItems"
                 />
-                <span class="text-sm text-gray-700"
-                  >Chọn tất cả ({{ cart ? getCartItemCount(cart) : 0 }})</span
-                >
+                <span class="text-sm text-gray-700">
+                  Chọn tất cả ({{ cart ? getCartItemCount(cart) : 0 }})
+                </span>
               </div>
 
               <button
@@ -236,32 +235,35 @@
 
             <!-- Right: Total & Checkout -->
             <div class="flex flex-col lg:flex-row lg:items-center gap-6">
-              <!-- ✅ Fix: Total Summary - hiển thị đúng số sản phẩm và tổng tiền -->
+              <!-- Total Summary -->
               <div class="text-right">
                 <div class="flex items-center gap-2 text-sm text-gray-600 mb-1">
                   <span>Tổng thanh toán ({{ selectedItems.length }} Sản phẩm):</span>
-                  <span class="text-2xl font-bold text-rose-600">{{
-                    formatPrice(selectedTotal)
-                  }}</span>
+                  <span class="text-2xl font-bold text-rose-600">
+                    {{ formatPrice(selectedTotal) }}
+                  </span>
                 </div>
                 <div class="text-xs text-gray-500">Đã bao gồm thuế VAT (nếu có)</div>
               </div>
 
-              <!-- Checkout Button -->
-              <button
-                @click="goToCheckout"
-                :disabled="selectedItems.length === 0"
-                class="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                Mua Hàng ({{ selectedItems.length }})
-              </button>
+              <!-- ✅ FIX: Checkout Button - đảm bảo luôn hiển thị -->
+              <div class="flex-shrink-0">
+                <button
+                  @click="goToCheckout"
+                  :disabled="selectedItems.length === 0"
+                  class="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none min-w-[200px]"
+                >
+                  <span v-if="selectedItems.length === 0">Chọn sản phẩm</span>
+                  <span v-else>Mua Hàng ({{ selectedItems.length }})</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Empty Cart -->
-      <div v-else-if="!loading && (isCartEmpty(cart) || !cart)" class="text-center py-20">
+      <div v-else-if="!loading && (!cart || isCartEmpty(cart))" class="text-center py-20">
         <div class="max-w-md mx-auto">
           <div
             class="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center"
@@ -352,7 +354,7 @@ const selectedItems = ref<string[]>([])
 const currentUser = computed(() => getCurrentUser())
 
 const selectedTotal = computed(() => {
-  if (!cart.value) return 0
+  if (!cart.value?.details) return 0
   return cart.value.details
     .filter((detail) => selectedItems.value.includes(detail.id))
     .reduce((total, detail) => total + detail.subtotal, 0)
@@ -364,7 +366,7 @@ const isAllSelected = computed(() => {
 })
 
 const isIndeterminate = computed(() => {
-  if (!cart.value?.details) return false
+  if (!cart.value?.details || cart.value.details.length === 0) return false
   return selectedItems.value.length > 0 && selectedItems.value.length < cart.value.details.length
 })
 
@@ -377,9 +379,12 @@ const loadCart = async () => {
 
   try {
     loading.value = true
-    cart.value = await getUserCart(currentUser.value.userId)
+    const cartData = await getUserCart(currentUser.value.userId) // ✅ Lưu vào biến tạm
+    cart.value = cartData // ✅ Assign sau khi đã có data
+
     console.log('✅ Loaded cart with full details:', cart.value)
 
+    // ✅ Null check trước khi access
     if (cart.value?.details) {
       selectedItems.value = cart.value.details.map((detail) => detail.id)
     }
@@ -393,6 +398,8 @@ const loadCart = async () => {
 
 const selectAllItems = (event: Event) => {
   const target = event.target as HTMLInputElement
+
+  // ✅ Null check
   if (!cart.value?.details) return
 
   if (target.checked) {
@@ -417,8 +424,12 @@ const updateQuantity = async (detailId: string, newQuantity: number) => {
   try {
     isUpdating.value = true
 
+    // ✅ Null check
     const detail = cart.value?.details.find((d) => d.id === detailId)
-    if (!detail) return
+    if (!detail) {
+      console.error('❌ Detail not found:', detailId)
+      return
+    }
 
     const request = new CartDetailRequest(detail.productVariantId, newQuantity)
     await updateCartDetail(detailId, request)
@@ -501,6 +512,10 @@ const goToCheckout = () => {
     showToast('Vui lòng chọn sản phẩm để thanh toán', 'error')
     return
   }
+
+  // ✅ Lưu selectedItems vào localStorage để CheckoutView sử dụng
+  localStorage.setItem('selectedCartItems', JSON.stringify(selectedItems.value))
+
   router.push('/checkout')
 }
 
@@ -675,7 +690,26 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* Custom scrollbar for quantity input */
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #f43f5e, #ec4899);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #e11d48, #db2777);
+}
+
+/* Remove number input arrows */
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -686,22 +720,38 @@ input[type='number'] {
   -moz-appearance: textfield;
 }
 
-/* Hover effects */
+/* Enhanced hover effects */
 .hover\:scale-105:hover {
   transform: scale(1.05);
 }
 
-/* Gradient backgrounds */
-.bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+/* Gradient text utilities */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
-.bg-gradient-to-br {
-  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
-}
-
-/* Custom shadows */
+/* Enhanced shadows */
 .shadow-2xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Cart summary fixed positioning on mobile */
+@media (max-width: 1024px) {
+  .cart-summary-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin: 0;
+    border-radius: 0;
+    border-top: 3px solid #f43f5e;
+  }
+}
+
+/* Button animation group hover */
+.group:hover .group-hover\:translate-x-full {
+  transform: translateX(100%);
 }
 </style>

@@ -5,6 +5,8 @@ import { usersRoutes } from '@/modules/users/users.routes'
 import { routes } from '@/modules/common/routes'
 import { productRoutes } from '@/modules/products/product.routes'
 import { cartsRoutes } from '@/modules/carts/carts.routes'
+import { ordersRoutes } from '@/modules/orders/orders.routes'
+//import { paymentsRoutes } from '@/modules/payments/payments.routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,6 +15,9 @@ const router = createRouter({
     ...usersRoutes,
     ...productRoutes,
     ...cartsRoutes,
+    ...ordersRoutes,
+    //...paymentsRoutes,
+
     ...routes,
     {
       path: '/:pathMatch(.*)*',
