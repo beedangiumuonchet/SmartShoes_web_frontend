@@ -1,12 +1,12 @@
 export const ordersRoutes = [
-  {
-    path: '/orders',
-    component: () => import('./OrderListView.vue'),
-    meta: {
-      requiresAuth: true,
-      layout: 'topbar',
-    },
-  },
+  // {
+  //   path: '/orders',
+  //   component: () => import('./OrderListView.vue'),
+  //   meta: {
+  //     requiresAuth: true,
+  //     layout: 'topbar',
+  //   },
+  // },
   {
     path: '/orders/:orderId',
     component: () => import('./OrderDetailView.vue'),
@@ -16,11 +16,9 @@ export const ordersRoutes = [
     },
   },
   {
-    path: '/checkout',
-    component: () => import('./CheckoutView.vue'),
-    meta: {
-      requiresAuth: true,
-      layout: 'topbar',
-    },
+    path: '/orders/success',
+    name: 'OrderSuccess',
+    component: () => import('./OrderSuccessView.vue'),
+    meta: { requiresAuth: true },
   },
 ]
