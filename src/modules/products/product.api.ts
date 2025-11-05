@@ -1,6 +1,6 @@
   import { AxiosHttpClient } from '@/common/utils/axios'
   import type { IApiResponse } from '@/common/types'
-  import type { Product, PaginationResponse, ProductFilter } from './product.type'
+  import type { Product, PaginationResponse, ProductFilter, ProductVariantWithProduct } from './product.type'
   import { useCookies } from '@vueuse/integrations/useCookies'
   import { getCurrentUser } from '@/common/guards/roleGuard.guard'
 
@@ -75,6 +75,26 @@ export const getAllProductsApi = async (params?: ProductFilter) => {
       throw error
     }
   }
+
+  /**
+ * 🟢 Lấy variant kèm product theo ID (dùng khi cần truy ngược lại thông tin sản phẩm)
+ */
+export const getVariantWithProductByIdApi = async (id: string) => {
+  console.log('=== GET VARIANT WITH PRODUCT ===')
+  console.log('Variant ID:', id)
+  console.log('==========================')
+
+  try {
+    const response = await axiosHttpClient.get<IApiResponse<ProductVariantWithProduct>>(
+      `/product-variants/${id}/with-product`,
+    )
+    console.log('✅ Get variant with product success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Get variant with product error:', error)
+    throw error
+  }
+}
 
   /**
    * 🟢 Lấy sản phẩm theo brand

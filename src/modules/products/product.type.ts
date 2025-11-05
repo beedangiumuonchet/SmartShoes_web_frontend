@@ -13,6 +13,11 @@ export interface Product {
   productAttributes: ProductAttribute[]
 }
 
+export interface SimpleProduct {
+  id: string
+  name: string
+}
+
 export interface Brand {
   id: string
   name: string
@@ -30,6 +35,10 @@ export interface ProductVariant {
   stock: number
   color: Color
   images: ProductImage[]
+}
+
+export interface ProductVariantWithProduct extends ProductVariant {
+  product: SimpleProduct
 }
 
 export interface Color {
