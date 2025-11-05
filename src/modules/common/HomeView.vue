@@ -525,11 +525,11 @@ const handleCategoryClick = (category: any) => {
 }
 
 const handleProductClick = (product: any) => {
-  router.push(`/product/${product.id}`)
+  router.push(`/products/${product.id}`)
 }
 
 const handleBrandClick = (brand: any) => {
-  router.push(`/brand/${brand.id}`)
+  router.push(`/brands/${brand.id}`)
 }
 
 const handleViewAll = () => {

@@ -6,6 +6,7 @@ export interface Cart {
   details: CartDetail[]
   createdAt: string
   updatedAt?: string
+  [key: string]: unknown // Index signature để compatible với Record<string, unknown>
 }
 
 // Interface cho CartDetail từ API
@@ -18,6 +19,34 @@ export interface CartDetail {
   subtotal: number
   createdAt: string
   updatedAt?: string
+
+  // Có thể có thông tin product variant được populate
+  productVariant?: {
+    id: string
+    size: string
+    color?: {
+      id: string
+      name: string
+      code: string
+    }
+    colorName?: string
+    images?: Array<{
+      id: string
+      url: string
+      isMain: boolean
+    }>
+    product?: {
+      id: string
+      name: string
+      description?: string
+    }
+  }
+  product?: {
+    id: string
+    name: string
+    description?: string
+  }
+  [key: string]: unknown // Index signature
 }
 
 // Form request để thêm/cập nhật cart detail

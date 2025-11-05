@@ -4,6 +4,7 @@ import { loginScreenRoutes } from '@/modules/LoginScreen/LoginScreen.routes'
 import { usersRoutes } from '@/modules/users/users.routes'
 import { routes } from '@/modules/common/routes'
 import { productRoutes } from '@/modules/products/product.routes'
+import { cartsRoutes } from '@/modules/carts/carts.routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +12,7 @@ const router = createRouter({
     ...loginScreenRoutes,
     ...usersRoutes,
     ...productRoutes,
+    ...cartsRoutes,
     ...routes,
     {
       path: '/:pathMatch(.*)*',
