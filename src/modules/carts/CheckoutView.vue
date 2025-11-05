@@ -5,27 +5,7 @@
       <nav class="flex mb-6" aria-label="Breadcrumb">
         <ol class="flex items-center space-x-2">
           <li>
-            <button
-              @click="$router.push('/')"
-              class="text-gray-500 hover:text-rose-500 transition-colors"
-            >
-              Trang chủ
-            </button>
-          </li>
-          <li>
-            <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-          </li>
-          <li>
-            <button
-              @click="$router.push('/cart')"
-              class="text-gray-500 hover:text-rose-500 transition-colors"
-            >
+            <button @click="goBack" class="text-gray-500 hover:text-rose-500 transition-colors">
               Giỏ hàng
             </button>
           </li>
@@ -33,7 +13,7 @@
             <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fill-rule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a 1 1 0 01-1.414 0z"
                 clip-rule="evenodd"
               ></path>
             </svg>
@@ -46,8 +26,8 @@
 
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Thanh Toán</h1>
-        <p class="mt-2 text-gray-600">Hoàn tất đơn hàng của bạn</p>
+        <h1 class="text-3xl font-bold text-gray-900">Thanh Toán Đơn Hàng</h1>
+        <p class="mt-2 text-gray-600">{{ checkoutItems.length }} sản phẩm được chọn</p>
       </div>
 
       <!-- Loading -->
@@ -59,158 +39,246 @@
               class="absolute inset-0 border-4 border-purple-500 rounded-full animate-spin border-t-transparent"
             ></div>
           </div>
-          <p class="text-gray-600 text-lg">Đang tải thông tin...</p>
+          <p class="text-gray-600 text-lg">Đang tải thông tin thanh toán...</p>
         </div>
       </div>
 
-      <!-- Checkout Content -->
+      <!-- Main Content -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Left Column: Forms -->
+        <!-- Left Column: Order Details & Address -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Shipping Address Section -->
+          <!-- Order Items -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-semibold text-gray-900 flex items-center">
-                <svg
-                  class="w-6 h-6 text-rose-500 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                Địa chỉ giao hàng
-              </h2>
-              <button
-                @click="showAddressForm = !showAddressForm"
-                class="text-rose-500 hover:text-rose-600 font-medium text-sm"
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+              <svg
+                class="w-6 h-6 text-rose-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                {{ showAddressForm ? 'Hủy' : 'Thêm mới' }}
-              </button>
-            </div>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"
+                ></path>
+              </svg>
+              Sản phẩm đã chọn
+            </h2>
 
-            <!-- Existing Addresses -->
-            <div v-if="!showAddressForm && addresses.length > 0" class="space-y-4">
+            <div class="space-y-4">
               <div
-                v-for="address in addresses"
-                :key="address.id"
-                class="border border-gray-200 rounded-lg p-4 cursor-pointer transition-all hover:border-rose-300"
-                :class="{ 'border-rose-500 bg-rose-50': selectedAddress?.id === address.id }"
-                @click="selectedAddress = address"
+                v-for="item in checkoutItems"
+                :key="item.cartDetailId"
+                class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center">
-                    <input
-                      type="radio"
-                      :checked="selectedAddress?.id === address.id"
-                      class="text-rose-500 focus:ring-rose-500"
-                      @change="selectedAddress = address"
-                    />
-                    <div class="ml-3">
-                      <div class="font-medium text-gray-900">{{ address.fullName }}</div>
-                      <div class="text-sm text-gray-600">{{ address.phone }}</div>
-                      <div class="text-sm text-gray-500 mt-1">
-                        {{ address.street }}, {{ address.ward }}, {{ address.city }}
-                      </div>
-                    </div>
+                <!-- Product Image -->
+                <div class="flex-shrink-0">
+                  <img
+                    :src="item.productImage"
+                    :alt="item.productName"
+                    class="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                  />
+                </div>
+
+                <!-- Product Info -->
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-base font-medium text-gray-900 line-clamp-2 mb-1">
+                    {{ item.productName }}
+                  </h3>
+                  <div class="flex flex-wrap gap-2 text-sm">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800"
+                    >
+                      Size: {{ item.size }}
+                    </span>
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                    >
+                      Màu: {{ item.color }}
+                    </span>
                   </div>
-                  <div
-                    v-if="address.isDefault"
-                    class="bg-rose-100 text-rose-800 px-2 py-1 rounded text-xs font-medium"
-                  >
-                    Mặc định
+                </div>
+
+                <!-- Quantity & Price -->
+                <div class="text-right">
+                  <div class="text-sm text-gray-600 mb-1">SL: {{ item.quantity }}</div>
+                  <div class="text-lg font-semibold text-rose-600">
+                    {{ formatPrice(item.subtotal) }}
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Delivery Address -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+              <svg
+                class="w-6 h-6 text-blue-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                ></path>
+              </svg>
+              Địa chỉ giao hàng
+            </h2>
+
+            <!-- Address Selection -->
+            <div v-if="addresses.length > 0" class="space-y-3">
+              <div v-for="address in addresses" :key="address.id" class="relative">
+                <label
+                  class="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  :class="{
+                    'border-rose-500 bg-rose-50': selectedAddress?.id === address.id,
+                    'border-gray-200': selectedAddress?.id !== address.id,
+                  }"
+                >
+                  <input
+                    type="radio"
+                    :value="address"
+                    v-model="selectedAddress"
+                    class="mt-1 text-rose-500 focus:ring-rose-500"
+                  />
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="font-medium text-gray-900">{{ address.fullName }}</span>
+                      <span
+                        v-if="address.isDefault"
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                      >
+                        Mặc định
+                      </span>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-1">{{ address.phone }}</div>
+                    <div class="text-sm text-gray-600">
+                      {{ address.street }}, {{ address.ward }}, {{ address.city }}
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Add New Address -->
+            <div class="mt-4">
+              <button
+                @click="showAddressForm = !showAddressForm"
+                class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  ></path>
+                </svg>
+                {{ addresses.length > 0 ? 'Thêm địa chỉ mới' : 'Thêm địa chỉ giao hàng' }}
+              </button>
+            </div>
 
             <!-- New Address Form -->
-            <div v-if="showAddressForm || addresses.length === 0" class="space-y-4">
+            <div
+              v-if="showAddressForm"
+              class="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50"
+            >
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Thêm địa chỉ mới</h3>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Họ và tên *</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
                   <input
-                    v-model="newAddress.fullName"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500"
+                    v-model="newAddress.fullName"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                     placeholder="Nhập họ và tên"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Số điện thoại *</label
-                  >
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
                   <input
-                    v-model="newAddress.phone"
                     type="tel"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500"
+                    v-model="newAddress.phone"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
                     placeholder="Nhập số điện thoại"
                   />
                 </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Thành phố *</label>
-                  <select
-                    v-model="newAddress.city"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500"
-                  >
-                    <option value="">Chọn thành phố</option>
-                    <option value="Hà Nội">Hà Nội</option>
-                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                    <option value="Đà Nẵng">Đà Nẵng</option>
-                    <option value="Hải Phòng">Hải Phòng</option>
-                    <option value="Cần Thơ">Cần Thơ</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Phường/Xã *</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
                   <input
-                    v-model="newAddress.ward"
                     type="text"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500"
-                    placeholder="Nhập phường/xã"
+                    v-model="newAddress.city"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                    placeholder="Nhập tỉnh/thành phố"
                   />
                 </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Quận/Huyện/Phường</label
+                  >
+                  <input
+                    type="text"
+                    v-model="newAddress.ward"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                    placeholder="Nhập quận/huyện/phường"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1"
+                    >Số nhà, tên đường</label
+                  >
+                  <input
+                    type="text"
+                    v-model="newAddress.street"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+                    placeholder="Nhập số nhà, tên đường"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      v-model="newAddress.isDefault"
+                      class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
+                    />
+                    <span class="ml-2 text-sm text-gray-700">Đặt làm địa chỉ mặc định</span>
+                  </label>
+                </div>
               </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Địa chỉ cụ thể *</label>
-                <input
-                  v-model="newAddress.street"
-                  type="text"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500"
-                  placeholder="Số nhà, tên đường..."
-                />
+              <div class="flex gap-3 mt-4">
+                <button
+                  @click="saveAddress"
+                  :disabled="!isAddressValid || isSaving"
+                  class="px-4 py-2 bg-rose-500 hover:bg-rose-600 disabled:bg-gray-300 text-white font-medium rounded-lg transition-colors"
+                >
+                  {{ isSaving ? 'Đang lưu...' : 'Lưu địa chỉ' }}
+                </button>
+                <button
+                  @click="showAddressForm = false"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Hủy
+                </button>
               </div>
-
-              <button
-                @click="saveAddress"
-                :disabled="!isAddressValid || isSaving"
-                class="w-full bg-rose-500 hover:bg-rose-600 disabled:bg-gray-300 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                {{ isSaving ? 'Đang lưu...' : 'Lưu địa chỉ' }}
-              </button>
             </div>
           </div>
 
-          <!-- Payment Method Section -->
+          <!-- Payment Method -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
               <svg
-                class="w-6 h-6 text-rose-500 mr-3"
+                class="w-6 h-6 text-green-500 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -220,42 +288,78 @@
                   stroke-linejoin="round"
                   stroke-width="2"
                   d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                />
+                ></path>
               </svg>
               Phương thức thanh toán
             </h2>
 
-            <div class="space-y-4">
-              <div
-                v-for="method in paymentMethods"
-                :key="method"
-                class="border border-gray-200 rounded-lg p-4 cursor-pointer transition-all hover:border-rose-300"
-                :class="{ 'border-rose-500 bg-rose-50': selectedPaymentMethod === method }"
-                @click="selectedPaymentMethod = method"
+            <div class="space-y-3">
+              <!-- Cash Payment -->
+              <label
+                class="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                :class="{
+                  'border-rose-500 bg-rose-50': selectedPaymentMethod === PaymentMethod.CASH,
+                  'border-gray-200': selectedPaymentMethod !== PaymentMethod.CASH,
+                }"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center">
-                    <input
-                      type="radio"
-                      :checked="selectedPaymentMethod === method"
-                      class="text-rose-500 focus:ring-rose-500"
-                    />
-                    <div class="ml-3">
-                      <div class="font-medium text-gray-900">
-                        {{ getPaymentMethodLabel(method) }}
-                      </div>
-                      <div class="text-sm text-gray-600">
-                        {{ getPaymentMethodDescription(method) }}
-                      </div>
-                    </div>
+                <input
+                  type="radio"
+                  :value="PaymentMethod.CASH"
+                  v-model="selectedPaymentMethod"
+                  class="mt-1 text-rose-500 focus:ring-rose-500"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <svg
+                      class="w-5 h-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                      ></path>
+                    </svg>
+                    <span class="font-medium text-gray-900">Thanh toán khi nhận hàng (COD)</span>
                   </div>
-                  <div v-if="method === PaymentMethod.MOMO" class="flex items-center">
-                    <div class="w-12 h-8 bg-pink-500 rounded flex items-center justify-center">
-                      <span class="text-white text-xs font-bold">MOMO</span>
-                    </div>
-                  </div>
+                  <div class="text-sm text-gray-600">Thanh toán bằng tiền mặt khi nhận hàng</div>
                 </div>
-              </div>
+              </label>
+
+              <!-- MoMo Payment -->
+              <label
+                class="flex items-start space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                :class="{
+                  'border-rose-500 bg-rose-50': selectedPaymentMethod === PaymentMethod.MOMO,
+                  'border-gray-200': selectedPaymentMethod !== PaymentMethod.MOMO,
+                }"
+              >
+                <input
+                  type="radio"
+                  :value="PaymentMethod.MOMO"
+                  v-model="selectedPaymentMethod"
+                  class="mt-1 text-rose-500 focus:ring-rose-500"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <svg class="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path
+                        d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22C6.486 22 2 17.514 2 12S6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"
+                      />
+                    </svg>
+                    <span class="font-medium text-gray-900">Ví MoMo</span>
+                    <span
+                      class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-pink-100 text-pink-800"
+                    >
+                      Phổ biến
+                    </span>
+                  </div>
+                  <div class="text-sm text-gray-600">Thanh toán online qua ví MoMo</div>
+                </div>
+              </label>
             </div>
           </div>
 
@@ -263,7 +367,7 @@
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
               <svg
-                class="w-6 h-6 text-rose-500 mr-3"
+                class="w-6 h-6 text-yellow-500 mr-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -273,15 +377,15 @@
                   stroke-linejoin="round"
                   stroke-width="2"
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
+                ></path>
               </svg>
               Ghi chú đơn hàng
             </h2>
             <textarea
               v-model="orderNote"
               rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500"
-              placeholder="Ghi chú thêm cho đơn hàng (tùy chọn)"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-rose-500 focus:border-rose-500"
+              placeholder="Nhập ghi chú cho đơn hàng (tùy chọn)"
             ></textarea>
           </div>
         </div>
@@ -289,82 +393,70 @@
         <!-- Right Column: Order Summary -->
         <div class="lg:col-span-1">
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-6">Tóm tắt đơn hàng</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h2>
 
-            <!-- Order Items -->
-            <div class="space-y-4 mb-6">
-              <div
-                v-for="item in checkoutItems"
-                :key="item.cartDetailId"
-                class="flex items-center space-x-3"
-              >
-                <img
-                  :src="item.productImage"
-                  :alt="item.productName"
-                  class="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                />
-                <div class="flex-1 min-w-0">
-                  <h3 class="text-sm font-medium text-gray-900 line-clamp-2">
-                    {{ item.productName }}
-                  </h3>
-                  <div class="flex items-center gap-2 text-xs text-gray-600 mt-1">
-                    <span class="bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded">{{
-                      item.size
-                    }}</span>
-                    <span class="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded">{{
-                      item.color
-                    }}</span>
-                  </div>
-                  <div class="flex items-center justify-between mt-2">
-                    <span class="text-sm text-gray-600">x{{ item.quantity }}</span>
-                    <span class="text-sm font-semibold text-rose-600">{{
-                      formatPrice(item.subtotal)
-                    }}</span>
-                  </div>
+            <!-- Order Summary -->
+            <div class="space-y-3 mb-6">
+              <div class="flex justify-between text-gray-600">
+                <span>Tạm tính ({{ summary.itemCount }} sản phẩm)</span>
+                <span>{{ formatPrice(summary.subtotal) }}</span>
+              </div>
+              <div class="flex justify-between text-gray-600">
+                <span>Phí vận chuyển</span>
+                <span>{{ formatPrice(summary.shippingFee) }}</span>
+              </div>
+              <div class="border-t border-gray-200 pt-3">
+                <div class="flex justify-between text-lg font-semibold text-gray-900">
+                  <span>Tổng cộng</span>
+                  <span class="text-rose-600">{{ formatPrice(summary.total) }}</span>
                 </div>
               </div>
             </div>
 
-            <!-- Order Summary -->
-            <div class="border-t border-gray-200 pt-6 space-y-3">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Tạm tính ({{ summary.itemCount }} sản phẩm)</span>
-                <span class="font-medium">{{ formatPrice(summary.subtotal) }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Phí vận chuyển</span>
-                <span class="font-medium">{{ formatPrice(summary.shippingFee) }}</span>
-              </div>
-              <div class="border-t border-gray-200 pt-3 flex justify-between text-lg font-semibold">
-                <span class="text-gray-900">Tổng cộng</span>
-                <span class="text-rose-600">{{ formatPrice(summary.total) }}</span>
-              </div>
-            </div>
-
-            <!-- Place Order Button -->
+            <!-- Checkout Button -->
             <button
               @click="placeOrder"
-              :disabled="!canPlaceOrder || isPlacingOrder"
-              class="w-full mt-6 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none"
+              :disabled="!canPlaceOrder"
+              class="w-full px-6 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none"
             >
               <span v-if="isPlacingOrder" class="flex items-center justify-center">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                <svg
+                  class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
                 Đang xử lý...
               </span>
               <span v-else>Đặt hàng ngay</span>
             </button>
 
             <!-- Security Note -->
-            <div class="mt-4 flex items-center justify-center text-xs text-gray-500">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-              Thông tin của bạn được bảo mật
+            <div class="mt-4 p-3 bg-green-50 rounded-lg">
+              <div class="flex items-center text-green-800 text-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  ></path>
+                </svg>
+                Thông tin của bạn được bảo mật hoàn toàn
+              </div>
             </div>
           </div>
         </div>
@@ -475,7 +567,7 @@ const isAddressValid = computed(() => {
 
 const summary = computed(() => {
   const subtotal = checkoutItems.value.reduce((total, item) => total + item.subtotal, 0)
-  const shippingFee = 30000 // Default shipping fee
+  const shippingFee = 0 // Default shipping fee
 
   return {
     subtotal,
@@ -500,16 +592,6 @@ const formatPrice = (price: number) => {
     style: 'currency',
     currency: 'VND',
   }).format(price)
-}
-
-const getPaymentMethodLabel = (method: PaymentMethod) => {
-  return method === PaymentMethod.CASH ? 'Thanh toán khi nhận hàng (COD)' : 'Ví MoMo'
-}
-
-const getPaymentMethodDescription = (method: PaymentMethod) => {
-  return method === PaymentMethod.CASH
-    ? 'Thanh toán bằng tiền mặt khi nhận hàng'
-    : 'Thanh toán online qua ví MoMo'
 }
 
 // Helper functions từ CartView
@@ -653,7 +735,7 @@ const saveAddress = async () => {
   }
 }
 
-// 🆕 FIXED: placeOrder function với shipping info đúng
+// 🆕 MAIN: placeOrder function với shipping info và payment methods
 const placeOrder = async () => {
   if (!canPlaceOrder.value) {
     showError('Vui lòng kiểm tra lại thông tin đơn hàng')
@@ -663,7 +745,14 @@ const placeOrder = async () => {
   try {
     isPlacingOrder.value = true
 
-    // 🆕 Chuẩn bị shipping info từ selectedAddress hoặc newAddress
+    // 🆕 VALIDATION: Kiểm tra user
+    if (!currentUser.value?.userId) {
+      showError('Phiên đăng nhập không hợp lệ')
+      router.push('/login')
+      return
+    }
+
+    // 🆕 STEP 1: Chuẩn bị shipping info từ selectedAddress hoặc newAddress
     let shippingInfo: {
       name: string
       phone: string
@@ -671,91 +760,165 @@ const placeOrder = async () => {
     }
 
     if (selectedAddress.value) {
+      // 🎯 Lấy từ địa chỉ đã chọn
       shippingInfo = {
         name: selectedAddress.value.fullName,
         phone: selectedAddress.value.phone,
         address: `${selectedAddress.value.street}, ${selectedAddress.value.ward}, ${selectedAddress.value.city}`,
       }
     } else if (isAddressValid.value) {
-      // Tạo địa chỉ mới nếu chưa có (tùy chọn)
-      const savedAddress = await createAddress(newAddress.value, currentUser.value!.userId)
+      // 🎯 Tạo địa chỉ mới từ form
+      const savedAddress = await createAddress(newAddress.value, currentUser.value.userId)
       shippingInfo = {
         name: savedAddress.fullName,
         phone: savedAddress.phone,
         address: `${savedAddress.street}, ${savedAddress.ward}, ${savedAddress.city}`,
       }
     } else {
-      throw new Error('Không có địa chỉ giao hàng hợp lệ')
+      throw new Error('Vui lòng chọn hoặc nhập địa chỉ giao hàng')
     }
 
-    // Step 1: Create order from cart với shipping info (BỎ addressId)
-    const cart = await getUserCart(currentUser.value!.userId)
+    // 🆕 VALIDATION: Kiểm tra shipping info
+    if (!shippingInfo.name.trim()) {
+      showError('Tên người nhận không được để trống')
+      return
+    }
+    if (!shippingInfo.phone.trim()) {
+      showError('Số điện thoại không được để trống')
+      return
+    }
+    if (!shippingInfo.address.trim()) {
+      showError('Địa chỉ giao hàng không được để trống')
+      return
+    }
 
-    // 🆕 UPDATED: FromCartRequest với shipping info thay vì addressId
+    console.log('📦 Shipping Info:', shippingInfo)
+
+    // 🆕 STEP 2: Get cart và validate
+    const cart = await getUserCart(currentUser.value.userId)
+
+    if (!cart || !cart.id) {
+      showError('Không tìm thấy giỏ hàng hợp lệ')
+      router.push('/cart')
+      return
+    }
+
+    if (!cart.details || cart.details.length === 0) {
+      showError('Giỏ hàng trống')
+      router.push('/cart')
+      return
+    }
+
+    console.log('🛒 Cart data:', cart)
+
+    // 🆕 STEP 3: Create order request với shipping info
     const orderRequest = new FromCartRequest(
       cart.id,
-      shippingInfo.name,
-      shippingInfo.phone,
-      shippingInfo.address,
+      shippingInfo.name.trim(),
+      shippingInfo.phone.trim(),
+      shippingInfo.address.trim(),
     )
 
-    console.log('🛒 Creating order with shipping data:', orderRequest)
+    console.log('📋 Order Request:', orderRequest)
+    console.log('📋 Order Request JSON:', JSON.stringify(orderRequest, null, 2))
+
+    // 🆕 STEP 4: Create order
     const order = await fromCart(orderRequest)
     console.log('✅ Order created successfully:', order)
 
-    // Step 2: Create payment based on method
+    // 🆕 STEP 5: Create payment based on method
     if (selectedPaymentMethod.value === PaymentMethod.CASH) {
       // 💰 COD Payment
-      const paymentRequest = new CreatePaymentRequest(
-        order.id,
-        PaymentMethod.CASH,
-        summary.value.total,
-      )
+      try {
+        const paymentRequest = new CreatePaymentRequest(
+          order.id,
+          PaymentMethod.CASH,
+          summary.value.total,
+        )
 
-      const payment = await createPayment(paymentRequest)
-      console.log('✅ COD Payment created:', payment)
+        console.log('💰 Creating COD payment:', paymentRequest)
+        const payment = await createPayment(paymentRequest)
+        console.log('✅ COD Payment created:', payment)
 
-      // Clear selected items and redirect
-      localStorage.removeItem('selectedCartItems')
-      showSuccess('Đặt hàng thành công! Bạn sẽ thanh toán khi nhận hàng.')
+        // Success handling
+        localStorage.removeItem('selectedCartItems')
+        showSuccess('Đặt hàng thành công! Bạn sẽ thanh toán khi nhận hàng.')
 
-      setTimeout(() => {
-        router.push(`/orders/${order.id}`)
-      }, 1500)
+        setTimeout(() => {
+          router.push(`/orders/${order.id}`)
+        }, 1500)
+      } catch (paymentError) {
+        console.error('❌ COD Payment error:', paymentError)
+        showError('Đặt hàng thành công nhưng có lỗi tạo thanh toán. Đơn hàng vẫn được xử lý.')
+
+        setTimeout(() => {
+          router.push(`/orders/${order.id}`)
+        }, 2000)
+      }
     } else if (selectedPaymentMethod.value === PaymentMethod.MOMO) {
       // 📱 MoMo Payment
-      console.log('🔄 Creating MoMo payment...')
-      const momoResponse = await createMomoPayment(order.id, summary.value.total)
-      console.log('✅ MoMo payment created:', momoResponse)
+      try {
+        console.log('🔄 Creating MoMo payment...')
+        const momoResponse = await createMomoPayment(order.id, summary.value.total)
+        console.log('✅ MoMo payment created:', momoResponse)
 
-      // Clear selected items
-      localStorage.removeItem('selectedCartItems')
-      showSuccess('Chuyển hướng đến MoMo để thanh toán...')
+        // Clear selected items
+        localStorage.removeItem('selectedCartItems')
+        showSuccess('Chuyển hướng đến MoMo để thanh toán...')
 
-      // Redirect to MoMo payment
-      setTimeout(() => {
-        redirectToMomoPayment(momoResponse.payUrl)
-      }, 1000)
+        // Redirect to MoMo payment
+        setTimeout(() => {
+          redirectToMomoPayment(momoResponse.payUrl)
+        }, 1000)
+      } catch (paymentError) {
+        console.error('❌ MoMo Payment error:', paymentError)
+        showError('Đặt hàng thành công nhưng có lỗi tạo thanh toán MoMo. Vui lòng thử lại.')
+
+        setTimeout(() => {
+          router.push(`/orders/${order.id}`)
+        }, 2000)
+      }
     }
   } catch (error) {
     console.error('❌ Error placing order:', error)
 
-    // Show specific error message
+    // Enhanced error handling
     let errorMsg = 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.'
 
-    if (error && typeof error === 'object' && 'response' in error) {
-      const httpError = error as any
-      if (httpError.response?.status === 400) {
-        errorMsg = 'Thông tin đơn hàng không hợp lệ. Vui lòng kiểm tra lại.'
-      } else if (httpError.response?.status === 401) {
-        errorMsg = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
-        setTimeout(() => {
-          router.push('/login')
-        }, 2000)
-      } else if (httpError.response?.status === 404) {
-        errorMsg = 'Không tìm thấy giỏ hàng hoặc sản phẩm.'
-      } else if (httpError.response?.data?.message) {
-        errorMsg = httpError.response.data.message
+    if (error && typeof error === 'object') {
+      if ('message' in error && typeof error.message === 'string') {
+        errorMsg = error.message
+      }
+
+      if ('response' in error) {
+        const httpError = error as any
+        const status = httpError.response?.status
+        const responseData = httpError.response?.data
+
+        console.error('🚨 HTTP Error Details:', {
+          status,
+          url: httpError.config?.url,
+          method: httpError.config?.method,
+          requestData: httpError.config?.data,
+          responseData,
+        })
+
+        if (status === 400) {
+          if (responseData?.message) {
+            errorMsg = responseData.message
+          } else {
+            errorMsg = 'Thông tin đơn hàng không hợp lệ. Vui lòng kiểm tra lại địa chỉ và sản phẩm.'
+          }
+        } else if (status === 401) {
+          errorMsg = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+        } else if (status === 404) {
+          errorMsg = 'Không tìm thấy giỏ hàng hoặc sản phẩm.'
+        } else if (status === 422) {
+          errorMsg = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.'
+        }
       }
     }
 
@@ -763,6 +926,10 @@ const placeOrder = async () => {
   } finally {
     isPlacingOrder.value = false
   }
+}
+
+const goBack = () => {
+  router.push('/cart')
 }
 
 const showSuccess = (message: string) => {
@@ -787,8 +954,6 @@ onMounted(() => {
 })
 </script>
 
-<!-- Template giữ nguyên như hiện tại -->
-
 <style scoped>
 @keyframes slide-up {
   from {
@@ -812,29 +977,32 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* Custom focus styles */
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1) !important;
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #f1f5f9;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
+  background: linear-gradient(to bottom, #f43f5e, #ec4899);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: linear-gradient(to bottom, #e11d48, #db2777);
+}
+
+/* Enhanced hover effects */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+/* Enhanced shadows */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 </style>

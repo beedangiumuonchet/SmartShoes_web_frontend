@@ -29,15 +29,18 @@ export class CreatePaymentRequest {
   orderId: string
   paymentMethod: PaymentMethod
   amount: number
+  transactionId: string | undefined
 
   constructor(
     orderId: string = '',
     paymentMethod: PaymentMethod = PaymentMethod.CASH,
     amount: number = 0,
+    transactionId?: string,
   ) {
     this.orderId = orderId
     this.paymentMethod = paymentMethod
     this.amount = amount
+    this.transactionId = transactionId
   }
 }
 
