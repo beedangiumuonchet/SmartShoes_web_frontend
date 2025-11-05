@@ -7,10 +7,8 @@ export interface Product {
   status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK'
   createdAt: string
 
-  // brand: Brand
-  // category: Category
-   brandName: String
-  categoryName: String
+  brand: Brand
+  category: Category
   variants: ProductVariant[]
   productAttributes: ProductAttribute[]
 }
