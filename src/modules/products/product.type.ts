@@ -34,6 +34,7 @@ export interface ProductVariant {
   price: number
   stock: number
   color: Color
+  colorName?: string // Tên màu tùy chỉnh (nếu có)
   images: ProductImage[]
 }
 

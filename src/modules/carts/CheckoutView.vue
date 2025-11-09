@@ -45,73 +45,9 @@
 
       <!-- Main Content -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Left Column: Order Details & Address -->
+        <!-- Left Column: Address & Order Details -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Order Items -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <svg
-                class="w-6 h-6 text-rose-500 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"
-                ></path>
-              </svg>
-              Sản phẩm đã chọn
-            </h2>
-
-            <div class="space-y-4">
-              <div
-                v-for="item in checkoutItems"
-                :key="item.cartDetailId"
-                class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
-              >
-                <!-- Product Image -->
-                <div class="flex-shrink-0">
-                  <img
-                    :src="item.productImage"
-                    :alt="item.productName"
-                    class="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                  />
-                </div>
-
-                <!-- Product Info -->
-                <div class="flex-1 min-w-0">
-                  <h3 class="text-base font-medium text-gray-900 line-clamp-2 mb-1">
-                    {{ item.productName }}
-                  </h3>
-                  <div class="flex flex-wrap gap-2 text-sm">
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800"
-                    >
-                      Size: {{ item.size }}
-                    </span>
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                    >
-                      Màu: {{ item.color }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Quantity & Price -->
-                <div class="text-right">
-                  <div class="text-sm text-gray-600 mb-1">SL: {{ item.quantity }}</div>
-                  <div class="text-lg font-semibold text-rose-600">
-                    {{ formatPrice(item.subtotal) }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Delivery Address -->
+          <!-- ✅ Delivery Address - MOVED TO TOP -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
               <svg
@@ -270,6 +206,70 @@
                 >
                   Hủy
                 </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ✅ Order Items - WITH API DATA -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+              <svg
+                class="w-6 h-6 text-rose-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"
+                ></path>
+              </svg>
+              Sản phẩm đã chọn
+            </h2>
+
+            <div class="space-y-4">
+              <div
+                v-for="item in checkoutItems"
+                :key="item.cartDetailId"
+                class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
+              >
+                <!-- Product Image -->
+                <div class="flex-shrink-0">
+                  <img
+                    :src="item.productImage"
+                    :alt="item.productName"
+                    class="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                  />
+                </div>
+
+                <!-- Product Info -->
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-base font-medium text-gray-900 line-clamp-2 mb-1">
+                    {{ item.productName }}
+                  </h3>
+                  <div class="flex flex-wrap gap-2 text-sm">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800"
+                    >
+                      Size: {{ item.size }}
+                    </span>
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                    >
+                      Màu: {{ item.color }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Quantity & Price -->
+                <div class="text-right">
+                  <div class="text-sm text-gray-600 mb-1">SL: {{ item.quantity }}</div>
+                  <div class="text-lg font-semibold text-rose-600">
+                    {{ formatPrice(item.subtotal) }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -514,6 +514,9 @@ import type { Address } from '../addresses/addresses.type'
 import { AddressForm } from '../addresses/addresses.type'
 import { FromCartRequest } from '../orders/orders.type'
 import { CreatePaymentRequest } from '../payments/payments.type'
+// ✅ Import API để lấy variant với product - SAME AS CARTVIEW
+import { getVariantWithProductByIdApi } from '@/modules/products/product.api'
+import type { ProductVariantWithProduct } from '@/modules/products/product.type'
 
 const router = useRouter()
 
@@ -527,6 +530,9 @@ const showErrorToast = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const orderNote = ref('')
+
+// ✅ Cache để lưu thông tin variant đã fetch - SAME AS CARTVIEW
+const variantCache = ref<Map<string, ProductVariantWithProduct>>(new Map())
 
 // Data
 interface CheckoutItem {
@@ -594,64 +600,181 @@ const formatPrice = (price: number) => {
   }).format(price)
 }
 
-// Helper functions từ CartView
+// ✅ HELPER FUNCTIONS - SAME AS CARTVIEW với API cache
 const getProductName = (detail: any) => {
+  console.log('📦 Getting product name for detail:', detail.id || detail.cartDetailId)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.product?.name) {
+    console.log('✅ Found product name from API cache:', variantInfo.product.name)
+    return variantInfo.product.name
+  }
+
+  // Fallback - từ data có sẵn trong cart (nếu được populate)
   if (detail.productVariant?.product?.name) {
+    console.log('✅ Found product name from populated data:', detail.productVariant.product.name)
     return detail.productVariant.product.name
   }
+
   if (detail.product?.name) {
+    console.log('✅ Found product name from detail.product:', detail.product.name)
     return detail.product.name
   }
+
   if (detail.name) {
+    console.log('✅ Found name from detail.name:', detail.name)
     return detail.name
   }
-  if (detail.productVariantId) {
-    return `Sản phẩm ${detail.productVariantId.slice(-8)}`
-  }
-  return `Sản phẩm ${detail.productVariantId?.slice(-8) || detail.id?.slice(-8) || 'Unknown'}`
+
+  // Fallback với productVariantId
+  const fallbackName = `Sản phẩm #${detail.productVariantId?.slice(-8) || 'Unknown'}`
+  console.log('⚠️ Using fallback name:', fallbackName)
+  return fallbackName
 }
 
 const getProductImage = (detail: any) => {
+  console.log('🖼️ Getting product image for detail:', detail.id || detail.cartDetailId)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.images?.length > 0) {
+    // Tìm main image trước
+    const mainImage = variantInfo.images.find((img) => img.isMain)
+    if (mainImage?.url) {
+      console.log('✅ Found main image from API cache:', mainImage.url)
+      return mainImage.url
+    }
+
+    // Nếu không có main, lấy ảnh đầu tiên
+    const firstImage = variantInfo.images[0]?.url
+    if (firstImage) {
+      console.log('✅ Found first image from API cache:', firstImage)
+      return firstImage
+    }
+  }
+
+  // Fallback - từ data có sẵn trong cart
   if (detail.productVariant?.images?.length > 0) {
     const mainImage = detail.productVariant.images.find((img: any) => img.isMain)
-    if (mainImage?.url) return mainImage.url
-    return detail.productVariant.images[0].url
+    if (mainImage?.url) {
+      console.log('✅ Found image from populated data (main):', mainImage.url)
+      return mainImage.url
+    }
+
+    const firstImage = detail.productVariant.images[0]?.url
+    if (firstImage) {
+      console.log('✅ Found image from populated data (first):', firstImage)
+      return firstImage
+    }
   }
+
   if (detail.productVariant?.product?.images?.length > 0) {
     const mainImage = detail.productVariant.product.images.find((img: any) => img.isMain)
     if (mainImage?.url) return mainImage.url
     return detail.productVariant.product.images[0].url
   }
+
   if (detail.productVariant?.image) {
     return typeof detail.productVariant.image === 'string'
       ? detail.productVariant.image
       : detail.productVariant.image.url
   }
+
   if (detail.product?.images?.length > 0) {
     const mainImage = detail.product.images.find((img: any) => img.isMain)
     if (mainImage?.url) return mainImage.url
     return detail.product.images[0].url
   }
+
   if (detail.image) {
     return typeof detail.image === 'string' ? detail.image : detail.image.url
   }
-  return 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
+
+  // Default placeholder
+  const placeholder = 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
+  console.log('⚠️ Using placeholder image:', placeholder)
+  return placeholder
 }
 
 const getVariantSize = (detail: any) => {
-  if (detail.productVariant?.size) return detail.productVariant.size
+  console.log('📏 Getting variant size for detail:', detail.id || detail.cartDetailId)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.size) {
+    console.log('✅ Found size from API cache:', variantInfo.size)
+    return variantInfo.size
+  }
+
+  // Fallback - từ data có sẵn trong cart
+  if (detail.productVariant?.size) {
+    console.log('✅ Found size from populated data:', detail.productVariant.size)
+    return detail.productVariant.size
+  }
+
   if (detail.size) return detail.size
   if (detail.variantSize) return detail.variantSize
+
+  console.log('⚠️ No size found, returning N/A')
   return 'N/A'
 }
 
 const getVariantColor = (detail: any) => {
-  if (detail.productVariant?.color?.name) return detail.productVariant.color.name
-  if (detail.productVariant?.colorName) return detail.productVariant.colorName
+  console.log('🎨 Getting variant color for detail:', detail.id || detail.cartDetailId)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+
+  // Support cả colorName và color.name
+  if (variantInfo?.colorName) {
+    console.log('✅ Found colorName from API cache:', variantInfo.colorName)
+    return variantInfo.colorName
+  }
+
+  if (variantInfo?.color?.name) {
+    console.log('✅ Found color.name from API cache:', variantInfo.color.name)
+    return variantInfo.color.name
+  }
+
+  // Fallback - từ data có sẵn trong cart
+  if (detail.productVariant?.color?.name) {
+    console.log('✅ Found color from populated data:', detail.productVariant.color.name)
+    return detail.productVariant.color.name
+  }
+
+  if (detail.productVariant?.colorName) {
+    console.log('✅ Found colorName from populated data:', detail.productVariant.colorName)
+    return detail.productVariant.colorName
+  }
+
   if (detail.color?.name) return detail.color.name
   if (detail.colorName) return detail.colorName
   if (detail.variantColor) return detail.variantColor
+
+  console.log('⚠️ No color found, returning N/A')
   return 'N/A'
+}
+
+// ✅ Load thông tin variant từ API cho tất cả items - SAME AS CARTVIEW
+const loadVariantInfoForCheckoutItems = async (cartDetails: any[]) => {
+  console.log('🔄 Loading variant info for checkout items...')
+
+  const promises = cartDetails.map(async (detail) => {
+    if (!variantCache.value.has(detail.productVariantId)) {
+      try {
+        console.log(`🔍 Fetching variant info for: ${detail.productVariantId}`)
+        const variantWithProduct = await getVariantWithProductByIdApi(detail.productVariantId)
+        variantCache.value.set(detail.productVariantId, variantWithProduct)
+        console.log(`✅ Loaded variant info:`, variantWithProduct)
+      } catch (error) {
+        console.error(`❌ Error loading variant ${detail.productVariantId}:`, error)
+      }
+    }
+  })
+
+  await Promise.all(promises)
+  console.log('✅ All variant info loaded for checkout')
 }
 
 const loadCheckoutData = async () => {
@@ -673,9 +796,13 @@ const loadCheckoutData = async () => {
       return
     }
 
-    // Filter selected items and transform to checkout items
+    // Filter selected items
     const selectedDetails = cart.details.filter((detail) => selectedItemIds.includes(detail.id))
 
+    // ✅ Load variant info cho các items được chọn
+    await loadVariantInfoForCheckoutItems(selectedDetails)
+
+    // ✅ Transform to checkout items with API data
     checkoutItems.value = selectedDetails.map((detail) => ({
       cartDetailId: detail.id,
       productVariantId: detail.productVariantId,
