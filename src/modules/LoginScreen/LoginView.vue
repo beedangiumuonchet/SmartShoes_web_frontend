@@ -153,32 +153,25 @@ const login = async () => {
     }
     // Use rememberMe to determine storage type (session vs local)
     setToken(response.result?.token ?? '')
+    // Get user roles from response
+    const userRoles = response.result?.roles || response.result?.user?.roles || []
 
-    // Debug: Kiểm tra token đã được set chưa
-    try {
-      const currentUser = getCurrentUser()
-      console.log('Current user after setToken:', currentUser)
-      console.log('User ID:', currentUser?.id)
-      console.log('User name:', currentUser?.name)
-    } catch (getUserError) {
-      console.error('Error getting current user (non-blocking):', getUserError)
-      // Don't throw error here, just log it
+    console.log('User roles for redirect:', userRoles)
+
+    // Redirect based on role
+    if (userRoles.includes('ADMIN')) {
+      console.log('Redirecting to admin dashboard...')
+      await router.push('/manager')
+    } else if (userRoles.includes('USER')) {
+      console.log('Redirecting to user homepage...')
+      await router.push('/')
+    } else {
+      // Fallback - redirect to homepage
+      console.log('No specific role found, redirecting to homepage...')
+      await router.push('/')
     }
 
-    console.log(
-      Info(
-        'Login successful',
-        {
-          user: response.result?.user.username,
-          roles: response.result?.roles,
-        },
-        DebugContexts.AUTH,
-      ),
-    )
-
-    await router.push('/')
-    // Debug: Kiểm tra sau khi navigate
-    console.log('Navigation completed, current route:', router.currentRoute.value)
+    console.log('Navigation completed, current route:', router.currentRoute.value.path)
   } catch (err) {
     console.log(ErrorLog('Login failed with exception', err, DebugContexts.AUTH))
     error.value = 'Đăng nhập thất bại: ' + (err as Error).message

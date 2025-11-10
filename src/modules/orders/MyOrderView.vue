@@ -1,11 +1,14 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 py-4">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Breadcrumb -->
-      <nav class="flex mb-6" aria-label="Breadcrumb">
+      <nav class="flex mb-4" aria-label="Breadcrumb">
         <ol class="flex items-center space-x-2">
           <li>
-            <router-link to="/" class="text-gray-500 hover:text-rose-500 transition-colors">
+            <router-link
+              to="/"
+              class="text-gray-500 hover:text-rose-500 transition-colors font-medium text-sm"
+            >
               Trang chủ
             </router-link>
           </li>
@@ -19,27 +22,27 @@
             </svg>
           </li>
           <li>
-            <span class="text-gray-900 font-medium">Đơn hàng của tôi</span>
+            <span class="text-gray-900 font-semibold text-sm">Đơn hàng của tôi</span>
           </li>
         </ol>
       </nav>
 
       <!-- Header -->
-      <div class="mb-8">
+      <div class="mb-6">
         <div class="flex items-center justify-between">
           <div>
             <h1
-              class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent"
+              class="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 bg-clip-text text-transparent"
             >
               Đơn Hàng Của Tôi
             </h1>
-            <p class="mt-2 text-gray-600">Quản lý và theo dõi tất cả đơn hàng của bạn</p>
+            <p class="mt-1 text-base text-gray-600">Quản lý và theo dõi tất cả đơn hàng của bạn</p>
           </div>
           <button
             @click="continueShopping"
-            class="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+            class="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm"
           >
-            <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -54,17 +57,17 @@
 
       <!-- Enhanced Filters -->
       <div class="mb-6">
-        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+        <div class="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg border border-white/30 p-4">
           <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
             <!-- Status Filter -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
+              <label class="block text-xs font-semibold text-gray-700 mb-2"
                 >Trạng thái đơn hàng</label
               >
               <select
                 v-model="selectedStatus"
                 @change="applyFilters"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white"
+                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white/80 backdrop-blur-sm shadow-sm transition-all"
               >
                 <option value="">Tất cả trạng thái</option>
                 <option v-for="status in statusOptions" :key="status.value" :value="status.value">
@@ -75,28 +78,28 @@
 
             <!-- Date Range Filter -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Từ ngày</label>
+              <label class="block text-xs font-semibold text-gray-700 mb-2">Từ ngày</label>
               <input
                 v-model="dateFrom"
                 @change="applyFilters"
                 type="date"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white/80 backdrop-blur-sm shadow-sm transition-all"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Đến ngày</label>
+              <label class="block text-xs font-semibold text-gray-700 mb-2">Đến ngày</label>
               <input
                 v-model="dateTo"
                 @change="applyFilters"
                 type="date"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white/80 backdrop-blur-sm shadow-sm transition-all"
               />
             </div>
 
             <!-- Search -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Tìm kiếm</label>
+              <label class="block text-xs font-semibold text-gray-700 mb-2">Tìm kiếm</label>
               <div class="relative">
                 <input
                   v-model="searchQuery"
@@ -104,7 +107,7 @@
                   @keyup.enter="applyFilters"
                   type="text"
                   placeholder="Mã đơn hàng, tên người nhận..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  class="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500 bg-white/80 backdrop-blur-sm shadow-sm transition-all"
                 />
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg
@@ -126,14 +129,14 @@
           </div>
 
           <!-- Filter Actions -->
-          <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+          <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200/50">
             <div class="flex items-center space-x-3">
               <button
                 @click="clearFilters"
-                class="px-4 py-2 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200 font-medium"
               >
                 <svg
-                  class="w-4 h-4 mr-1 inline"
+                  class="w-3 h-3 mr-1 inline"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -147,7 +150,7 @@
                 </svg>
                 Xóa bộ lọc
               </button>
-              <span v-if="hasActiveFilters" class="text-sm text-gray-600">
+              <span v-if="hasActiveFilters" class="text-xs text-gray-600 font-medium">
                 {{ filteredOrders.length }} / {{ orders.length }} đơn hàng
               </span>
             </div>
@@ -155,10 +158,10 @@
             <button
               @click="refreshOrders"
               :disabled="loading"
-              class="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors"
+              class="px-4 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 disabled:from-gray-300 disabled:to-gray-400 text-white text-xs font-semibold rounded-lg transition-all duration-200 shadow-md"
             >
               <svg
-                class="w-4 h-4 mr-1 inline"
+                class="w-3 h-3 mr-1 inline"
                 :class="{ 'animate-spin': loading }"
                 fill="none"
                 stroke="currentColor"
@@ -178,7 +181,7 @@
       </div>
 
       <!-- Loading -->
-      <div v-if="loading && orders.length === 0" class="text-center py-20">
+      <div v-if="loading && orders.length === 0" class="text-center py-16">
         <div class="relative">
           <div class="w-16 h-16 mx-auto mb-4">
             <div class="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
@@ -186,12 +189,12 @@
               class="absolute inset-0 border-4 border-purple-500 rounded-full animate-spin border-t-transparent"
             ></div>
           </div>
-          <p class="text-gray-600 text-lg">Đang tải danh sách đơn hàng...</p>
+          <p class="text-gray-600 text-lg font-medium">Đang tải danh sách đơn hàng...</p>
         </div>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="text-center py-20">
+      <div v-else-if="error" class="text-center py-16">
         <div
           class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center"
         >
@@ -204,23 +207,23 @@
             ></path>
           </svg>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Không thể tải danh sách đơn hàng</h3>
-        <p class="text-gray-600 mb-4">{{ error }}</p>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Không thể tải danh sách đơn hàng</h3>
+        <p class="text-gray-600 mb-4 text-sm">{{ error }}</p>
         <button
           @click="loadOrders"
-          class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg transition-colors"
+          class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg transition-colors font-medium text-sm"
         >
           Thử lại
         </button>
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="!loading && filteredOrders.length === 0" class="text-center py-20">
+      <div v-else-if="!loading && filteredOrders.length === 0" class="text-center py-16">
         <div
-          class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center"
+          class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center"
         >
           <svg
-            class="w-10 h-10 text-gray-400"
+            class="w-10 h-10 text-purple-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -233,50 +236,56 @@
             ></path>
           </svg>
         </div>
-        <h3 class="text-xl font-medium text-gray-900 mb-2">
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">
           {{ hasActiveFilters ? 'Không tìm thấy đơn hàng nào' : 'Chưa có đơn hàng nào' }}
         </h3>
-        <p class="text-gray-600 mb-6">
+        <p class="text-gray-600 mb-6 text-sm">
           {{
             hasActiveFilters
               ? 'Thử thay đổi bộ lọc để tìm kiếm đơn hàng khác'
               : 'Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên của bạn!'
           }}
         </p>
-        <button
-          v-if="hasActiveFilters"
-          @click="clearFilters"
-          class="mr-3 px-6 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors"
-        >
-          Xóa bộ lọc
-        </button>
-        <button
-          @click="continueShopping"
-          class="px-6 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-medium rounded-lg transition-all"
-        >
-          {{ hasActiveFilters ? 'Tiếp tục mua sắm' : 'Bắt đầu mua sắm' }}
-        </button>
+        <div class="flex justify-center gap-3">
+          <button
+            v-if="hasActiveFilters"
+            @click="clearFilters"
+            class="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-all duration-200 text-sm"
+          >
+            Xóa bộ lọc
+          </button>
+          <button
+            @click="continueShopping"
+            class="px-6 py-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm"
+          >
+            {{ hasActiveFilters ? 'Tiếp tục mua sắm' : 'Bắt đầu mua sắm' }}
+          </button>
+        </div>
       </div>
 
-      <!-- Orders List -->
+      <!-- ✅ Orders List - COMPACT & SOFT COLORS -->
       <div v-else class="space-y-4">
         <div
           v-for="order in paginatedOrders"
           :key="order.id"
-          class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200"
+          class="bg-gradient-to-r from-white/85 via-purple-50/30 to-pink-50/30 backdrop-blur-sm rounded-xl shadow-md border border-white/40 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:scale-[1.005]"
         >
-          <!-- Order Header -->
-          <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+          <!-- ✅ Order Header - COMPACT -->
+          <div
+            class="p-4 border-b border-gray-200/40 bg-gradient-to-r from-gray-50/60 to-purple-50/40"
+          >
             <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-4">
+              <div class="flex items-center space-x-3">
                 <div>
-                  <h3 class="text-lg font-semibold text-gray-900">
+                  <h3 class="text-lg font-bold text-gray-900">
                     Đơn hàng #{{ order.id.slice(-8) }}
                   </h3>
-                  <p class="text-sm text-gray-600">Đặt ngày {{ formatDate(order.createdAt) }}</p>
+                  <p class="text-xs text-gray-600 mt-0.5">
+                    Đặt ngày {{ formatDate(order.createdAt) }}
+                  </p>
                 </div>
                 <span
-                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm"
                   :class="getStatusColor(order.status)"
                 >
                   {{ getStatusLabel(order.status) }}
@@ -284,16 +293,18 @@
               </div>
               <div class="flex items-center space-x-3">
                 <div class="text-right">
-                  <div class="text-2xl font-bold text-rose-600">
+                  <div
+                    class="text-xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent"
+                  >
                     {{ formatPrice(order.totalAmount) }}
                   </div>
-                  <div class="text-sm text-gray-500">
+                  <div class="text-xs text-gray-500 font-medium">
                     {{ getTotalQuantity(order.orderDetails) }} sản phẩm
                   </div>
                 </div>
                 <button
                   @click="viewOrderDetail(order.id)"
-                  class="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  class="px-3 py-1.5 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors font-medium text-xs"
                 >
                   Chi tiết
                 </button>
@@ -301,51 +312,53 @@
             </div>
           </div>
 
-          <!-- Order Items Preview -->
-          <div class="p-6">
-            <div class="space-y-4">
+          <!-- ✅ Order Items Preview - COMPACT WITH SOFT COLORS -->
+          <div class="p-4">
+            <div class="space-y-3">
               <div
                 v-for="detail in getPreviewItems(order.orderDetails)"
                 :key="detail.id"
-                class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
+                class="flex items-center space-x-3 p-3 bg-gradient-to-r from-gray-50/40 via-purple-50/20 to-pink-50/20 rounded-lg border border-gray-100/40"
               >
                 <!-- Product Image -->
                 <div class="flex-shrink-0">
                   <img
                     :src="getProductImage(detail)"
                     :alt="getProductName(detail)"
-                    class="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
+                    class="w-16 h-16 object-cover rounded-lg border border-gray-200/50 shadow-sm"
                   />
                 </div>
 
                 <!-- Product Info -->
                 <div class="flex-1 min-w-0">
-                  <h4 class="text-base font-medium text-gray-900 line-clamp-1 mb-1">
+                  <h4 class="text-base font-semibold text-gray-900 line-clamp-1 mb-1">
                     {{ getProductName(detail) }}
                   </h4>
-                  <div class="flex flex-wrap gap-2 text-sm mb-2">
+                  <div class="flex flex-wrap gap-1.5 text-xs mb-1">
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose-100/70 text-rose-700 border border-rose-200/50"
                     >
                       Size: {{ getVariantSize(detail) }}
                     </span>
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100/70 text-purple-700 border border-purple-200/50"
                     >
                       Màu: {{ getVariantColor(detail) }}
                     </span>
                     <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100/70 text-blue-700 border border-blue-200/50"
                     >
                       SL: {{ detail.quantity }}
                     </span>
                   </div>
-                  <div class="text-sm text-gray-600">Đơn giá: {{ formatPrice(detail.price) }}</div>
+                  <div class="text-xs text-gray-600 font-medium">
+                    Đơn giá: {{ formatPrice(detail.price) }}
+                  </div>
                 </div>
 
                 <!-- Price -->
                 <div class="text-right">
-                  <div class="text-lg font-semibold text-gray-900">
+                  <div class="text-lg font-bold text-gray-900">
                     {{ formatPrice(detail.subtotal) }}
                   </div>
                 </div>
@@ -355,7 +368,7 @@
               <div v-if="order.orderDetails.length > 2" class="text-center">
                 <button
                   @click="viewOrderDetail(order.id)"
-                  class="text-sm text-rose-600 hover:text-rose-500 font-medium underline"
+                  class="text-xs text-rose-600 hover:text-rose-500 font-semibold underline decoration-2 underline-offset-2"
                 >
                   + {{ order.orderDetails.length - 2 }} sản phẩm khác
                 </button>
@@ -363,19 +376,23 @@
             </div>
           </div>
 
-          <!-- Order Actions -->
-          <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <!-- ✅ Order Actions - COMPACT -->
+          <div
+            class="px-4 py-3 bg-gradient-to-r from-gray-50/60 to-purple-50/40 border-t border-gray-200/40"
+          >
             <div class="flex items-center justify-between">
-              <div class="text-sm text-gray-600">
-                <span class="font-medium">{{ getTotalQuantity(order.orderDetails) }} sản phẩm</span>
-                • Giao đến: <span class="font-medium">{{ order.shippingName }}</span>
+              <div class="text-xs text-gray-600">
+                <span class="font-semibold"
+                  >{{ getTotalQuantity(order.orderDetails) }} sản phẩm</span
+                >
+                • Giao đến: <span class="font-semibold">{{ order.shippingName }}</span>
               </div>
               <div class="flex space-x-2">
                 <!-- Cancel Order -->
                 <button
                   v-if="canCancelOrder(order)"
                   @click="confirmCancelOrder(order)"
-                  class="px-3 py-1.5 text-sm border border-red-300 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  class="px-3 py-1.5 text-xs border border-red-300 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
                 >
                   Hủy đơn
                 </button>
@@ -383,7 +400,7 @@
                 <!-- Reorder -->
                 <button
                   @click="reorderItems(order)"
-                  class="px-3 py-1.5 text-sm border border-rose-300 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                  class="px-3 py-1.5 text-xs border border-rose-300 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors font-medium"
                 >
                   Đặt lại
                 </button>
@@ -391,7 +408,7 @@
                 <!-- View Detail -->
                 <button
                   @click="viewOrderDetail(order.id)"
-                  class="px-3 py-1.5 text-sm bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-lg transition-all"
+                  class="px-3 py-1.5 text-xs bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-lg transition-all font-medium shadow-md"
                 >
                   Chi tiết
                 </button>
@@ -407,14 +424,14 @@
           <button
             @click="currentPage = 1"
             :disabled="currentPage === 1"
-            class="px-3 py-2 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 rounded-lg transition-colors"
+            class="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 rounded-lg transition-colors font-medium"
           >
             Đầu
           </button>
           <button
             @click="currentPage--"
             :disabled="currentPage === 1"
-            class="px-3 py-2 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 rounded-lg transition-colors"
+            class="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 rounded-lg transition-colors font-medium"
           >
             Trước
           </button>
@@ -424,10 +441,10 @@
               @click="currentPage = page"
               :class="
                 currentPage === page
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
               "
-              class="px-3 py-2 text-sm border border-gray-300 rounded-lg transition-colors"
+              class="px-3 py-1.5 text-xs rounded-lg transition-all font-medium"
             >
               {{ page }}
             </button>
@@ -436,14 +453,14 @@
           <button
             @click="currentPage++"
             :disabled="currentPage === totalPages"
-            class="px-3 py-2 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 rounded-lg transition-colors"
+            class="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 rounded-lg transition-colors font-medium"
           >
             Sau
           </button>
           <button
             @click="currentPage = totalPages"
             :disabled="currentPage === totalPages"
-            class="px-3 py-2 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 rounded-lg transition-colors"
+            class="px-3 py-1.5 text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 rounded-lg transition-colors font-medium"
           >
             Cuối
           </button>
@@ -451,7 +468,10 @@
       </div>
 
       <!-- Results Info -->
-      <div v-if="filteredOrders.length > 0" class="mt-4 text-center text-sm text-gray-600">
+      <div
+        v-if="filteredOrders.length > 0"
+        class="mt-4 text-center text-xs text-gray-600 font-medium"
+      >
         Hiển thị {{ (currentPage - 1) * pageSize + 1 }} -
         {{ Math.min(currentPage * pageSize, filteredOrders.length) }} trong
         {{ filteredOrders.length }} đơn hàng
@@ -461,27 +481,27 @@
     <!-- Cancel Confirmation Dialog -->
     <div
       v-if="showCancelDialog"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
     >
       <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Xác nhận hủy đơn hàng</h3>
-        <p class="text-gray-600 mb-2">
-          Đơn hàng: <span class="font-medium">#{{ orderToCancel?.id.slice(-8) }}</span>
+        <h3 class="text-lg font-semibold text-gray-900 mb-3">Xác nhận hủy đơn hàng</h3>
+        <p class="text-gray-600 mb-2 text-sm">
+          Đơn hàng: <span class="font-semibold">#{{ orderToCancel?.id.slice(-8) }}</span>
         </p>
-        <p class="text-gray-600 mb-6">
+        <p class="text-gray-600 mb-6 text-sm">
           Bạn có chắc chắn muốn hủy đơn hàng này? Hành động này không thể hoàn tác.
         </p>
         <div class="flex gap-3">
           <button
             @click="cancelOrderHandler"
             :disabled="isCanceling"
-            class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white font-medium rounded-lg transition-colors"
+            class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 text-white font-medium rounded-lg transition-colors text-sm"
           >
             {{ isCanceling ? 'Đang hủy...' : 'Xác nhận hủy' }}
           </button>
           <button
             @click="showCancelDialog = false"
-            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors"
+            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors text-sm"
           >
             Không hủy
           </button>
@@ -492,10 +512,10 @@
     <!-- Success Toast -->
     <div
       v-if="showSuccessToast"
-      class="fixed bottom-6 right-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-lg shadow-2xl z-50 flex items-center space-x-3 transform animate-slide-up"
+      class="fixed bottom-6 right-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-3 rounded-lg shadow-xl z-50 flex items-center space-x-2 transform animate-slide-up"
     >
-      <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+        <svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -504,16 +524,16 @@
           />
         </svg>
       </div>
-      <span class="font-medium">{{ successMessage }}</span>
+      <span class="font-medium text-sm">{{ successMessage }}</span>
     </div>
 
     <!-- Error Toast -->
     <div
       v-if="showErrorToast"
-      class="fixed bottom-6 right-6 bg-gradient-to-r from-red-500 to-rose-500 text-white px-6 py-4 rounded-lg shadow-2xl z-50 flex items-center space-x-3 transform animate-slide-up"
+      class="fixed bottom-6 right-6 bg-gradient-to-r from-red-500 to-rose-500 text-white px-4 py-3 rounded-lg shadow-xl z-50 flex items-center space-x-2 transform animate-slide-up"
     >
-      <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+        <svg class="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -522,7 +542,7 @@
           />
         </svg>
       </div>
-      <span class="font-medium">{{ errorMessage }}</span>
+      <span class="font-medium text-sm">{{ errorMessage }}</span>
     </div>
   </div>
 </template>
@@ -535,6 +555,9 @@ import { getCurrentUser } from '@/common/guards/roleGuard.guard'
 import { ORDER_STATUS_LABELS, OrderStatus, type Order, type OrderDetail } from './orders.type'
 import { CartDetailRequest } from '../carts/carts.type'
 import { getOrCreateUserCart, addCartDetail } from '../carts/carts.api'
+// ✅ Import API để lấy variant với product - SAME AS CARTVIEW
+import { getVariantWithProductByIdApi } from '@/modules/products/product.api'
+import type { ProductVariantWithProduct } from '@/modules/products/product.type'
 
 const router = useRouter()
 
@@ -564,6 +587,9 @@ const pageSize = ref(5)
 // Data
 const orders = ref<Order[]>([])
 const orderToCancel = ref<Order | null>(null)
+
+// ✅ Cache để lưu thông tin variant đã fetch - SAME AS CARTVIEW
+const variantCache = ref<Map<string, ProductVariantWithProduct>>(new Map())
 
 // Status options for filter
 const statusOptions = [
@@ -673,33 +699,152 @@ const getStatusLabel = (status: OrderStatus) => {
 
 const getStatusColor = (status: OrderStatus) => {
   const colors: Record<OrderStatus, string> = {
-    [OrderStatus.PENDING]: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    [OrderStatus.PAID]: 'bg-orange-100 text-orange-800 border-orange-200',
-    [OrderStatus.CONFIRMED]: 'bg-blue-100 text-blue-800 border-blue-200',
-    [OrderStatus.SHIPPING]: 'bg-purple-100 text-purple-800 border-purple-200',
-    [OrderStatus.DELIVERED]: 'bg-green-100 text-green-800 border-green-200',
-    [OrderStatus.CANCELLED]: 'bg-red-100 text-red-800 border-red-200',
+    [OrderStatus.PENDING]: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+    [OrderStatus.PAID]: 'bg-orange-100 text-orange-800 border border-orange-200',
+    [OrderStatus.CONFIRMED]: 'bg-blue-100 text-blue-800 border border-blue-200',
+    [OrderStatus.SHIPPING]: 'bg-purple-100 text-purple-800 border border-purple-200',
+    [OrderStatus.DELIVERED]: 'bg-green-100 text-green-800 border border-green-200',
+    [OrderStatus.CANCELLED]: 'bg-red-100 text-red-800 border border-red-200',
   }
-  return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200'
+  return colors[status] || 'bg-gray-100 text-gray-800 border border-gray-200'
 }
 
 // ================================
-// HELPER FUNCTIONS
+// ✅ HELPER FUNCTIONS - SAME AS CARTVIEW với API cache
 // ================================
 const getProductName = (detail: OrderDetail) => {
-  return detail.productVariant?.name || `Sản phẩm #${detail.productVariantId.slice(-8)}`
+  console.log('📦 Getting product name for order detail:', detail.id)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.product?.name) {
+    console.log('✅ Found product name from API cache:', variantInfo.product.name)
+    return variantInfo.product.name
+  }
+
+  // Fallback - từ data có sẵn trong order
+  if (detail.productVariant?.product?.name) {
+    console.log('✅ Found product name from populated data:', detail.productVariant.product.name)
+    return detail.productVariant.product.name
+  }
+
+  if (detail.productVariant?.name) {
+    console.log('✅ Found variant name:', detail.productVariant.name)
+    return detail.productVariant.name
+  }
+
+  // Fallback với productVariantId
+  const fallbackName = `Sản phẩm #${detail.productVariantId?.slice(-8) || 'Unknown'}`
+  console.log('⚠️ Using fallback name:', fallbackName)
+  return fallbackName
 }
 
 const getProductImage = (detail: OrderDetail) => {
-  return detail.productVariant?.image || 'https://via.placeholder.com/64x64/f3f4f6/9ca3af?text=SP'
+  console.log('🖼️ Getting product image for order detail:', detail.id)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.images?.length > 0) {
+    // Tìm main image trước
+    const mainImage = variantInfo.images.find((img) => img.isMain)
+    if (mainImage?.url) {
+      console.log('✅ Found main image from API cache:', mainImage.url)
+      return mainImage.url
+    }
+
+    // Nếu không có main, lấy ảnh đầu tiên
+    const firstImage = variantInfo.images[0]?.url
+    if (firstImage) {
+      console.log('✅ Found first image from API cache:', firstImage)
+      return firstImage
+    }
+  }
+
+  // Fallback - từ data có sẵn trong order
+  if (detail.productVariant?.images?.length > 0) {
+    const mainImage = detail.productVariant.images.find((img: any) => img.isMain)
+    if (mainImage?.url) {
+      console.log('✅ Found image from populated data (main):', mainImage.url)
+      return mainImage.url
+    }
+
+    const firstImage = detail.productVariant.images[0]?.url
+    if (firstImage) {
+      console.log('✅ Found image from populated data (first):', firstImage)
+      return firstImage
+    }
+  }
+
+  if (detail.productVariant?.image) {
+    const image =
+      typeof detail.productVariant.image === 'string'
+        ? detail.productVariant.image
+        : detail.productVariant.image.url
+    console.log('✅ Found productVariant.image:', image)
+    return image
+  }
+
+  // Default placeholder
+  const placeholder = 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
+  console.log('⚠️ Using placeholder image:', placeholder)
+  return placeholder
 }
 
 const getVariantSize = (detail: OrderDetail) => {
-  return detail.productVariant?.size || 'N/A'
+  console.log('📏 Getting variant size for order detail:', detail.id)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.size) {
+    console.log('✅ Found size from API cache:', variantInfo.size)
+    return variantInfo.size
+  }
+
+  // Fallback - từ data có sẵn trong order
+  if (detail.productVariant?.size) {
+    console.log('✅ Found size from populated data:', detail.productVariant.size)
+    return detail.productVariant.size
+  }
+
+  console.log('⚠️ No size found, returning N/A')
+  return 'N/A'
 }
 
 const getVariantColor = (detail: OrderDetail) => {
-  return detail.productVariant?.color || 'N/A'
+  console.log('🎨 Getting variant color for order detail:', detail.id)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+
+  // Support cả colorName và color.name
+  if (variantInfo?.colorName) {
+    console.log('✅ Found colorName from API cache:', variantInfo.colorName)
+    return variantInfo.colorName
+  }
+
+  if (variantInfo?.color?.name) {
+    console.log('✅ Found color.name from API cache:', variantInfo.color.name)
+    return variantInfo.color.name
+  }
+
+  // Fallback - từ data có sẵn trong order
+  if (detail.productVariant?.color?.name) {
+    console.log('✅ Found color from populated data:', detail.productVariant.color.name)
+    return detail.productVariant.color.name
+  }
+
+  if (detail.productVariant?.colorName) {
+    console.log('✅ Found colorName from populated data:', detail.productVariant.colorName)
+    return detail.productVariant.colorName
+  }
+
+  if (detail.productVariant?.color) {
+    console.log('✅ Found productVariant.color:', detail.productVariant.color)
+    return detail.productVariant.color
+  }
+
+  console.log('⚠️ No color found, returning N/A')
+  return 'N/A'
 }
 
 const getTotalQuantity = (orderDetails: OrderDetail[]) => {
@@ -712,6 +857,37 @@ const getPreviewItems = (orderDetails: OrderDetail[]) => {
 
 const canCancelOrder = (order: Order) => {
   return [OrderStatus.PENDING, OrderStatus.PAID, OrderStatus.CONFIRMED].includes(order.status)
+}
+
+// ✅ Load thông tin variant từ API cho tất cả order details
+const loadVariantInfoForOrder = async (order: Order) => {
+  console.log('🔄 Loading variant info for order:', order.id.slice(-8))
+
+  const promises = order.orderDetails.map(async (detail) => {
+    if (!variantCache.value.has(detail.productVariantId)) {
+      try {
+        console.log(`🔍 Fetching variant info for: ${detail.productVariantId}`)
+        const variantWithProduct = await getVariantWithProductByIdApi(detail.productVariantId)
+        variantCache.value.set(detail.productVariantId, variantWithProduct)
+        console.log(`✅ Loaded variant info:`, variantWithProduct)
+      } catch (error) {
+        console.error(`❌ Error loading variant ${detail.productVariantId}:`, error)
+      }
+    }
+  })
+
+  await Promise.all(promises)
+  console.log('✅ Variant info loaded for order:', order.id.slice(-8))
+}
+
+// ✅ Load thông tin variant cho tất cả orders
+const loadVariantInfoForAllOrders = async () => {
+  console.log('🔄 Loading variant info for all orders...')
+
+  const promises = orders.value.map((order) => loadVariantInfoForOrder(order))
+  await Promise.all(promises)
+
+  console.log('✅ All variant info loaded for orders')
 }
 
 // ================================
@@ -731,6 +907,12 @@ const loadOrders = async () => {
     orders.value = ordersData || []
 
     console.log('✅ User orders loaded:', orders.value.length, 'orders')
+
+    // ✅ Load variant info cho tất cả orders
+    if (orders.value.length > 0) {
+      await loadVariantInfoForAllOrders()
+    }
+
     console.log(
       '📊 Orders data:',
       orders.value.map((order) => ({
@@ -896,5 +1078,60 @@ onMounted(() => {
 .bg-clip-text {
   -webkit-background-clip: text;
   background-clip: text;
+}
+
+/* Custom backdrop blur */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+/* Enhanced shadows and gradients */
+.shadow-xl {
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-lg {
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Smooth transitions */
+* {
+  transition-property:
+    color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow,
+    transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Hover effects */
+.hover\:scale-\[1\.005\]:hover {
+  transform: scale(1.005);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+/* Soft glass morphism effect */
+.from-white\/85 {
+  --tw-gradient-from: rgba(255, 255, 255, 0.85);
+}
+
+.via-purple-50\/30 {
+  --tw-gradient-via: rgba(250, 245, 255, 0.3);
+}
+
+.to-pink-50\/30 {
+  --tw-gradient-to: rgba(253, 242, 248, 0.3);
 }
 </style>

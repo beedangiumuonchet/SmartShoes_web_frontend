@@ -6,6 +6,9 @@ import { routes } from '@/modules/common/routes'
 import { productRoutes } from '@/modules/products/product.routes'
 import { cartsRoutes } from '@/modules/carts/carts.routes'
 import { ordersRoutes } from '@/modules/orders/orders.routes'
+import { usersManagerRoutes } from '@/modules/users/users.manager.routes'
+import { ordersManagerRoutes } from '@/modules/orders/orders.manager.routes'
+import { reviewsRoutes } from '@/modules/reviews/reviews.routes'
 //import { paymentsRoutes } from '@/modules/payments/payments.routes'
 
 const router = createRouter({
@@ -16,6 +19,9 @@ const router = createRouter({
     ...productRoutes,
     ...cartsRoutes,
     ...ordersRoutes,
+    ...usersManagerRoutes,
+    ...ordersManagerRoutes,
+    ...reviewsRoutes,
     //...paymentsRoutes,
 
     ...routes,

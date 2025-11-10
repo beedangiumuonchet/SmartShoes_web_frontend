@@ -5,6 +5,7 @@ export const routes = [
     meta: {
       requiresAuth: true,
       layout: 'topbar',
+      requiredRoles: ['USER', 'ADMIN'],
     },
   },
   {
@@ -13,6 +14,7 @@ export const routes = [
     meta: {
       requiresAuth: true,
       layout: 'default',
+      requiredRoles: ['ADMIN'],
     },
   },
   {
