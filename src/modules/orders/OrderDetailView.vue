@@ -187,7 +187,7 @@
               <div
                 v-for="detail in order.orderDetails"
                 :key="detail.id"
-                class="flex items-center space-x-4 p-4 bg-gradient-to-r from-gray-50/70 via-purple-50/30 to-pink-50/30 rounded-xl border border-gray-100/50"
+                class="flex items-start space-x-4 p-4 bg-gradient-to-r from-gray-50/70 via-purple-50/30 to-pink-50/30 rounded-xl border border-gray-100/50"
               >
                 <!-- Product Image -->
                 <div class="flex-shrink-0">
@@ -199,7 +199,7 @@
                   />
                 </div>
 
-                <!-- Product Info -->
+                <!-- Product Info & Review Section -->
                 <div class="flex-1 min-w-0">
                   <h3
                     class="text-lg font-semibold text-gray-900 line-clamp-2 mb-2 cursor-pointer hover:text-rose-600 transition-colors"
@@ -207,7 +207,8 @@
                   >
                     {{ getProductName(detail) }}
                   </h3>
-                  <div class="flex flex-wrap gap-2 text-sm mb-2">
+
+                  <div class="flex flex-wrap gap-2 text-sm mb-3">
                     <span
                       class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-100/70 text-rose-800 border border-rose-200/50"
                     >
@@ -224,8 +225,103 @@
                       SL: {{ detail.quantity }}
                     </span>
                   </div>
-                  <div class="text-sm text-gray-600 font-medium">
+
+                  <div class="text-sm text-gray-600 font-medium mb-3">
                     Đơn giá: {{ formatPrice(detail.price) }}
+                  </div>
+
+                  <!-- ✅ Review Section - Chỉ hiển thị nếu đơn hàng đã giao -->
+                  <div v-if="canReviewOrder" class="mt-3">
+                    <!-- Loading review info -->
+                    <div v-if="loadingReviews" class="flex items-center text-sm text-gray-500">
+                      <svg
+                        class="w-4 h-4 animate-spin mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        ></path>
+                      </svg>
+                      Đang kiểm tra đánh giá...
+                    </div>
+
+                    <!-- Has review -->
+                    <div v-else-if="getProductReview(detail)" class="space-y-2">
+                      <!-- Existing Review Display -->
+                      <div class="bg-amber-50/80 border border-amber-200 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                          <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium text-amber-800"
+                              >Đánh giá của bạn:</span
+                            >
+                            <div class="flex items-center">
+                              <span v-for="n in 5" :key="n" class="text-yellow-400">
+                                {{ n <= (getProductReview(detail)?.rating || 0) ? '★' : '☆' }}
+                              </span>
+                              <span class="ml-1 text-sm text-gray-600"
+                                >({{ getProductReview(detail)?.rating }}/5)</span
+                              >
+                            </div>
+                          </div>
+                          <span class="text-xs text-amber-600">
+                            {{ formatReviewDate(getProductReview(detail)?.createdAt || '') }}
+                          </span>
+                        </div>
+
+                        <p class="text-sm text-gray-700 mb-2 line-clamp-2">
+                          {{ getProductReview(detail)?.comment }}
+                        </p>
+
+                        <!-- Edit Review Button -->
+                        <button
+                          @click="editReview(detail, getProductReview(detail)!)"
+                          class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                        >
+                          <svg
+                            class="w-3 h-3 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            ></path>
+                          </svg>
+                          Sửa đánh giá
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- No review yet -->
+                    <div v-else>
+                      <button
+                        @click="createReview(detail)"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors shadow-sm hover:shadow-md"
+                      >
+                        <svg
+                          class="w-4 h-4 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                          ></path>
+                        </svg>
+                        Viết đánh giá
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -470,7 +566,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getOrder, cancelOrder } from './orders.api'
 import { getCurrentUser } from '@/common/guards/roleGuard.guard'
@@ -481,6 +577,12 @@ import { getOrCreateUserCart, addCartDetail } from '../carts/carts.api'
 import { getVariantWithProductByIdApi } from '@/modules/products/product.api'
 import type { ProductVariantWithProduct } from '@/modules/products/product.type'
 
+// ✅ THÊM: Import review APIs và types
+import { getReviewsByProduct, formatReviewDate } from '@/modules/reviews/reviews.api'
+import { type Review } from '@/modules/reviews/reviews.type'
+// ✅ THÊM: Review-related state
+const loadingReviews = ref(false)
+const productReviews = ref<Map<string, Review[]>>(new Map())
 const route = useRoute()
 const router = useRouter()
 
@@ -569,6 +671,102 @@ const orderSummary = computed(() => {
     itemCount,
   }
 })
+
+// ================================
+// ✅ THÊM: REVIEW COMPUTED PROPERTIES
+// ================================
+const canReviewOrder = computed(() => {
+  return order.value?.status === OrderStatus.DELIVERED
+})
+
+// ================================
+// ✅ THÊM: REVIEW HELPER FUNCTIONS
+// ================================
+const getProductReview = (detail: OrderDetail): Review | null => {
+  if (!currentUser.value?.userId) return null
+
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  const productId = variantInfo?.product?.id
+
+  if (!productId) return null
+
+  const reviews = productReviews.value.get(productId)
+  return reviews?.find((review) => review.userId === currentUser.value?.userId) || null
+}
+
+const getProductIdFromDetail = (detail: OrderDetail): string | null => {
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  return variantInfo?.product?.id || null
+}
+
+// ✅ Load reviews cho tất cả products trong order
+const loadProductReviews = async () => {
+  if (!order.value?.orderDetails || !currentUser.value?.userId) return
+
+  try {
+    loadingReviews.value = true
+    console.log('🔄 Loading reviews for order products...')
+
+    // Get unique product IDs
+    const productIds = new Set<string>()
+    order.value.orderDetails.forEach((detail) => {
+      const productId = getProductIdFromDetail(detail)
+      if (productId) {
+        productIds.add(productId)
+      }
+    })
+
+    console.log('📊 Found product IDs:', Array.from(productIds))
+
+    // Load reviews for each product
+    const promises = Array.from(productIds).map(async (productId) => {
+      try {
+        const reviewsResponse = await getReviewsByProduct(productId, {
+          page: 0,
+          size: 100, // Get all reviews for this product
+          sortBy: 'createdAt',
+          sortDirection: 'desc',
+        })
+
+        productReviews.value.set(productId, reviewsResponse.content)
+        console.log(`✅ Loaded ${reviewsResponse.content.length} reviews for product ${productId}`)
+      } catch (error) {
+        console.error(`❌ Error loading reviews for product ${productId}:`, error)
+      }
+    })
+
+    await Promise.all(promises)
+  } catch (error) {
+    console.error('❌ Error loading product reviews:', error)
+  } finally {
+    loadingReviews.value = false
+  }
+}
+
+// ================================
+// ✅ THÊM: REVIEW NAVIGATION FUNCTIONS
+// ================================
+const createReview = (detail: OrderDetail) => {
+  const productId = getProductIdFromDetail(detail)
+  if (!productId) {
+    showError('Không thể xác định sản phẩm để đánh giá')
+    return
+  }
+
+  console.log('🌟 Creating new review for product:', productId)
+  router.push(`/reviews/create/${productId}`)
+}
+
+const editReview = (detail: OrderDetail, review: Review) => {
+  const productId = getProductIdFromDetail(detail)
+  if (!productId) {
+    showError('Không thể xác định sản phẩm để chỉnh sửa đánh giá')
+    return
+  }
+
+  console.log('✏️ Editing review:', review.id, 'for product:', productId)
+  router.push(`/reviews/create/${productId}?reviewId=${review.id}`)
+}
 
 // ================================
 // UTILITY METHODS
@@ -906,6 +1104,30 @@ const showError = (message: string) => {
 onMounted(() => {
   loadOrderDetail()
 })
+
+// ✅ Watch order changes để load reviews
+watch(
+  order,
+  async (newOrder) => {
+    if (newOrder && canReviewOrder.value) {
+      // Đợi variant info load xong trước
+      if (variantCache.value.size > 0) {
+        await loadProductReviews()
+      }
+    }
+  },
+  { immediate: false },
+)
+
+// ✅ Watch variant cache để load reviews khi đã có product info
+watch(
+  () => variantCache.value.size,
+  async (newSize) => {
+    if (newSize > 0 && order.value && canReviewOrder.value) {
+      await loadProductReviews()
+    }
+  },
+)
 </script>
 
 <style scoped>

@@ -1174,7 +1174,6 @@
 </template>
 
 <script setup lang="ts">
-// filepath: g:\LearnPTIT\TotNghiep\SmartShoes_web_frontend\src\modules\users\manager\UserManagerList.vue
 import { ref, computed, onMounted, onUnmounted, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCookies } from '@vueuse/integrations/useCookies'
