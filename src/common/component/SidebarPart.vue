@@ -17,7 +17,7 @@
           </div>
           <div v-if="!isCollapsed" class="ml-4 flex-1">
             <h2 class="text-xl font-bold text-gray-900">SMARTSHOES</h2>
-            <p class="text-sm text-gray-500">Quản lý đơn hàng</p>
+            <p class="text-sm text-gray-500">Quản lý cửa hàng</p>
           </div>
         </div>
       </div>
