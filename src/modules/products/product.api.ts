@@ -77,6 +77,25 @@ export const getAllProductsApi = async (params?: ProductFilter) => {
   }
 
   /**
+ * 🟢 Lấy chi tiết sản phẩm theo SLUG
+ */
+export const getProductBySlugApi = async (slug: string) => {
+  console.log('=== GET PRODUCT BY SLUG ===')
+  console.log('Product Slug:', slug)
+  console.log('===========================')
+
+  try {
+    const response = await axiosHttpClient.get<IApiResponse<Product>>(`/products/slug/${slug}`)
+    console.log('✅ Get product by slug success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Get product by slug error:', error)
+    throw error
+  }
+}
+
+
+  /**
    * 🟢 Lấy sản phẩm theo brand
    */
   export const getProductsByBrandApi = async (brandId: string, params?: ProductFilter) => {

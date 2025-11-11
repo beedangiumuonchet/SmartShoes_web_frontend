@@ -140,7 +140,7 @@
             >
               <div class="aspect-w-1 aspect-h-1 relative overflow-hidden">
                 <img
-                  :src="product.mainImage || '/api/placeholder/300/300'"
+                  :src="getDirectImageUrl(product.mainImage) || '/api/placeholder/300/300'"
                   :alt="product.name"
                   class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
@@ -223,11 +223,8 @@
             @click="handleBrandClick(brand)"
             class="flex items-center justify-center p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
           >
-            <img
-              :src="brand.logo || '/api/placeholder/120/60'"
-              :alt="brand.name"
-              class="h-12 object-contain"
-            />
+            <span class="text-lg font-semibold text-gray-800">{{ brand.name }}</span>
+
           </div>
         </div>
       </div>
@@ -433,30 +430,51 @@ onUnmounted(() => {
 
 // Methods
 
+function getDirectImageUrl(driveUrl: string) {
+  // Tách ID ảnh từ link Google Drive
+  const match = driveUrl?.match(/\/d\/([^/]+)/)
+  if (!match) return driveUrl
+
+  const driveId = match[1]
+  // Gọi ảnh qua API backend (nó sẽ tự cache local)
+  return `http://localhost:8080/api/v1/images/${driveId}`
+}
+
 const fetchFeaturedProducts = async () => {
   try {
     const response = await getAllProductsApi({
-      page: 1,
+      page: 0,
       size: 8,
       status: 'ACTIVE',
     })
     const data = response.content || []
 
-    featuredProducts.value = data.map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      brand: p.brandName,
-      price: p.variants?.[0]?.price || 0,
-      originalPrice: p.variants?.[0]?.originalPrice || null,
-      discount: p.variants?.[0]?.discount || null,
-      rating: p.rating || 4.5,
-      mainImage: p.variants?.[0]?.images?.[0]?.url || '/api/placeholder/300/300',
-      isWishlisted: false,
-    }))
+    featuredProducts.value = data.map((p: any, index: number) => {
+      // Lấy ảnh đầu tiên của biến thể đầu tiên
+      const imgUrl = p.variants?.[0]?.images?.[0]?.url || null
+      const directUrl = getDirectImageUrl(imgUrl)
+
+      console.log(`Ảnh sản phẩm [${index}] (${p.name}):`, directUrl)
+
+      return {
+        id: p.id,
+        name: p.name,
+        brand: p.brandName,
+        slug: p.slug,
+        price: p.variants?.[0]?.price || 0,
+        originalPrice: p.variants?.[0]?.originalPrice || null,
+        discount: p.variants?.[0]?.discount || null,
+        rating: p.rating || 4.5,
+        mainImage: directUrl,
+        isWishlisted: false,
+      }
+    })
   } catch (error) {
     console.error('Lỗi khi tải sản phẩm nổi bật:', error)
   }
 }
+
+
 
 const fetchBrands = async () => {
   try {
@@ -525,7 +543,7 @@ const handleCategoryClick = (category: any) => {
 }
 
 const handleProductClick = (product: any) => {
-  router.push(`/products/${product.id}`)
+  router.push(`/products/${product.slug}`)
 }
 
 const handleBrandClick = (brand: any) => {

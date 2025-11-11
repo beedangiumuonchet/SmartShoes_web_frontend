@@ -27,6 +27,7 @@ export interface ProductVariant {
   id: string
   size: string
   price: number
+  priceSale: number
   stock: number
   color: Color
   images: ProductImage[]
