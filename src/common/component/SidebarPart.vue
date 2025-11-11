@@ -16,8 +16,8 @@
             </div>
           </div>
           <div v-if="!isCollapsed" class="ml-4 flex-1">
-            <h2 class="text-xl font-bold text-gray-900">CRM</h2>
-            <p class="text-sm text-gray-500">Quản lý đơn hàng</p>
+            <h2 class="text-xl font-bold text-gray-900">SMARTSHOES</h2>
+            <p class="text-sm text-gray-500">Quản lý cửa hàng</p>
           </div>
         </div>
       </div>
@@ -172,13 +172,18 @@ const navigationItems = ref<NavigationMenuItem[][]>([
   [
     {
       label: 'Trang Chủ',
-      to: '/',
+      to: '/manager',
       icon: 'i-heroicons-home',
     },
     {
       label: 'Đơn Hàng',
       to: '/manager/orders',
       icon: 'i-heroicons-shopping-cart',
+    },
+    {
+      label: 'Người Dùng', // ✅ THÊM MENU USER
+      to: '/manager/users',
+      icon: 'i-heroicons-users',
     },
     {
       label: 'Báo Cáo',

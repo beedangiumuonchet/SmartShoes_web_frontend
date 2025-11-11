@@ -14,10 +14,16 @@ export interface Order {
   status: OrderStatus
   userId: string
   totalAmount: number
+
+  // 🆕 ADD: Shipping information fields
+  shippingName: string
+  shippingPhone: string
+  shippingAddress: string
+
   createdAt: string
   updatedAt?: string
   orderDetails: OrderDetail[]
-  [key: string]: unknown // ADD: Index signature để compatible với Record<string, unknown>
+  [key: string]: unknown
 }
 
 // Interface cho OrderDetail từ API
@@ -43,23 +49,45 @@ export interface OrderDetail {
 export class BuyNowRequest {
   productVariantId: string
   quantity: number
-  addressId: string
 
-  constructor(productVariantId: string = '', quantity: number = 1, addressId: string = '') {
+  // 🆕 ADD: Shipping information fields
+  shippingName: string
+  shippingPhone: string
+  shippingAddress: string
+
+  constructor(
+    productVariantId: string = '',
+    quantity: number = 1,
+    shippingName: string = '',
+    shippingPhone: string = '',
+    shippingAddress: string = '',
+  ) {
     this.productVariantId = productVariantId
     this.quantity = quantity
-    this.addressId = addressId
+    this.shippingName = shippingName
+    this.shippingPhone = shippingPhone
+    this.shippingAddress = shippingAddress
   }
 }
 
 // Form request để tạo order từ giỏ hàng
 export class FromCartRequest {
   cartId: string
-  addressId: string
+  // 🆕 ADD: Shipping information fields
+  shippingName: string
+  shippingPhone: string
+  shippingAddress: string
 
-  constructor(cartId: string = '', addressId: string = '') {
+  constructor(
+    cartId: string = '',
+    shippingName: string = '',
+    shippingPhone: string = '',
+    shippingAddress: string = '',
+  ) {
     this.cartId = cartId
-    this.addressId = addressId
+    this.shippingName = shippingName
+    this.shippingPhone = shippingPhone
+    this.shippingAddress = shippingAddress
   }
 }
 

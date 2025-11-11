@@ -9,6 +9,8 @@ import {
   PaymentFilterRequest,
   HandleMomoIpnRequest,
   type MomoPaymentResponse,
+  PaymentMethod,
+  PaymentStatus,
   type CreatePaymentResponse,
   type CreateMomoPaymentResponse,
   type HandleMomoIpnResponse,
@@ -33,21 +35,39 @@ function hasProperty(obj: Record<string, unknown>, key: string): boolean {
 }
 
 // Type guard để kiểm tra Payment structure
+// 🆕 ENHANCED: Type guard cho Payment với flexible field checking
 function isValidPayment(obj: Record<string, unknown>): obj is Payment {
-  return (
+  const hasRequiredFields =
     hasProperty(obj, 'id') &&
     hasProperty(obj, 'amount') &&
     hasProperty(obj, 'paymentMethod') &&
     hasProperty(obj, 'status') &&
     hasProperty(obj, 'order') &&
-    hasProperty(obj, 'createdAt') &&
+    hasProperty(obj, 'createdAt')
+
+  const hasValidTypes =
     typeof obj.id === 'string' &&
     typeof obj.amount === 'number' &&
     typeof obj.paymentMethod === 'string' &&
     typeof obj.status === 'string' &&
     typeof obj.order === 'string' &&
     typeof obj.createdAt === 'string'
-  )
+
+  return hasRequiredFields && hasValidTypes
+}
+
+// 🆕 ADD: Helper để normalize Payment object
+function normalizePayment(obj: Record<string, unknown>): Payment {
+  return {
+    id: obj.id as string,
+    amount: obj.amount as number,
+    paymentMethod: obj.paymentMethod as PaymentMethod,
+    transactionId: obj.transactionId as string | undefined,
+    status: obj.status as PaymentStatus,
+    order: obj.order as string,
+    createdAt: obj.createdAt as string,
+    updatedAt: obj.updatedAt as string | undefined,
+  }
 }
 
 // Type guard để kiểm tra PaginationResponse structure
@@ -90,6 +110,7 @@ function isValidMomoPaymentResponse(obj: Record<string, unknown>): obj is MomoPa
 export const createPayment = async (request: CreatePaymentRequest): Promise<Payment> => {
   console.log('=== CREATE PAYMENT ===')
   console.log('Request:', request)
+  console.log('Request JSON:', JSON.stringify(request, null, 2))
   console.log('Token exists:', !!cookie.get('jwt_token'))
   console.log('======================')
 
@@ -97,73 +118,90 @@ export const createPayment = async (request: CreatePaymentRequest): Promise<Paym
     const response = await axiosHttpClient.post('/payments', request)
     console.log('✅ Create payment success:', response)
 
-    // Handle BE response structure
+    // 🆕 ENHANCED: Handle various response structures
     if (response && isRecord(response)) {
-      // Case 1: Direct payment response
+      let paymentData: Record<string, unknown> | null = null
+
+      // Try different response structures
       if (isValidPayment(response)) {
-        return response
-      }
-      // Case 2: Wrapped in data property
-      else if (
+        paymentData = response
+      } else if (
         hasProperty(response, 'data') &&
         response.data &&
         isRecord(response.data) &&
         isValidPayment(response.data)
       ) {
-        return response.data
-      }
-      // Case 3: Wrapped in result property
-      else if (
+        paymentData = response.data
+      } else if (
         hasProperty(response, 'result') &&
         response.result &&
         isRecord(response.result) &&
         isValidPayment(response.result)
       ) {
-        return response.result
-      }
-      // Case 4: Has success flag
-      else if (hasProperty(response, 'success') && response.success) {
+        paymentData = response.result
+      } else if (hasProperty(response, 'success') && response.success) {
         if (
           hasProperty(response, 'data') &&
           response.data &&
           isRecord(response.data) &&
           isValidPayment(response.data)
         ) {
-          return response.data
+          paymentData = response.data
         } else if (
           hasProperty(response, 'result') &&
           response.result &&
           isRecord(response.result) &&
           isValidPayment(response.result)
         ) {
-          return response.result
+          paymentData = response.result
         }
-      }
-      // Case 5: ResponseUtils.success() format
-      else if (
+      } else if (
         hasProperty(response, 'message') &&
         hasProperty(response, 'data') &&
         response.data &&
         isRecord(response.data) &&
         isValidPayment(response.data)
       ) {
-        return response.data
+        paymentData = response.data
       }
+
+      if (paymentData) {
+        return normalizePayment(paymentData)
+      }
+
+      // 🆕 LOG: Debug invalid response structure
+      console.error('🚨 Invalid payment response structure:', response)
+      console.error('🚨 Response keys:', Object.keys(response))
+      console.error('🚨 Response data:', JSON.stringify(response, null, 2))
     }
 
     throw new Error('Invalid create payment response structure')
   } catch (error) {
     console.error('❌ Create payment error:', error)
 
-    // Log chi tiết lỗi
+    // Enhanced error logging
     if (error && isRecord(error) && hasProperty(error, 'response')) {
       const httpError = error as any
-      console.error('HTTP Error details:', {
+      console.error('🚨 HTTP Error details:', {
         status: httpError.response?.status,
+        statusText: httpError.response?.statusText,
         url: httpError.config?.url,
         method: httpError.config?.method,
-        data: httpError.response?.data,
+        requestData: httpError.config?.data,
+        responseData: httpError.response?.data,
+        headers: httpError.response?.headers,
       })
+
+      // Specific handling for 400 errors
+      if (httpError.response?.status === 400) {
+        console.error('🚨 400 Bad Request Details:')
+        console.error('Request that failed:', request)
+        console.error('Backend error response:', httpError.response?.data)
+
+        if (httpError.response?.data?.message) {
+          throw new Error(httpError.response.data.message)
+        }
+      }
     }
 
     throw error

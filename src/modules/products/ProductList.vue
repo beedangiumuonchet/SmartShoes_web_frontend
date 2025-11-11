@@ -78,7 +78,7 @@
       <RouterLink
         v-for="product in products"
         :key="product.id"
-        :to="`/product/${product.id}`"
+        :to="`/products/${product.id}`"
         class="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg transition-all overflow-hidden group"
       >
         <!-- Ảnh -->
@@ -106,7 +106,11 @@
             </span>
             <span
               class="px-2 py-1 rounded-lg text-xs font-medium"
-              :class="product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'"
+              :class="
+                product.status === 'ACTIVE'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-200 text-gray-500'
+              "
             >
               {{ statusLabel(product.status) }}
             </span>
@@ -116,9 +120,7 @@
     </div>
 
     <!-- Loading / Empty -->
-    <div v-else class="text-center py-20 text-gray-500 text-lg">
-      Không tìm thấy sản phẩm nào.
-    </div>
+    <div v-else class="text-center py-20 text-gray-500 text-lg">Không tìm thấy sản phẩm nào.</div>
   </div>
 </template>
 
@@ -143,7 +145,7 @@ const filters = ref<ProductFilter>({
 const fetchProducts = async () => {
   try {
     const res = await getAllProductsApi(filters.value)
-    products.value = res?.content || []   // ✅ thêm .data
+    products.value = res?.content || [] // ✅ thêm .data
     console.log('✅ Products loaded:', products.value)
   } catch (err) {
     console.error('❌ Lỗi tải danh sách sản phẩm:', err)
@@ -162,7 +164,7 @@ const fetchFilters = async () => {
 
 const getMainImage = (product: Product) => {
   const img =
-    product.variants?.flatMap(v => v.images)?.find(i => i.isMain)?.url ||
+    product.variants?.flatMap((v) => v.images)?.find((i) => i.isMain)?.url ||
     product.variants?.[0]?.images?.[0]?.url ||
     'https://via.placeholder.com/400x400?text=No+Image'
   return img

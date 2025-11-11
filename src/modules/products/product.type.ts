@@ -13,6 +13,11 @@ export interface Product {
   productAttributes: ProductAttribute[]
 }
 
+export interface SimpleProduct {
+  id: string
+  name: string
+}
+
 export interface Brand {
   id: string
   name: string
@@ -30,7 +35,12 @@ export interface ProductVariant {
   priceSale: number
   stock: number
   color: Color
+  colorName?: string // Tên màu tùy chỉnh (nếu có)
   images: ProductImage[]
+}
+
+export interface ProductVariantWithProduct extends ProductVariant {
+  product: SimpleProduct
 }
 
 export interface Color {

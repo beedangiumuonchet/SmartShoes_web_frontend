@@ -41,7 +41,6 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div class="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-700">
             <div class="col-span-1 flex items-center">
-              <!-- ✅ Fix: Thêm :checked và :indeterminate -->
               <input
                 type="checkbox"
                 class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
@@ -83,13 +82,17 @@
                   <img
                     :src="getProductImage(detail)"
                     :alt="getProductName(detail)"
-                    class="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                    class="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                    @click="goToProductDetail(detail)"
                   />
                 </div>
 
                 <!-- Product Details -->
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-base font-medium text-gray-900 line-clamp-2 mb-2">
+                  <h3
+                    class="text-base font-medium text-gray-900 line-clamp-2 mb-2 cursor-pointer hover:text-rose-600 transition-colors"
+                    @click="goToProductDetail(detail)"
+                  >
                     {{ getProductName(detail) }}
                   </h3>
                   <div class="flex flex-wrap gap-2 text-sm">
@@ -205,7 +208,6 @@
             <!-- Left: Bulk Actions -->
             <div class="flex items-center gap-6">
               <div class="flex items-center gap-2">
-                <!-- ✅ Fix: Thêm :checked và :indeterminate cho checkbox footer -->
                 <input
                   type="checkbox"
                   class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
@@ -213,9 +215,9 @@
                   :indeterminate="isIndeterminate"
                   @change="selectAllItems"
                 />
-                <span class="text-sm text-gray-700"
-                  >Chọn tất cả ({{ cart ? getCartItemCount(cart) : 0 }})</span
-                >
+                <span class="text-sm text-gray-700">
+                  Chọn tất cả ({{ cart ? getCartItemCount(cart) : 0 }})
+                </span>
               </div>
 
               <button
@@ -236,32 +238,35 @@
 
             <!-- Right: Total & Checkout -->
             <div class="flex flex-col lg:flex-row lg:items-center gap-6">
-              <!-- ✅ Fix: Total Summary - hiển thị đúng số sản phẩm và tổng tiền -->
+              <!-- Total Summary -->
               <div class="text-right">
                 <div class="flex items-center gap-2 text-sm text-gray-600 mb-1">
                   <span>Tổng thanh toán ({{ selectedItems.length }} Sản phẩm):</span>
-                  <span class="text-2xl font-bold text-rose-600">{{
-                    formatPrice(selectedTotal)
-                  }}</span>
+                  <span class="text-2xl font-bold text-rose-600">
+                    {{ formatPrice(selectedTotal) }}
+                  </span>
                 </div>
                 <div class="text-xs text-gray-500">Đã bao gồm thuế VAT (nếu có)</div>
               </div>
 
               <!-- Checkout Button -->
-              <button
-                @click="goToCheckout"
-                :disabled="selectedItems.length === 0"
-                class="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                Mua Hàng ({{ selectedItems.length }})
-              </button>
+              <div class="flex-shrink-0">
+                <button
+                  @click="goToCheckout"
+                  :disabled="selectedItems.length === 0"
+                  class="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none min-w-[200px]"
+                >
+                  <span v-if="selectedItems.length === 0">Chọn sản phẩm</span>
+                  <span v-else>Mua Hàng ({{ selectedItems.length }})</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Empty Cart -->
-      <div v-else-if="!loading && (isCartEmpty(cart) || !cart)" class="text-center py-20">
+      <div v-else-if="!loading && (!cart || isCartEmpty(cart))" class="text-center py-20">
         <div class="max-w-md mx-auto">
           <div
             class="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center"
@@ -324,6 +329,7 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -336,11 +342,16 @@ import {
   getCartItemCount,
   isCartEmpty,
 } from './carts.api'
-import { CartDetailRequest, type Cart } from './carts.type'
+import { CartDetailRequest, type Cart, type CartDetail } from './carts.type'
+// ✅ Import API để lấy variant với product
+import { getVariantByIdApi, getVariantWithProductByIdApi } from '@/modules/products/product.api'
+import type { ProductVariantWithProduct } from '@/modules/products/product.type'
 
 const router = useRouter()
 
-// State
+// ================================
+// STATE MANAGEMENT
+// ================================
 const cart = ref<Cart | null>(null)
 const loading = ref(true)
 const isUpdating = ref(false)
@@ -348,11 +359,16 @@ const showSuccessToast = ref(false)
 const successMessage = ref('')
 const selectedItems = ref<string[]>([])
 
-// Computed
+// ✅ Cache để lưu thông tin variant đã fetch
+const variantCache = ref<Map<string, ProductVariantWithProduct>>(new Map())
+
+// ================================
+// COMPUTED PROPERTIES
+// ================================
 const currentUser = computed(() => getCurrentUser())
 
 const selectedTotal = computed(() => {
-  if (!cart.value) return 0
+  if (!cart.value?.details) return 0
   return cart.value.details
     .filter((detail) => selectedItems.value.includes(detail.id))
     .reduce((total, detail) => total + detail.subtotal, 0)
@@ -364,11 +380,13 @@ const isAllSelected = computed(() => {
 })
 
 const isIndeterminate = computed(() => {
-  if (!cart.value?.details) return false
+  if (!cart.value?.details || cart.value.details.length === 0) return false
   return selectedItems.value.length > 0 && selectedItems.value.length < cart.value.details.length
 })
 
-// Methods
+// ================================
+// CART OPERATIONS
+// ================================
 const loadCart = async () => {
   if (!currentUser.value?.userId) {
     router.push('/login')
@@ -377,10 +395,14 @@ const loadCart = async () => {
 
   try {
     loading.value = true
-    cart.value = await getUserCart(currentUser.value.userId)
-    console.log('✅ Loaded cart with full details:', cart.value)
+    const cartData = await getUserCart(currentUser.value.userId)
+    cart.value = cartData
 
+    console.log('✅ Loaded cart:', cart.value)
+
+    // ✅ Load thông tin variant cho tất cả items trong cart
     if (cart.value?.details) {
+      await loadVariantInfoForAllItems()
       selectedItems.value = cart.value.details.map((detail) => detail.id)
     }
   } catch (error) {
@@ -391,8 +413,37 @@ const loadCart = async () => {
   }
 }
 
+// ✅ Load thông tin variant từ API cho tất cả items
+const loadVariantInfoForAllItems = async () => {
+  if (!cart.value?.details) return
+
+  console.log('🔄 Loading variant info for all items...')
+
+  const promises = cart.value.details.map(async (detail) => {
+    if (!variantCache.value.has(detail.productVariantId)) {
+      try {
+        console.log(`🔍 Fetching variant info for: ${detail.productVariantId}`)
+
+        // ✅ Option 1: Chỉ lấy variant info (nhanh hơn)
+        // const variantInfo = await getVariantByIdApi(detail.productVariantId)
+
+        // ✅ Option 2: Lấy variant + product info (đầy đủ hơn)
+        const variantWithProduct = await getVariantWithProductByIdApi(detail.productVariantId)
+        variantCache.value.set(detail.productVariantId, variantWithProduct)
+        console.log(`✅ Loaded variant info:`, variantWithProduct)
+      } catch (error) {
+        console.error(`❌ Error loading variant ${detail.productVariantId}:`, error)
+      }
+    }
+  })
+
+  await Promise.all(promises)
+  console.log('✅ All variant info loaded')
+}
+
 const selectAllItems = (event: Event) => {
   const target = event.target as HTMLInputElement
+
   if (!cart.value?.details) return
 
   if (target.checked) {
@@ -418,7 +469,10 @@ const updateQuantity = async (detailId: string, newQuantity: number) => {
     isUpdating.value = true
 
     const detail = cart.value?.details.find((d) => d.id === detailId)
-    if (!detail) return
+    if (!detail) {
+      console.error('❌ Detail not found:', detailId)
+      return
+    }
 
     const request = new CartDetailRequest(detail.productVariantId, newQuantity)
     await updateCartDetail(detailId, request)
@@ -496,11 +550,16 @@ const clearCartConfirm = async () => {
   }
 }
 
+// ================================
+// NAVIGATION & CHECKOUT
+// ================================
 const goToCheckout = () => {
   if (selectedItems.value.length === 0) {
     showToast('Vui lòng chọn sản phẩm để thanh toán', 'error')
     return
   }
+
+  localStorage.setItem('selectedCartItems', JSON.stringify(selectedItems.value))
   router.push('/checkout')
 }
 
@@ -508,6 +567,142 @@ const continueShopping = () => {
   router.push('/')
 }
 
+// ✅ Navigation đến ProductDetail
+const goToProductDetail = (detail: CartDetail) => {
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.product?.id) {
+    router.push(`/products/${variantInfo.product.id}`)
+  } else {
+    console.warn('❌ Cannot navigate to product detail: product ID not found')
+    showToast('Không thể xem chi tiết sản phẩm', 'error')
+  }
+}
+
+// ================================
+// HELPER FUNCTIONS - ✅ FIXED theo API thực tế
+// ================================
+const formatPrice = (price: number) => {
+  if (!price || isNaN(price)) return '0 ₫'
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(price)
+}
+
+const getProductName = (detail: CartDetail) => {
+  console.log('📦 Getting product name for detail:', detail.id)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.product?.name) {
+    console.log('✅ Found product name from API cache:', variantInfo.product.name)
+    return variantInfo.product.name
+  }
+
+  // Fallback - từ data có sẵn trong cart (nếu được populate)
+  if (detail.productVariant?.product?.name) {
+    console.log('✅ Found product name from populated data:', detail.productVariant.product.name)
+    return detail.productVariant.product.name
+  }
+
+  if (detail.product?.name) {
+    console.log('✅ Found product name from detail.product:', detail.product.name)
+    return detail.product.name
+  }
+
+  // Fallback với productVariantId
+  const fallbackName = `Sản phẩm #${detail.productVariantId?.slice(-8) || 'Unknown'}`
+  console.log('⚠️ Using fallback name:', fallbackName)
+  return fallbackName
+}
+
+const getProductImage = (detail: CartDetail) => {
+  console.log('🖼️ Getting product image for detail:', detail.id)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.images?.length > 0) {
+    // Tìm main image trước
+    const mainImage = variantInfo.images.find((img) => img.isMain)
+    if (mainImage?.url) {
+      console.log('✅ Found main image from API cache:', mainImage.url)
+      return mainImage.url
+    }
+
+    // Nếu không có main, lấy ảnh đầu tiên
+    const firstImage = variantInfo.images[0]?.url
+    if (firstImage) {
+      console.log('✅ Found first image from API cache:', firstImage)
+      return firstImage
+    }
+  }
+
+  // Fallback - từ data có sẵn trong cart
+  if (detail.productVariant?.images?.length > 0) {
+    const mainImage = detail.productVariant.images.find((img) => img.isMain)
+    if (mainImage?.url) {
+      console.log('✅ Found image from populated data (main):', mainImage.url)
+      return mainImage.url
+    }
+
+    const firstImage = detail.productVariant.images[0]?.url
+    if (firstImage) {
+      console.log('✅ Found image from populated data (first):', firstImage)
+      return firstImage
+    }
+  }
+
+  // Default placeholder
+  const placeholder = 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
+  console.log('⚠️ Using placeholder image:', placeholder)
+  return placeholder
+}
+
+const getVariantSize = (detail: CartDetail) => {
+  console.log('📏 Getting variant size for detail:', detail.id)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.size) {
+    console.log('✅ Found size from API cache:', variantInfo.size)
+    return variantInfo.size
+  }
+
+  // Fallback - từ data có sẵn trong cart
+  if (detail.productVariant?.size) {
+    console.log('✅ Found size from populated data:', detail.productVariant.size)
+    return detail.productVariant.size
+  }
+
+  console.log('⚠️ No size found, returning N/A')
+  return 'N/A'
+}
+
+const getVariantColor = (detail: CartDetail) => {
+  console.log('🎨 Getting variant color for detail:', detail.id)
+
+  // ✅ Lấy từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+
+  // Support cả colorName và color.name
+  if (variantInfo?.colorName) {
+    console.log('✅ Found colorName from API cache:', variantInfo.colorName)
+    return variantInfo.colorName
+  }
+
+  if (variantInfo?.color?.name) {
+    console.log('✅ Found color.name from API cache:', variantInfo.color.name)
+    return variantInfo.color.name
+  }
+
+  // Fallback logic...
+  console.log('⚠️ No color found, returning N/A')
+  return 'N/A'
+}
+
+// ================================
+// TOAST NOTIFICATIONS
+// ================================
 const showToast = (message: string, type: 'success' | 'error' = 'success') => {
   successMessage.value = message
   showSuccessToast.value = true
@@ -516,136 +711,9 @@ const showToast = (message: string, type: 'success' | 'error' = 'success') => {
   }, 3500)
 }
 
-// ✅ Helper functions - Lấy đúng thông tin từ database theo structure thực tế
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-  }).format(price)
-}
-
-const getProductName = (detail: any) => {
-  console.log('📦 Detail object for name:', detail)
-
-  // Thử lấy từ productVariant.product trước (nếu được populate)
-  if (detail.productVariant?.product?.name) {
-    return detail.productVariant.product.name
-  }
-
-  // Thử lấy từ product trực tiếp
-  if (detail.product?.name) {
-    return detail.product.name
-  }
-
-  // Fallback - có thể từ API trả về nested khác
-  if (detail.name) {
-    return detail.name
-  }
-
-  // 3. Nếu API không populate, fallback với productVariantId
-  if (detail.productVariantId) {
-    return `Sản phẩm ${detail.productVariantId.slice(-8)}`
-  }
-
-  // Last resort - tạo tên mặc định
-  return `Sản phẩm ${detail.productVariantId?.slice(-8) || detail.id?.slice(-8) || 'Unknown'}`
-}
-
-const getProductImage = (detail: any) => {
-  console.log('🖼️ Detail object for image:', detail)
-
-  // 1. Từ productVariant.images (array)
-  if (detail.productVariant?.images?.length > 0) {
-    // Tìm main image trước
-    const mainImage = detail.productVariant.images.find((img: any) => img.isMain)
-    if (mainImage?.url) return mainImage.url
-
-    // Nếu không có main, lấy image đầu tiên
-    return detail.productVariant.images[0].url
-  }
-
-  // 2. Từ productVariant.product.images (nếu được populate)
-  if (detail.productVariant?.product?.images?.length > 0) {
-    const mainImage = detail.productVariant.product.images.find((img: any) => img.isMain)
-    if (mainImage?.url) return mainImage.url
-    return detail.productVariant.product.images[0].url
-  }
-
-  // 3. Từ single image field
-  if (detail.productVariant?.image) {
-    return typeof detail.productVariant.image === 'string'
-      ? detail.productVariant.image
-      : detail.productVariant.image.url
-  }
-
-  // 4. Từ product trực tiếp
-  if (detail.product?.images?.length > 0) {
-    const mainImage = detail.product.images.find((img: any) => img.isMain)
-    if (mainImage?.url) return mainImage.url
-    return detail.product.images[0].url
-  }
-
-  // 5. Fallback
-  if (detail.image) {
-    return typeof detail.image === 'string' ? detail.image : detail.image.url
-  }
-
-  // Default placeholder
-  return 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
-}
-
-const getVariantSize = (detail: any) => {
-  console.log('📏 Detail object for size:', detail)
-
-  // 1. Từ productVariant.size
-  if (detail.productVariant?.size) {
-    return detail.productVariant.size
-  }
-
-  // 2. Từ detail trực tiếp (nếu API flatten data)
-  if (detail.size) {
-    return detail.size
-  }
-
-  // 3. Từ variant info khác
-  if (detail.variantSize) {
-    return detail.variantSize
-  }
-
-  return 'N/A'
-}
-
-const getVariantColor = (detail: any) => {
-  console.log('🎨 Detail object for color:', detail)
-
-  // 1. Từ productVariant.color.name (object với name)
-  if (detail.productVariant?.color?.name) {
-    return detail.productVariant.color.name
-  }
-
-  // 2. Từ productVariant.colorName (string)
-  if (detail.productVariant?.colorName) {
-    return detail.productVariant.colorName
-  }
-
-  // 3. Từ detail trực tiếp
-  if (detail.color?.name) {
-    return detail.color.name
-  }
-
-  if (detail.colorName) {
-    return detail.colorName
-  }
-
-  // 4. Từ variant info khác
-  if (detail.variantColor) {
-    return detail.variantColor
-  }
-
-  return 'N/A'
-}
-
-// Lifecycle
+// ================================
+// LIFECYCLE
+// ================================
 onMounted(() => {
   loadCart()
   window.addEventListener('cart-updated', loadCart)
@@ -675,7 +743,26 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* Custom scrollbar for quantity input */
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #f43f5e, #ec4899);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #e11d48, #db2777);
+}
+
+/* Remove number input arrows */
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -686,22 +773,43 @@ input[type='number'] {
   -moz-appearance: textfield;
 }
 
-/* Hover effects */
+/* Enhanced hover effects */
 .hover\:scale-105:hover {
   transform: scale(1.05);
 }
 
-/* Gradient backgrounds */
-.bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+/* Gradient text utilities */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
-.bg-gradient-to-br {
-  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
-}
-
-/* Custom shadows */
+/* Enhanced shadows */
 .shadow-2xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Cart summary fixed positioning on mobile */
+@media (max-width: 1024px) {
+  .cart-summary-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin: 0;
+    border-radius: 0;
+    border-top: 3px solid #f43f5e;
+  }
+}
+
+/* Button animation group hover */
+.group:hover .group-hover\:translate-x-full {
+  transform: translateX(100%);
+}
+
+/* ✅ Cursor pointer cho clickable elements */
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>
