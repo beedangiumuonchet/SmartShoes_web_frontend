@@ -8,7 +8,9 @@ import { cartsRoutes } from '@/modules/carts/carts.routes'
 import { ordersRoutes } from '@/modules/orders/orders.routes'
 import { usersManagerRoutes } from '@/modules/users/users.manager.routes'
 import { ordersManagerRoutes } from '@/modules/orders/orders.manager.routes'
+import { productManagerRoutes } from '@/modules/products/product.manager.routes'
 import { reviewsRoutes } from '@/modules/reviews/reviews.routes'
+import { brandManagerRoutes } from '@/modules/brand/brand.manager.routes'
 //import { paymentsRoutes } from '@/modules/payments/payments.routes'
 
 const router = createRouter({
@@ -21,7 +23,9 @@ const router = createRouter({
     ...ordersRoutes,
     ...usersManagerRoutes,
     ...ordersManagerRoutes,
+    ...productManagerRoutes,
     ...reviewsRoutes,
+    ...brandManagerRoutes,
     //...paymentsRoutes,
 
     ...routes,

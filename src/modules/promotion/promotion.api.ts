@@ -1,27 +1,89 @@
-// api/promotion.api.ts
 import { AxiosHttpClient } from '@/common/utils/axios'
 import type { IApiResponse } from '@/common/types'
 import type { Promotion, PromotionForm } from './promotion.type'
+import { useCookies } from '@vueuse/integrations/useCookies'
+import { getCurrentUser } from '@/common/guards/roleGuard.guard'
 
 const axiosHttpClient = new AxiosHttpClient(import.meta.env.VITE_API_URL)
-const BASE_URL = '/api/promotions'
+const cookie = useCookies(['jwt_token'])
 
-export const getAllPromotions = async () => {
-  return axiosHttpClient.get<IApiResponse<Promotion[]>>(BASE_URL)
+const BASE_URL = '/promotions'
+
+export const getAllPromotionsApi = async () => {
+  console.log('=== GET ALL PROMOTIONS ===')
+  console.log('Token exists:', !!cookie.get('jwt_token'))
+  console.log('Full URL:', `${import.meta.env.VITE_API_URL}${BASE_URL}`)
+  console.log('==========================')
+
+  try {
+    const response = await axiosHttpClient.get<IApiResponse<Promotion[]>>(BASE_URL)
+    console.log('✅ Get all promotions success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Get all promotions error:', error)
+    throw error
+  }
 }
 
-export const getPromotionById = async (id: string) => {
-  return axiosHttpClient.get<IApiResponse<Promotion>>(`${BASE_URL}/${id}`)
+export const getPromotionByIdApi = async (id: string) => {
+  console.log('=== GET PROMOTION BY ID ===')
+  console.log('Promotion ID:', id)
+  console.log('===========================')
+
+  try {
+    const response = await axiosHttpClient.get<IApiResponse<Promotion>>(`${BASE_URL}/${id}`)
+    console.log('✅ Get promotion by id success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Get promotion by id error:', error)
+    throw error
+  }
 }
 
-export const createPromotion = async (form: PromotionForm) => {
-  return axiosHttpClient.post<IApiResponse<Promotion>, PromotionForm>(BASE_URL, form)
+export const createPromotionApi = async (form: PromotionForm) => {
+  console.log('=== CREATE PROMOTION ===')
+  console.log('Form Data:', form)
+
+  const currentUser = getCurrentUser()
+  console.log('Current User:', currentUser)
+
+  try {
+    const response = await axiosHttpClient.post<IApiResponse<Promotion>, PromotionForm>(BASE_URL, form)
+    console.log('✅ Create promotion success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Create promotion error:', error)
+    throw error
+  }
 }
 
-export const updatePromotion = async (id: string, form: PromotionForm) => {
-  return axiosHttpClient.put<IApiResponse<Promotion>, PromotionForm>(`${BASE_URL}/${id}`, form)
+export const updatePromotionApi = async (id: string, form: PromotionForm) => {
+  console.log('=== UPDATE PROMOTION ===')
+  console.log('Promotion ID:', id)
+  console.log('Form Data:', form)
+  console.log('========================')
+
+  try {
+    const response = await axiosHttpClient.put<IApiResponse<Promotion>, PromotionForm>(`${BASE_URL}/${id}`, form)
+    console.log('✅ Update promotion success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Update promotion error:', error)
+    throw error
+  }
 }
 
-export const deletePromotion = async (id: string) => {
-  return axiosHttpClient.delete<IApiResponse<void>>(`${BASE_URL}/${id}`)
+export const deletePromotionApi = async (id: string) => {
+  console.log('=== DELETE PROMOTION ===')
+  console.log('Promotion ID:', id)
+  console.log('========================')
+
+  try {
+    const response = await axiosHttpClient.delete<IApiResponse<void>>(`${BASE_URL}/${id}`)
+    console.log('✅ Delete promotion success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Delete promotion error:', error)
+    throw error
+  }
 }

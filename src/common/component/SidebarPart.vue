@@ -175,6 +175,33 @@ const navigationItems = ref<NavigationMenuItem[][]>([
       to: '/manager',
       icon: 'i-heroicons-home',
     },
+    //✅ NHÓM DANH MỤC SẢN PHẨM
+    {
+      label: 'Danh mục sản phẩm',
+      icon: 'i-heroicons-rectangle-group',
+      children: [
+        {
+          label: 'Thương hiệu',
+          to: '/manager/brands',
+          icon: 'i-heroicons-building-storefront',
+        },
+        {
+          label: 'Thể loại',
+          to: '/manager/categories',
+          icon: 'i-heroicons-tag',
+        },
+        {
+          label: 'Thuộc tính',
+          to: '/manager/attributes',
+          icon: 'i-heroicons-adjustments-horizontal',
+        },
+      ],
+    },
+    {
+      label: 'Sản phẩm',
+      to: '/manager/products',
+      icon: 'i-heroicons-cube',
+    },
     {
       label: 'Đơn Hàng',
       to: '/manager/orders',

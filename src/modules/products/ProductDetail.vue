@@ -1,7 +1,7 @@
 <template>
   <div v-if="product" class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-2 gap-12">
     <!-- Left: Images -->
-    <div>
+    <!-- <div>
       <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
         <img
           :src="selectedImage"
@@ -14,7 +14,7 @@
         <img
           v-for="(img, i) in currentVariant?.images || mainImages"
           :key="i"
-          :src="img.url"
+          :src="getDirectImageUrl(img.url)"
           :alt="'image-' + i"
           @click="selectedImage = img.url"
           class="w-20 h-20 rounded-xl object-cover cursor-pointer border transition-all duration-300"
@@ -25,7 +25,33 @@
           "
         />
       </div>
-    </div>
+    </div> -->
+    <!-- Left: Images -->
+<div>
+  <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+    <img
+      :src="selectedImage"
+      alt="Product Image"
+      class="w-full h-[500px] object-cover transition-transform duration-500 hover:scale-105"
+    />
+  </div>
+
+  <!-- Danh sách ảnh thumbnail -->
+  <div class="flex gap-3 mt-4 justify-center flex-wrap">
+    <img
+      v-for="(img, i) in displayedImages"
+      :key="i"
+      :src="getDirectImageUrl(img.url)"
+      :alt="'image-' + i"
+      @click="selectedImage = getDirectImageUrl(img.url)"
+      class="w-20 h-20 rounded-xl object-cover cursor-pointer border transition-all duration-300"
+      :class="selectedImage === getDirectImageUrl(img.url)
+        ? 'border-blue-500 scale-105'
+        : 'border-gray-200 hover:scale-105'"
+    />
+  </div>
+</div>
+
 
     <!-- Right: Info -->
     <div>
@@ -55,19 +81,34 @@
         <span v-else>{{ product.category?.name || product.categoryName || 'Không rõ phân loại' }}</span>
       </p>
 
-      <!-- <p class="text-gray-500 mb-4">
-        {{ product.brand?.name || product.brandName || 'Không rõ thương hiệu' }} ·
-        {{ product.category?.name || product.categoryName || 'Không rõ phân loại' }}
-      </p> -->
-
       <!-- Giá và tồn kho -->
-      <div v-if="currentVariant" class="flex items-center space-x-3 mb-6">
+      <!-- <div v-if="currentVariant" class="flex items-center space-x-3 mb-6">
         <span class="text-3xl font-bold text-blue-600">{{
           formatPrice(currentVariant.price)
         }}</span>
         <span class="text-gray-500 text-sm">Còn lại: {{ currentVariant.stock }}</span>
-      </div>
+      </div> -->
+      <div v-if="currentVariant" class="flex items-center space-x-3 mb-6">
+  <span class="text-3xl font-bold text-blue-600">
+    {{ formatPrice(currentVariant.priceSale ?? currentVariant.price) }}
+  </span>
 
+  <span
+    v-if="isOnSale"
+    class="text-gray-500 line-through text-lg"
+  >
+    {{ formatPrice(currentVariant.price) }} 
+  </span>
+
+  <span
+    v-if="isOnSale"
+    class="text-red-500 font-semibold text-sm"
+  >
+    -{{ salePercent }}%
+  </span>
+
+  <span class="text-gray-500 text-sm ml-2">Còn lại: {{ currentVariant.stock }}</span>
+</div>
       <div v-else class="text-gray-500 mb-6 italic">
         Vui lòng chọn đủ size và màu để xem chi tiết sản phẩm.
       </div>
@@ -77,18 +118,21 @@
         <h3 class="font-semibold text-gray-800 mb-2">Chọn size</h3>
         <div class="flex flex-wrap gap-2">
           <button
-            v-for="size in availableSizes"
-            :key="size"
-            @click="selectSize(size)"
-            class="px-4 py-2 rounded-lg border transition-all duration-200"
-            :class="
-              selectedSize === size
+              v-for="size in allSizes"
+              :key="size"
+              @click="selectSize(size)"
+              :disabled="!availableSizes.includes(size)"
+              class="px-4 py-2 rounded-lg border transition-all duration-200"
+              :class="selectedSize === size
                 ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-            "
-          >
-            {{ size }}
+                : !availableSizes.includes(size)
+                  ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+              "
+            >
+              {{ size }}
           </button>
+
         </div>
       </div>
 
@@ -97,18 +141,21 @@
         <h3 class="font-semibold text-gray-800 mb-2">Chọn màu</h3>
         <div class="flex flex-wrap gap-2">
           <button
-            v-for="color in availableColors"
+            v-for="color in allColors"
             :key="color"
             @click="selectColor(color)"
+            :disabled="!availableColors.includes(color)"
             class="px-4 py-2 rounded-lg border transition-all duration-200"
-            :class="
-              selectedColor === color
-                ? 'bg-blue-600 text-white border-blue-600'
+            :class="selectedColor === color
+              ? 'bg-blue-600 text-white border-blue-600'
+              : !availableColors.includes(color)
+                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
             "
           >
             {{ color }}
           </button>
+
         </div>
       </div>
 
@@ -241,9 +288,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, unref } from 'vue'
+import { ref, computed, onMounted, unref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { getProductByIdApi } from './product.api'
+import { getProductByIdApi, getProductBySlugApi } from './product.api'
 import { getOrCreateUserCart, addCartDetail } from '@/modules/carts/carts.api'
 import { CartDetailRequest } from '@/modules/carts/carts.type'
 import { getCurrentUser } from '@/common/guards/roleGuard.guard'
@@ -264,17 +311,78 @@ const normalize = (str: string) =>
     ?.toLowerCase()
     ?.trim()
 
-// const availableSizes = computed(() => [...new Set(product.value?.variants?.map((v) => v.size) || [])])
-const availableSizes = computed(() => {
+const allSizes = computed(() => {
   const sizes = [...new Set(product.value?.variants?.map(v => v.size) || [])]
-  // Nếu toàn là số, sắp xếp theo số; nếu có chữ, sắp xếp theo thứ tự chữ
   const allNumeric = sizes.every(s => !isNaN(Number(s)))
-  return allNumeric
-    ? sizes.sort((a, b) => Number(a) - Number(b))
-    : sizes.sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }))
+  return allNumeric ? sizes.sort((a, b) => Number(a) - Number(b)) : sizes.sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }))
 })
 
-const availableColors = computed(() => [...new Set(product.value?.variants?.map((v) => v.colorName) || [])])
+const allColors = computed(() => [...new Set(product.value?.variants?.map(v => v.colorName) || [])])
+
+// Kiểm tra size còn khả dụng với color đã chọn
+const availableSizes = computed(() => {
+  if (!product.value?.variants?.length) return []
+
+  return allSizes.value.filter(size => {
+    // Tìm variant cùng size và color (nếu đã chọn color)
+    const variants = product.value.variants.filter(v => {
+      const matchSize = normalize(v.size) === normalize(size)
+      const matchColor = selectedColor.value ? normalize(v.colorName) === normalize(selectedColor.value) : true
+      const hasStock = v.stock > 0
+      return matchSize && matchColor && hasStock
+    })
+    return variants.length > 0
+  })
+})
+
+// Kiểm tra color còn khả dụng với size đã chọn
+const availableColors = computed(() => {
+  if (!product.value?.variants?.length) return []
+
+  return allColors.value.filter(color => {
+    const variants = product.value.variants.filter(v => {
+      const matchColor = normalize(v.colorName) === normalize(color)
+      const matchSize = selectedSize.value ? normalize(v.size) === normalize(selectedSize.value) : true
+      const hasStock = v.stock > 0
+      return matchColor && matchSize && hasStock
+    })
+    return variants.length > 0
+  })
+})
+
+// 🖼️ Danh sách ảnh hiển thị (phụ thuộc vào variant được chọn)
+const displayedImages = computed(() => {
+  // Nếu đã chọn variant (size + color hợp lệ)
+  if (currentVariant.value?.images?.length) {
+    return currentVariant.value.images
+  }
+
+  // Nếu chưa chọn, hiển thị ảnh chính (main images)
+  const mainImgs =
+    product.value?.variants
+      ?.flatMap((v) => v.images?.filter((i) => i.isMain)) || []
+
+  // Nếu không có ảnh main, fallback ảnh đầu tiên của variant đầu
+  if (!mainImgs.length && product.value?.variants?.length) {
+    return product.value.variants[0].images || []
+  }
+
+  return mainImgs
+})
+
+
+const isOnSale = computed(() => {
+  return currentVariant.value?.priceSale != null && currentVariant.value.priceSale < currentVariant.value.price
+})
+
+const salePercent = computed(() => {
+  if (!isOnSale.value) return 0
+  const original = currentVariant.value?.price ?? 0
+  const sale = currentVariant.value?.priceSale ?? 0
+  return Math.round(((original - sale) / original) * 100)
+})
+
+
 
 const currentVariant = computed(() => {
   const size = unref(selectedSize)
@@ -298,13 +406,33 @@ const canAddToCart = computed(() => {
   )
 })
 
+
 const selectSize = (size: string) => {
-  selectedSize.value = selectedSize.value === size ? null : size
+  if (selectedSize.value === size) {
+    selectedSize.value = null
+  } else {
+    selectedSize.value = size
+  }
+
+  // Nếu currentColor không còn hợp lệ với size mới, reset màu
+  if (selectedColor.value && !availableColors.value.includes(selectedColor.value)) {
+    selectedColor.value = null
+  }
 }
 
 const selectColor = (color: string) => {
-  selectedColor.value = selectedColor.value === color ? null : color
+  if (selectedColor.value === color) {
+    selectedColor.value = null
+  } else {
+    selectedColor.value = color
+  }
+
+  // Nếu currentSize không còn hợp lệ với color mới, reset size
+  if (selectedSize.value && !availableSizes.value.includes(selectedSize.value)) {
+    selectedSize.value = null
+  }
 }
+
 
 const increaseQuantity = () => {
   if (currentVariant.value && quantity.value < currentVariant.value.stock) {
@@ -320,6 +448,19 @@ const decreaseQuantity = () => {
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
+
+
+function getDirectImageUrl(driveUrl: string) {
+  // Tách ID ảnh từ link Google Drive
+  const match = driveUrl?.match(/\/d\/([^/]+)/)
+  if (!match) return driveUrl
+
+  const driveId = match[1]
+  // Gọi ảnh qua API backend (nó sẽ tự cache local)
+  return `http://localhost:8080/api/v1/images/${driveId}`
+}
+
+
 
 const addToCart = async () => {
   if (!currentVariant.value || !canAddToCart.value) {
@@ -389,8 +530,11 @@ const addToCart = async () => {
 
 onMounted(async () => {
   try {
-    const id = route.params.id as string
-    const res = await getProductByIdApi(id)
+    // const id = route.params.id as string
+    // const res = await getProductByIdApi(id)
+    const slug = route.params.slug as string
+    const res = await getProductBySlugApi(slug)
+
 
     console.log('=== API RESPONSE DEBUG ===')
     console.log('Full response:', res)
@@ -408,13 +552,24 @@ onMounted(async () => {
     // ✅ Hiển thị ảnh mặc định
     if (product.value?.variants?.length) {
       const firstVariant = product.value.variants.find((v) => v.images?.length)
-      selectedImage.value =
-        firstVariant?.images?.find((i: any) => i.isMain)?.url ||
-        firstVariant?.images?.[0]?.url ||
-        ''
+      selectedImage.value = getDirectImageUrl(
+      firstVariant?.images?.find((i: any) => i.isMain)?.url ||
+      firstVariant?.images?.[0]?.url ||
+      ''
+    )
+
+      console.log('✅ Ảnh sản phẩm đã chọn:', selectedImage.value)
     }
   } catch (err) {
     console.error('❌ Lỗi tải sản phẩm:', err)
   }
 })
+watch(currentVariant, (newVal) => {
+  if (newVal?.images?.length) {
+    selectedImage.value = getDirectImageUrl(
+      newVal.images.find((i) => i.isMain)?.url || newVal.images[0].url
+    )
+  }
+})
+
 </script>

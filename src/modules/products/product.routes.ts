@@ -12,7 +12,17 @@ export const productRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/products/:id',
+    path: '/products/create',
+    name: 'ProductCreate',
+    component: () => import('./ProductCreate.vue'),
+    meta: {
+      title: 'Create Product',
+      requiresAuth: false,
+      layout: 'topbar',
+    },
+  },
+  {
+    path: '/products/:slug',
     name: 'ProductDetail',
     component: () => import('./ProductDetail.vue'),
     meta: {
