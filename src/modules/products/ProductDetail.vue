@@ -109,8 +109,6 @@
 
   <span class="text-gray-500 text-sm ml-2">Còn lại: {{ currentVariant.stock }}</span>
 </div>
-
-
       <div v-else class="text-gray-500 mb-6 italic">
         Vui lòng chọn đủ size và màu để xem chi tiết sản phẩm.
       </div>

@@ -208,3 +208,27 @@ export const createProductApi = async (formData: Partial<Product>) => {
     throw error
   }
 }
+
+/**
+ * 🟡 Cập nhật sản phẩm theo ID
+ */
+export const updateProductApi = async (id: string, formData: Partial<Product>) => {
+  console.log('=== UPDATE PRODUCT ===')
+  console.log('Product ID:', id)
+  console.log('Form Data:', formData)
+
+  const currentUser = getCurrentUser()
+  console.log('Current User:', currentUser)
+
+  try {
+    const response = await axiosHttpClient.put<IApiResponse<Product>>(
+      `/products/${id}`,
+      formData
+    )
+    console.log('✅ Update product success:', response)
+    return response
+  } catch (error) {
+    console.error('❌ Update product error:', error)
+    throw error
+  }
+}
