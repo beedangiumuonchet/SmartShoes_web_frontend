@@ -5,5 +5,6 @@ export interface ProductVariant {
   colorId: string
   size: string
   price: number
+  priceSale?: number
   stock: number
 }
