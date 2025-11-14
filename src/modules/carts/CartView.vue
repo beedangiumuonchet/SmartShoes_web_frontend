@@ -1,3 +1,4 @@
+<!-- filepath: g:\LearnPTIT\TotNghiep\SmartShoes_web_frontend\src\modules\carts\CartView.vue -->
 <template>
   <div class="min-h-screen bg-gray-50 py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,7 +38,7 @@
 
       <!-- Cart Content -->
       <div v-if="!loading && cart && !isCartEmpty(cart)" class="space-y-6">
-        <!-- Cart Header - Like Shopee -->
+        <!-- ✅ Cart Header - Shopee Style với cột đúng -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div class="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-700">
             <div class="col-span-1 flex items-center">
@@ -57,7 +58,7 @@
           </div>
         </div>
 
-        <!-- Cart Items -->
+        <!-- ✅ Cart Items - Shopee Style -->
         <div class="space-y-4">
           <div
             v-for="detail in cart.details"
@@ -65,7 +66,7 @@
             class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200"
           >
             <div class="grid grid-cols-12 gap-4 items-center">
-              <!-- Checkbox (1 column) -->
+              <!-- ✅ Checkbox (1 column) -->
               <div class="col-span-1 flex items-center">
                 <input
                   type="checkbox"
@@ -75,7 +76,7 @@
                 />
               </div>
 
-              <!-- Product Info (5 columns) -->
+              <!-- ✅ Product Info (5 columns) -->
               <div class="col-span-5 flex items-center space-x-4">
                 <!-- Product Image -->
                 <div class="flex-shrink-0">
@@ -110,18 +111,41 @@
                 </div>
               </div>
 
-              <!-- Unit Price (2 columns) -->
+              <!-- ✅ Đơn Giá (2 columns) - DÙNG TRỰC TIẾP TỪ DTO -->
               <div class="col-span-2 text-center">
-                <div class="text-lg font-semibold text-rose-600">
-                  {{ formatPrice(detail.price) }}
+                <div class="flex flex-col items-center space-y-1">
+                  <!-- Hiển thị giá sale nếu có và khác null -->
+                  <div v-if="hasSalePrice(detail)" class="text-lg font-semibold text-rose-600">
+                    {{ formatPrice(detail.priceSale) }}
+                  </div>
+
+                  <!-- Hiển thị giá gốc -->
+                  <div
+                    :class="[
+                      hasSalePrice(detail)
+                        ? 'text-sm text-gray-500 line-through'
+                        : 'text-lg font-semibold text-rose-600',
+                    ]"
+                  >
+                    {{ formatPrice(detail.price) }}
+                  </div>
+
+                  <!-- Badge giảm giá nếu có sale -->
+                  <div
+                    v-if="hasSalePrice(detail)"
+                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                  >
+                    -{{ getDiscountPercentage(detail) }}%
+                  </div>
                 </div>
               </div>
 
-              <!-- Quantity Controls (2 columns) -->
+              <!-- ✅ Số Lượng (2 columns) -->
               <div class="col-span-2 flex items-center justify-center">
                 <div
                   class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white"
                 >
+                  <!-- Nút giảm -->
                   <button
                     @click="updateQuantity(detail.id, detail.quantity - 1)"
                     :disabled="detail.quantity <= 1 || isUpdating"
@@ -142,6 +166,7 @@
                     </svg>
                   </button>
 
+                  <!-- Input số lượng -->
                   <input
                     type="number"
                     :value="detail.quantity"
@@ -151,6 +176,7 @@
                     :disabled="isUpdating"
                   />
 
+                  <!-- Nút tăng -->
                   <button
                     @click="updateQuantity(detail.id, detail.quantity + 1)"
                     :disabled="isUpdating"
@@ -173,14 +199,17 @@
                 </div>
               </div>
 
-              <!-- Subtotal (1 column) -->
+              <!-- ✅ Số Tiền (1 column) - TÍNH THEO GIÁ HIỆU LỰC -->
               <div class="col-span-1 text-center">
-                <div class="text-lg font-bold text-rose-600">
-                  {{ formatPrice(detail.subtotal) }}
+                <div class="flex flex-col items-center space-y-1">
+                  <!-- Subtotal hiện tại theo giá hiệu lực -->
+                  <div class="text-lg font-bold text-rose-600">
+                    {{ formatPrice(calculateItemSubtotal(detail)) }}
+                  </div>
                 </div>
               </div>
 
-              <!-- Actions (1 column) -->
+              <!-- ✅ Thao Tác (1 column) -->
               <div class="col-span-1 text-center">
                 <button
                   @click="removeFromCart(detail.id)"
@@ -202,7 +231,7 @@
           </div>
         </div>
 
-        <!-- Cart Summary - Shopee Style -->
+        <!-- ✅ Cart Summary - Shopee Style -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <!-- Left: Bulk Actions -->
@@ -221,11 +250,11 @@
               </div>
 
               <button
-                @click="clearCartConfirm"
+                @click="clearSelectedItems"
                 :disabled="isUpdating || selectedItems.length === 0"
                 class="text-sm text-gray-500 hover:text-rose-500 disabled:opacity-50 transition-colors"
               >
-                Xóa
+                Xóa ({{ selectedItems.length }})
               </button>
 
               <button
@@ -238,15 +267,31 @@
 
             <!-- Right: Total & Checkout -->
             <div class="flex flex-col lg:flex-row lg:items-center gap-6">
-              <!-- Total Summary -->
               <div class="text-right">
-                <div class="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                  <span>Tổng thanh toán ({{ selectedItems.length }} Sản phẩm):</span>
+                <div class="flex flex-col items-end gap-1">
+                  <!-- Tổng tiền label -->
+                  <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span>Tổng thanh toán ({{ selectedItems.length }} Sản phẩm):</span>
+                  </div>
+
+                  <!-- Tổng tiền hiện tại -->
                   <span class="text-2xl font-bold text-rose-600">
                     {{ formatPrice(selectedTotal) }}
                   </span>
+
+                  <!-- Tổng tiền gốc và tiết kiệm -->
+                  <div v-if="totalSavings > 0" class="flex items-center gap-2 text-sm">
+                    <span class="text-gray-500 line-through">
+                      {{ formatPrice(selectedOriginalTotal) }}
+                    </span>
+                    <span
+                      class="text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-full text-xs"
+                    >
+                      Tiết kiệm {{ formatPrice(totalSavings) }}
+                    </span>
+                  </div>
                 </div>
-                <div class="text-xs text-gray-500">Đã bao gồm thuế VAT (nếu có)</div>
+                <div class="text-xs text-gray-500 mt-1">Đã bao gồm thuế VAT (nếu có)</div>
               </div>
 
               <!-- Checkout Button -->
@@ -343,8 +388,7 @@ import {
   isCartEmpty,
 } from './carts.api'
 import { CartDetailRequest, type Cart, type CartDetail } from './carts.type'
-// ✅ Import API để lấy variant với product
-import { getVariantByIdApi, getVariantWithProductByIdApi } from '@/modules/products/product.api'
+import { getVariantWithProductByIdApi } from '@/modules/products/product.api'
 import type { ProductVariantWithProduct } from '@/modules/products/product.type'
 
 const router = useRouter()
@@ -359,20 +403,13 @@ const showSuccessToast = ref(false)
 const successMessage = ref('')
 const selectedItems = ref<string[]>([])
 
-// ✅ Cache để lưu thông tin variant đã fetch
+// Cache để lưu thông tin variant đã fetch (để lấy product name, image, etc.)
 const variantCache = ref<Map<string, ProductVariantWithProduct>>(new Map())
 
 // ================================
 // COMPUTED PROPERTIES
 // ================================
 const currentUser = computed(() => getCurrentUser())
-
-const selectedTotal = computed(() => {
-  if (!cart.value?.details) return 0
-  return cart.value.details
-    .filter((detail) => selectedItems.value.includes(detail.id))
-    .reduce((total, detail) => total + detail.subtotal, 0)
-})
 
 const isAllSelected = computed(() => {
   if (!cart.value?.details || cart.value.details.length === 0) return false
@@ -385,8 +422,86 @@ const isIndeterminate = computed(() => {
 })
 
 // ================================
-// CART OPERATIONS
+// ✅ PRICING HELPER FUNCTIONS - DÙNG DTO DATA
 // ================================
+
+/**
+ * ✅ Kiểm tra có giá sale không
+ * Dùng trực tiếp từ CartDetail DTO: priceSale !== null && priceSale > 0 && priceSale < price
+ */
+const hasSalePrice = (detail: CartDetail): boolean => {
+  return (
+    detail.priceSale !== null &&
+    detail.priceSale !== undefined &&
+    detail.priceSale > 0 &&
+    detail.priceSale < detail.price
+  )
+}
+
+/**
+ * ✅ Tính phần trăm giảm giá
+ */
+const getDiscountPercentage = (detail: CartDetail): number => {
+  if (!hasSalePrice(detail)) return 0
+
+  const originalPrice = detail.price
+  const salePrice = detail.priceSale!
+
+  return Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+}
+
+/**
+ * ✅ Lấy giá hiệu lực (sale nếu có, không thì gốc)
+ */
+const getEffectivePrice = (detail: CartDetail): number => {
+  return hasSalePrice(detail) ? detail.priceSale! : detail.price
+}
+
+/**
+ * ✅ Tính subtotal của 1 item theo giá hiệu lực
+ */
+const calculateItemSubtotal = (detail: CartDetail): number => {
+  const effectivePrice = getEffectivePrice(detail)
+  return detail.quantity * effectivePrice
+}
+
+// ================================
+// ✅ COMPUTED TOTALS
+// ================================
+
+/**
+ * ✅ Tổng tiền đã chọn (theo giá hiệu lực)
+ */
+const selectedTotal = computed(() => {
+  if (!cart.value?.details) return 0
+
+  return cart.value.details
+    .filter((detail) => selectedItems.value.includes(detail.id))
+    .reduce((total, detail) => total + calculateItemSubtotal(detail), 0)
+})
+
+/**
+ * ✅ Tổng tiền gốc (trước sale) của items đã chọn
+ */
+const selectedOriginalTotal = computed(() => {
+  if (!cart.value?.details) return 0
+
+  return cart.value.details
+    .filter((detail) => selectedItems.value.includes(detail.id))
+    .reduce((total, detail) => total + detail.quantity * detail.price, 0)
+})
+
+/**
+ * ✅ Tổng tiền tiết kiệm được
+ */
+const totalSavings = computed(() => {
+  return selectedOriginalTotal.value - selectedTotal.value
+})
+
+// ================================
+// ✅ CART OPERATIONS
+// ================================
+
 const loadCart = async () => {
   if (!currentUser.value?.userId) {
     router.push('/login')
@@ -398,9 +513,9 @@ const loadCart = async () => {
     const cartData = await getUserCart(currentUser.value.userId)
     cart.value = cartData
 
-    console.log('✅ Loaded cart:', cart.value)
+    console.log('✅ Loaded cart with DTO pricing:', cart.value)
 
-    // ✅ Load thông tin variant cho tất cả items trong cart
+    // Load thông tin variant cho product name, image, etc.
     if (cart.value?.details) {
       await loadVariantInfoForAllItems()
       selectedItems.value = cart.value.details.map((detail) => detail.id)
@@ -413,24 +528,27 @@ const loadCart = async () => {
   }
 }
 
-// ✅ Load thông tin variant từ API cho tất cả items
+/**
+ * ✅ Load thông tin variant từ API để lấy product name, image, etc.
+ * Giá đã có sẵn trong DTO rồi
+ */
 const loadVariantInfoForAllItems = async () => {
   if (!cart.value?.details) return
 
-  console.log('🔄 Loading variant info for all items...')
+  console.log('🔄 Loading variant info for product details...')
 
   const promises = cart.value.details.map(async (detail) => {
     if (!variantCache.value.has(detail.productVariantId)) {
       try {
         console.log(`🔍 Fetching variant info for: ${detail.productVariantId}`)
-
-        // ✅ Option 1: Chỉ lấy variant info (nhanh hơn)
-        // const variantInfo = await getVariantByIdApi(detail.productVariantId)
-
-        // ✅ Option 2: Lấy variant + product info (đầy đủ hơn)
         const variantWithProduct = await getVariantWithProductByIdApi(detail.productVariantId)
         variantCache.value.set(detail.productVariantId, variantWithProduct)
-        console.log(`✅ Loaded variant info:`, variantWithProduct)
+        console.log(`✅ Loaded variant for product info:`, {
+          id: variantWithProduct.id,
+          productName: variantWithProduct.product?.name,
+          size: variantWithProduct.size,
+          color: variantWithProduct.color?.name || variantWithProduct.colorName,
+        })
       } catch (error) {
         console.error(`❌ Error loading variant ${detail.productVariantId}:`, error)
       }
@@ -438,7 +556,7 @@ const loadVariantInfoForAllItems = async () => {
   })
 
   await Promise.all(promises)
-  console.log('✅ All variant info loaded')
+  console.log('✅ All variant info loaded for UI display')
 }
 
 const selectAllItems = (event: Event) => {
@@ -468,17 +586,21 @@ const updateQuantity = async (detailId: string, newQuantity: number) => {
   try {
     isUpdating.value = true
 
-    const detail = cart.value?.details.find((d) => d.id === detailId)
-    if (!detail) {
+    // 1. Tìm index và chi tiết hiện tại
+    const detailIndex = cart.value?.details.findIndex((d) => d.id === detailId)
+    if (detailIndex === undefined || detailIndex === -1 || !cart.value) {
       console.error('❌ Detail not found:', detailId)
       return
     }
 
+    const detail = cart.value.details[detailIndex]
     const request = new CartDetailRequest(detail.productVariantId, newQuantity)
-    await updateCartDetail(detailId, request)
 
-    await loadCart()
-    window.dispatchEvent(new CustomEvent('cart-updated'))
+    // 2. GỌI API và NHẬN LẠI DTO đã cập nhật
+    const updatedDetailDto = await updateCartDetail(detailId, request)
+
+    // 🚀 KHẮC PHỤC: CẬP NHẬT CỤC BỘ (Giữ nguyên thứ tự)
+    cart.value.details[detailIndex] = updatedDetailDto
 
     showToast('Đã cập nhật số lượng')
   } catch (error) {
@@ -522,7 +644,7 @@ const removeFromCart = async (detailId: string) => {
   }
 }
 
-const clearCartConfirm = async () => {
+const clearSelectedItems = async () => {
   if (selectedItems.value.length === 0) {
     showToast('Vui lòng chọn sản phẩm để xóa', 'error')
     return
@@ -567,7 +689,6 @@ const continueShopping = () => {
   router.push('/')
 }
 
-// ✅ Navigation đến ProductDetail
 const goToProductDetail = (detail: CartDetail) => {
   const variantInfo = variantCache.value.get(detail.productVariantId)
   if (variantInfo?.product?.id) {
@@ -579,8 +700,9 @@ const goToProductDetail = (detail: CartDetail) => {
 }
 
 // ================================
-// HELPER FUNCTIONS - ✅ FIXED theo API thực tế
+// ✅ HELPER FUNCTIONS
 // ================================
+
 const formatPrice = (price: number) => {
   if (!price || isNaN(price)) return '0 ₫'
   return new Intl.NumberFormat('vi-VN', {
@@ -590,113 +712,87 @@ const formatPrice = (price: number) => {
 }
 
 const getProductName = (detail: CartDetail) => {
-  console.log('📦 Getting product name for detail:', detail.id)
-
-  // ✅ Lấy từ cache variant đã fetch
+  // Từ cache variant đã fetch
   const variantInfo = variantCache.value.get(detail.productVariantId)
   if (variantInfo?.product?.name) {
-    console.log('✅ Found product name from API cache:', variantInfo.product.name)
     return variantInfo.product.name
   }
 
-  // Fallback - từ data có sẵn trong cart (nếu được populate)
+  // Fallback từ data có sẵn trong cart (nếu BE populate)
   if (detail.productVariant?.product?.name) {
-    console.log('✅ Found product name from populated data:', detail.productVariant.product.name)
     return detail.productVariant.product.name
   }
 
   if (detail.product?.name) {
-    console.log('✅ Found product name from detail.product:', detail.product.name)
     return detail.product.name
   }
 
-  // Fallback với productVariantId
-  const fallbackName = `Sản phẩm #${detail.productVariantId?.slice(-8) || 'Unknown'}`
-  console.log('⚠️ Using fallback name:', fallbackName)
-  return fallbackName
+  return `Sản phẩm #${detail.productVariantId?.slice(-8) || 'Unknown'}`
 }
 
 const getProductImage = (detail: CartDetail) => {
-  console.log('🖼️ Getting product image for detail:', detail.id)
-
-  // ✅ Lấy từ cache variant đã fetch
+  // Từ cache variant đã fetch
   const variantInfo = variantCache.value.get(detail.productVariantId)
   if (variantInfo?.images?.length > 0) {
     // Tìm main image trước
     const mainImage = variantInfo.images.find((img) => img.isMain)
     if (mainImage?.url) {
-      console.log('✅ Found main image from API cache:', mainImage.url)
       return mainImage.url
     }
-
     // Nếu không có main, lấy ảnh đầu tiên
-    const firstImage = variantInfo.images[0]?.url
-    if (firstImage) {
-      console.log('✅ Found first image from API cache:', firstImage)
-      return firstImage
-    }
+    return variantInfo.images[0]?.url
   }
 
-  // Fallback - từ data có sẵn trong cart
+  // Fallback từ data có sẵn trong cart
   if (detail.productVariant?.images?.length > 0) {
     const mainImage = detail.productVariant.images.find((img) => img.isMain)
     if (mainImage?.url) {
-      console.log('✅ Found image from populated data (main):', mainImage.url)
       return mainImage.url
     }
-
-    const firstImage = detail.productVariant.images[0]?.url
-    if (firstImage) {
-      console.log('✅ Found image from populated data (first):', firstImage)
-      return firstImage
-    }
+    return detail.productVariant.images[0]?.url
   }
 
   // Default placeholder
-  const placeholder = 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
-  console.log('⚠️ Using placeholder image:', placeholder)
-  return placeholder
+  return 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
 }
 
 const getVariantSize = (detail: CartDetail) => {
-  console.log('📏 Getting variant size for detail:', detail.id)
-
-  // ✅ Lấy từ cache variant đã fetch
+  // Từ cache variant đã fetch
   const variantInfo = variantCache.value.get(detail.productVariantId)
   if (variantInfo?.size) {
-    console.log('✅ Found size from API cache:', variantInfo.size)
     return variantInfo.size
   }
 
-  // Fallback - từ data có sẵn trong cart
+  // Fallback từ data có sẵn trong cart
   if (detail.productVariant?.size) {
-    console.log('✅ Found size from populated data:', detail.productVariant.size)
     return detail.productVariant.size
   }
 
-  console.log('⚠️ No size found, returning N/A')
   return 'N/A'
 }
 
 const getVariantColor = (detail: CartDetail) => {
-  console.log('🎨 Getting variant color for detail:', detail.id)
-
-  // ✅ Lấy từ cache variant đã fetch
+  // Từ cache variant đã fetch
   const variantInfo = variantCache.value.get(detail.productVariantId)
 
   // Support cả colorName và color.name
   if (variantInfo?.colorName) {
-    console.log('✅ Found colorName from API cache:', variantInfo.colorName)
     return variantInfo.colorName
   }
 
   if (variantInfo?.color?.name) {
-    console.log('✅ Found color.name from API cache:', variantInfo.color.name)
     return variantInfo.color.name
   }
 
-  // Fallback logic...
-  console.log('⚠️ No color found, returning N/A')
+  // Fallback từ data có sẵn trong cart
+  if (detail.productVariant?.color?.name) {
+    return detail.productVariant.color.name
+  }
+
+  if (detail.productVariant?.colorName) {
+    return detail.productVariant.colorName
+  }
+
   return 'N/A'
 }
 
@@ -778,38 +874,42 @@ input[type='number'] {
   transform: scale(1.05);
 }
 
-/* Gradient text utilities */
-.bg-clip-text {
-  -webkit-background-clip: text;
-  background-clip: text;
+/* Price display styles */
+.line-through {
+  text-decoration: line-through;
 }
 
-/* Enhanced shadows */
-.shadow-2xl {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+/* Badge styles */
+.bg-red-100 {
+  background-color: #fee2e2;
 }
 
-/* Cart summary fixed positioning on mobile */
+.text-red-800 {
+  color: #991b1b;
+}
+
+.bg-green-100 {
+  background-color: #dcfce7;
+}
+
+.text-green-600 {
+  color: #16a34a;
+}
+
+/* Responsive design */
 @media (max-width: 1024px) {
-  .cart-summary-fixed {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    margin: 0;
-    border-radius: 0;
-    border-top: 3px solid #f43f5e;
+  .grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 }
 
-/* Button animation group hover */
-.group:hover .group-hover\:translate-x-full {
-  transform: translateX(100%);
-}
+@media (max-width: 768px) {
+  .col-span-5 {
+    grid-column: span 6 / span 6;
+  }
 
-/* ✅ Cursor pointer cho clickable elements */
-.cursor-pointer {
-  cursor: pointer;
+  .col-span-2 {
+    grid-column: span 3 / span 3;
+  }
 }
 </style>

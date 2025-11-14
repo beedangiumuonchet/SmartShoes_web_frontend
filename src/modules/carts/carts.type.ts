@@ -16,6 +16,7 @@ export interface CartDetail {
   productVariantId: string
   quantity: number
   price: number
+  priceSale: number
   subtotal: number
   createdAt: string
   updatedAt?: string

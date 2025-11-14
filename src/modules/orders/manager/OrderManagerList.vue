@@ -643,7 +643,7 @@
                           Cập nhật trạng thái
                         </button>
                         <button
-                          v-if="order.status === 'PENDING'"
+                          v-if="['PENDING', 'PAID', 'CONFIRMED'].includes(order.status)"
                           @click="cancelOrderAction(order.id)"
                           class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                         >
@@ -1317,22 +1317,37 @@ const cancelOrderAction = async (orderId: string): Promise<void> => {
       return
     }
 
-    // ✅ Kiểm tra trạng thái có thể hủy
-    if (order.status !== 'PENDING') {
-      showError('Chỉ có thể hủy đơn hàng ở trạng thái "Chờ xác nhận"')
+    // ✅ CẬP NHẬT: Kiểm tra trạng thái có thể hủy - PENDING, PAID, CONFIRMED
+    const cancellableStatuses = ['PENDING', 'PAID', 'CONFIRMED']
+    if (!cancellableStatuses.includes(order.status)) {
+      showError(
+        'Chỉ có thể hủy đơn hàng ở trạng thái "Chờ xác nhận", "Đã thanh toán", hoặc "Đã xác nhận"',
+      )
       return
     }
 
-    if (!confirm(`Bạn có chắc chắn muốn hủy đơn hàng ${order.id}?`)) {
+    const statusLabels: Record<string, string> = {
+      PENDING: 'Chờ xác nhận',
+      PAID: 'Đã thanh toán',
+      CONFIRMED: 'Đã xác nhận',
+    }
+
+    const currentStatusLabel = statusLabels[order.status] || order.status
+
+    if (
+      !confirm(
+        `Bạn có chắc chắn muốn hủy đơn hàng ${order.id}?\nTrạng thái hiện tại: ${currentStatusLabel}`,
+      )
+    ) {
       return
     }
 
-    console.log('🚫 Cancelling order:', orderId)
+    console.log('🚫 Cancelling order:', orderId, 'with status:', order.status)
 
-    await cancelOrder(orderId) // ✅ Gọi API với orderId
+    await cancelOrder(orderId)
     showSuccess('Hủy đơn hàng thành công')
 
-    activeOrderMenu.value = null // ✅ Đóng menu
+    activeOrderMenu.value = null
     await loadOrders() // Reload data từ BE
   } catch (error: any) {
     console.error('❌ Error cancelling order:', error)

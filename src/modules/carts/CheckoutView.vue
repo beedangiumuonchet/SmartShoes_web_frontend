@@ -810,7 +810,7 @@ const loadCheckoutData = async () => {
       productImage: getProductImage(detail),
       size: getVariantSize(detail),
       color: getVariantColor(detail),
-      price: detail.price,
+      price: detail.priceSale,
       quantity: detail.quantity,
       subtotal: detail.subtotal,
     }))
