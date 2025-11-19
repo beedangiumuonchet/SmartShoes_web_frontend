@@ -191,6 +191,11 @@ const navigationItems = ref<NavigationMenuItem[][]>([
           icon: 'i-heroicons-tag',
         },
         {
+          label: 'Màu sắc', // ✅ THÊM MỚI
+          to: '/manager/colors', // ✅ Route đến trang quản lý màu
+          icon: 'i-heroicons-swatch', // ✅ Icon màu sắc
+        },
+        {
           label: 'Thuộc tính',
           to: '/manager/attributes',
           icon: 'i-heroicons-adjustments-horizontal',
