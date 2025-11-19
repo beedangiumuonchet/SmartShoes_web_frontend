@@ -1,4 +1,3 @@
-// filepath: [BrandManagerList.vue](http://_vscodecontentref_/0)
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header Section -->
@@ -6,8 +5,8 @@
       <div class="px-6 py-4">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">Quản lý thương hiệu</h1>
-            <p class="text-gray-600 mt-1">Quản lý tất cả thương hiệu sản phẩm trong hệ thống</p>
+            <h1 class="text-2xl font-bold text-gray-900">Quản lý thuộc tính</h1>
+            <p class="text-gray-600 mt-1">Quản lý tất cả thuộc tính sản phẩm trong hệ thống</p>
           </div>
           <div class="flex items-center space-x-3">
             <!-- Refresh Button -->
@@ -32,7 +31,7 @@
               Làm mới
             </button>
 
-            <!-- Add Brand Button -->
+            <!-- Add Attribute Button -->
             <button
               @click="openCreateModal"
               class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -45,7 +44,7 @@
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-              Thêm thương hiệu
+              Thêm thuộc tính
             </button>
           </div>
         </div>
@@ -78,7 +77,7 @@
                 v-model="searchQuery"
                 type="text"
                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Tìm kiếm theo tên thương hiệu..."
+                placeholder="Tìm kiếm theo key, value, mô tả..."
                 @input="debouncedSearch"
               />
             </div>
@@ -105,11 +104,11 @@
 
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
-          <div class="bg-blue-50 rounded-lg p-4 stats-card">
+          <div class="bg-cyan-50 rounded-lg p-4 stats-card">
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <svg
-                  class="w-8 h-8 text-blue-600"
+                  class="w-8 h-8 text-cyan-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -118,13 +117,13 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"
                   />
                 </svg>
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-blue-600">Tổng thương hiệu</p>
-                <p class="text-2xl font-bold text-blue-900">{{ totalBrands }}</p>
+                <p class="text-sm font-medium text-cyan-600">Tổng thuộc tính</p>
+                <p class="text-2xl font-bold text-cyan-900">{{ totalAttributes }}</p>
               </div>
             </div>
           </div>
@@ -148,16 +147,16 @@
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-green-600">Đang hiển thị</p>
-                <p class="text-2xl font-bold text-green-900">{{ filteredBrands.length }}</p>
+                <p class="text-2xl font-bold text-green-900">{{ filteredAttributes.length }}</p>
               </div>
             </div>
           </div>
 
-          <div class="bg-purple-50 rounded-lg p-4 stats-card">
+          <div class="bg-orange-50 rounded-lg p-4 stats-card">
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <svg
-                  class="w-8 h-8 text-purple-600"
+                  class="w-8 h-8 text-orange-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -171,8 +170,8 @@
                 </svg>
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-purple-600">Mới thêm hôm nay</p>
-                <p class="text-2xl font-bold text-purple-900">{{ todayAdded }}</p>
+                <p class="text-sm font-medium text-orange-600">Mới thêm hôm nay</p>
+                <p class="text-2xl font-bold text-orange-900">{{ todayAdded }}</p>
               </div>
             </div>
           </div>
@@ -180,14 +179,14 @@
       </div>
     </div>
 
-    <!-- Brands Table -->
+    <!-- Attributes Table -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900">
-            Danh sách thương hiệu
+            Danh sách thuộc tính
             <span class="text-sm font-normal text-gray-500 ml-2">
-              ({{ filteredBrands.length }} kết quả)
+              ({{ filteredAttributes.length }} kết quả)
             </span>
           </h2>
         </div>
@@ -214,7 +213,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="!filteredBrands.length" class="p-12 text-center">
+      <div v-else-if="!filteredAttributes.length" class="p-12 text-center">
         <svg
           class="w-12 h-12 text-gray-400 mx-auto mb-4"
           fill="none"
@@ -225,15 +224,15 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"
           />
         </svg>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Không có thương hiệu nào</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Không có thuộc tính nào</h3>
         <p class="text-gray-600 mb-4">
           {{
             searchQuery
-              ? 'Không tìm thấy thương hiệu phù hợp với từ khóa tìm kiếm.'
-              : 'Chưa có thương hiệu nào trong hệ thống.'
+              ? 'Không tìm thấy thuộc tính phù hợp với từ khóa tìm kiếm.'
+              : 'Chưa có thuộc tính nào trong hệ thống.'
           }}
         </p>
         <button
@@ -249,13 +248,13 @@
               d="M12 6v6m0 0v6m0-6h6m-6 0H6"
             />
           </svg>
-          Thêm thương hiệu đầu tiên
+          Thêm thuộc tính đầu tiên
         </button>
       </div>
 
-      <!-- Brands Grid/Table -->
+      <!-- Attributes Grid/Table -->
       <div v-else class="overflow-x-auto">
-        <!-- Grid View for desktop -->
+        <!-- Table View for desktop -->
         <div class="hidden md:block">
           <table class="w-full">
             <thead class="bg-gray-50">
@@ -264,15 +263,15 @@
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   <button
-                    @click="handleSort('name')"
+                    @click="handleSort('key')"
                     class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
                   >
-                    <span>Tên thương hiệu</span>
+                    <span>Key</span>
                     <div class="flex flex-col">
                       <svg
                         :class="[
                           'w-3 h-3 transition-colors',
-                          sortConfig.field === 'name' && sortConfig.direction === 'asc'
+                          sortConfig.field === 'key' && sortConfig.direction === 'asc'
                             ? 'text-indigo-600'
                             : 'text-gray-400',
                         ]"
@@ -288,7 +287,51 @@
                       <svg
                         :class="[
                           'w-3 h-3 -mt-1 transition-colors',
-                          sortConfig.field === 'name' && sortConfig.direction === 'desc'
+                          sortConfig.field === 'key' && sortConfig.direction === 'desc'
+                            ? 'text-indigo-600'
+                            : 'text-gray-400',
+                        ]"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </button>
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  <button
+                    @click="handleSort('value')"
+                    class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
+                  >
+                    <span>Value</span>
+                    <div class="flex flex-col">
+                      <svg
+                        :class="[
+                          'w-3 h-3 transition-colors',
+                          sortConfig.field === 'value' && sortConfig.direction === 'asc'
+                            ? 'text-indigo-600'
+                            : 'text-gray-400',
+                        ]"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <svg
+                        :class="[
+                          'w-3 h-3 -mt-1 transition-colors',
+                          sortConfig.field === 'value' && sortConfig.direction === 'desc'
                             ? 'text-indigo-600'
                             : 'text-gray-400',
                         ]"
@@ -323,49 +366,60 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr
-                v-for="brand in paginatedBrands"
-                :key="brand.id"
+                v-for="attribute in paginatedAttributes"
+                :key="attribute.id"
                 class="hover:bg-gray-50 transition-colors duration-200"
               >
-                <!-- Brand Name -->
+                <!-- Key Column -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
                       <div
-                        class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
+                        class="h-10 w-10 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center"
                       >
                         <span class="text-sm font-medium text-white">
-                          {{ brand.name.substring(0, 2).toUpperCase() }}
+                          {{ attribute.key.substring(0, 2).toUpperCase() }}
                         </span>
                       </div>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ brand.name }}</div>
-                      <div class="text-sm text-gray-500">Thương hiệu</div>
+                      <div class="text-sm font-medium text-gray-900">{{ attribute.key }}</div>
+                      <div class="text-sm text-gray-500">Thuộc tính key</div>
                     </div>
                   </div>
                 </td>
 
-                <!-- Description -->
+                <!-- Value Column -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                    >
+                      {{ attribute.value }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Description Column -->
                 <td class="px-6 py-4">
                   <div class="text-sm text-gray-900 max-w-xs">
-                    <div v-if="brand.description" class="truncate">
-                      {{ brand.description }}
+                    <div v-if="attribute.description" class="truncate">
+                      {{ attribute.description }}
                     </div>
                     <div v-else class="text-gray-500 italic">Không có mô tả</div>
                   </div>
                 </td>
 
-                <!-- ID -->
+                <!-- ID Column -->
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ brand.id }}</code>
+                  <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ attribute.id }}</code>
                 </td>
 
-                <!-- Actions -->
+                <!-- Actions Column -->
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="relative inline-block text-left">
                     <button
-                      @click="toggleActionMenu(brand.id)"
+                      @click="toggleActionMenu(attribute.id)"
                       class="text-gray-400 hover:text-gray-600 focus:outline-none"
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,12 +433,12 @@
                     </button>
 
                     <div
-                      v-if="activeActionMenu === brand.id"
+                      v-if="activeActionMenu === attribute.id"
                       class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
                     >
                       <div class="py-1">
                         <button
-                          @click="openEditModal(brand)"
+                          @click="openEditModal(attribute)"
                           class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
                           <svg
@@ -403,7 +457,7 @@
                           Chỉnh sửa
                         </button>
                         <button
-                          @click="confirmDelete(brand)"
+                          @click="confirmDelete(attribute)"
                           class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                         >
                           <svg
@@ -433,25 +487,28 @@
         <!-- Card View for mobile -->
         <div class="md:hidden p-4 space-y-4">
           <div
-            v-for="brand in paginatedBrands"
-            :key="brand.id"
+            v-for="attribute in paginatedAttributes"
+            :key="attribute.id"
             class="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-3">
                 <div
-                  class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
+                  class="h-10 w-10 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center"
                 >
                   <span class="text-sm font-medium text-white">
-                    {{ brand.name.substring(0, 2).toUpperCase() }}
+                    {{ attribute.key.substring(0, 2).toUpperCase() }}
                   </span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-medium text-gray-900">{{ brand.name }}</h3>
-                  <p class="text-xs text-gray-500">ID: {{ brand.id }}</p>
+                  <h3 class="text-sm font-medium text-gray-900">{{ attribute.key }}</h3>
+                  <p class="text-xs text-gray-500">ID: {{ attribute.id }}</p>
                 </div>
               </div>
-              <button @click="toggleActionMenu(brand.id)" class="text-gray-400 hover:text-gray-600">
+              <button
+                @click="toggleActionMenu(attribute.id)"
+                class="text-gray-400 hover:text-gray-600"
+              >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round"
@@ -463,17 +520,26 @@
               </button>
             </div>
 
-            <div v-if="brand.description" class="text-sm text-gray-600">
-              {{ brand.description }}
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-500">Value:</span>
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+              >
+                {{ attribute.value }}
+              </span>
+            </div>
+
+            <div v-if="attribute.description" class="text-sm text-gray-600">
+              {{ attribute.description }}
             </div>
             <div v-else class="text-sm text-gray-500 italic">Không có mô tả</div>
 
             <div
-              v-if="activeActionMenu === brand.id"
+              v-if="activeActionMenu === attribute.id"
               class="flex space-x-2 pt-2 border-t border-gray-200"
             >
               <button
-                @click="openEditModal(brand)"
+                @click="openEditModal(attribute)"
                 class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -487,7 +553,7 @@
                 Sửa
               </button>
               <button
-                @click="confirmDelete(brand)"
+                @click="confirmDelete(attribute)"
                 class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100"
               >
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -506,12 +572,15 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="filteredBrands.length > itemsPerPage" class="px-6 py-4 border-t border-gray-200">
+      <div
+        v-if="filteredAttributes.length > itemsPerPage"
+        class="px-6 py-4 border-t border-gray-200"
+      >
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-700">
             Hiển thị {{ (currentPage - 1) * itemsPerPage + 1 }} -
-            {{ Math.min(currentPage * itemsPerPage, filteredBrands.length) }}
-            trong tổng số {{ filteredBrands.length }} kết quả
+            {{ Math.min(currentPage * itemsPerPage, filteredAttributes.length) }}
+            trong tổng số {{ filteredAttributes.length }} kết quả
           </div>
 
           <div class="flex items-center space-x-2">
@@ -537,7 +606,7 @@
       </div>
     </div>
 
-    <!-- Create/Edit Brand Modal -->
+    <!-- Create/Edit Attribute Modal -->
     <div
       v-if="showModal"
       class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
@@ -548,7 +617,7 @@
         <div class="mt-3">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900">
-              {{ isEditMode ? 'Chỉnh sửa thương hiệu' : 'Thêm thương hiệu mới' }}
+              {{ isEditMode ? 'Chỉnh sửa thuộc tính' : 'Thêm thuộc tính mới' }}
             </h3>
             <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -563,28 +632,42 @@
           </div>
 
           <form @submit.prevent="handleSubmit" class="space-y-4">
-            <!-- Brand Name -->
+            <!-- Key Field -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Tên thương hiệu <span class="text-red-500">*</span>
+                Key <span class="text-red-500">*</span>
               </label>
               <input
-                v-model="form.name"
+                v-model="form.key"
                 type="text"
                 required
                 class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Nhập tên thương hiệu..."
+                placeholder="Nhập key thuộc tính (VD: size, color, material...)"
               />
             </div>
 
-            <!-- Description -->
+            <!-- Value Field -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Value <span class="text-red-500">*</span>
+              </label>
+              <input
+                v-model="form.value"
+                type="text"
+                required
+                class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Nhập value thuộc tính (VD: XL, Đỏ, Da thật...)"
+              />
+            </div>
+
+            <!-- Description Field -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2"> Mô tả </label>
               <textarea
                 v-model="form.description"
                 rows="3"
                 class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Nhập mô tả thương hiệu..."
+                placeholder="Nhập mô tả chi tiết về thuộc tính..."
               ></textarea>
             </div>
 
@@ -639,8 +722,9 @@
 
           <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">Xác nhận xóa</h3>
           <p class="text-gray-600 text-center mb-6">
-            Bạn có chắc chắn muốn xóa thương hiệu
-            <strong class="text-gray-900">{{ brandToDelete?.name }}</strong
+            Bạn có chắc chắn muốn xóa thuộc tính
+            <strong class="text-gray-900"
+              >{{ attributeToDelete?.key }}:{{ attributeToDelete?.value }}</strong
             >? Hành động này không thể hoàn tác.
           </p>
 
@@ -785,8 +869,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
-import { getAllBrandsApi, createBrandApi, updateBrandApi, deleteBrandApi } from '../brand.api'
-import type { Brand, BrandForm } from '../brand.type'
+import {
+  getAllAttributesApi,
+  createAttributeApi,
+  updateAttributeApi,
+  deleteAttributeApi,
+} from '../attribute.api'
+import type { Attribute, AttributeForm } from '../attribute.type'
 
 // ✅ Custom debounce function
 function debounce<T extends (...args: any[]) => any>(
@@ -808,12 +897,12 @@ const submitting = ref(false)
 const deleting = ref(false)
 
 // Data
-const brands = ref<Brand[]>([])
+const attributes = ref<Attribute[]>([])
 
 // Search & Filter
 const searchQuery = ref('')
 const sortConfig = reactive({
-  field: 'name',
+  field: 'key',
   direction: 'asc' as 'asc' | 'desc',
 })
 
@@ -824,17 +913,18 @@ const itemsPerPage = ref(10)
 // Modals
 const showModal = ref(false)
 const isEditMode = ref(false)
-const selectedBrand = ref<Brand | null>(null)
+const selectedAttribute = ref<Attribute | null>(null)
 
 const showDeleteModal = ref(false)
-const brandToDelete = ref<Brand | null>(null)
+const attributeToDelete = ref<Attribute | null>(null)
 
 // UI State
 const activeActionMenu = ref<string | null>(null)
 
-// ✅ FIXED: Form data - BỎ type annotation reactive<BrandForm>
+// Form data
 const form = reactive({
-  name: '',
+  key: '',
+  value: '',
   description: '',
 })
 
@@ -847,7 +937,7 @@ const errorMessage = ref('')
 // ================================
 // COMPUTED PROPERTIES
 // ================================
-const totalBrands = computed(() => brands.value.length)
+const totalAttributes = computed(() => attributes.value.length)
 
 const todayAdded = computed(() => {
   // For demo purposes, return a static number
@@ -855,24 +945,25 @@ const todayAdded = computed(() => {
   return Math.floor(Math.random() * 5)
 })
 
-const filteredBrands = computed(() => {
-  let result = [...brands.value]
+const filteredAttributes = computed(() => {
+  let result = [...attributes.value]
 
   // Search filter
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim()
     result = result.filter(
-      (brand) =>
-        brand.name.toLowerCase().includes(query) ||
-        (brand.description && brand.description.toLowerCase().includes(query)) ||
-        brand.id.toLowerCase().includes(query),
+      (attribute) =>
+        attribute.key.toLowerCase().includes(query) ||
+        attribute.value.toLowerCase().includes(query) ||
+        (attribute.description && attribute.description.toLowerCase().includes(query)) ||
+        attribute.id.toLowerCase().includes(query),
     )
   }
 
   // Sorting
   result.sort((a, b) => {
-    let aValue = a[sortConfig.field as keyof Brand] || ''
-    let bValue = b[sortConfig.field as keyof Brand] || ''
+    let aValue = a[sortConfig.field as keyof Attribute] || ''
+    let bValue = b[sortConfig.field as keyof Attribute] || ''
 
     if (typeof aValue === 'string') aValue = aValue.toLowerCase()
     if (typeof bValue === 'string') bValue = bValue.toLowerCase()
@@ -887,12 +978,12 @@ const filteredBrands = computed(() => {
   return result
 })
 
-const totalPages = computed(() => Math.ceil(filteredBrands.value.length / itemsPerPage.value))
+const totalPages = computed(() => Math.ceil(filteredAttributes.value.length / itemsPerPage.value))
 
-const paginatedBrands = computed(() => {
+const paginatedAttributes = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
-  return filteredBrands.value.slice(start, end)
+  return filteredAttributes.value.slice(start, end)
 })
 
 // ================================
@@ -917,27 +1008,38 @@ const showError = (message: string) => {
 // ================================
 // API METHODS
 // ================================
-const loadBrands = async (): Promise<void> => {
+const loadAttributes = async (): Promise<void> => {
   try {
     loading.value = true
-    console.log('🔄 Loading brands from API...')
+    console.log('🔄 Loading attributes from API...')
 
-    const response = await getAllBrandsApi()
-    brands.value = response || []
+    const response = await getAllAttributesApi()
 
-    console.log('✅ Brands loaded successfully:', response)
+    // Handle different response structures
+    if (response && Array.isArray(response)) {
+      attributes.value = response
+    } else if (response && response.content && Array.isArray(response.content)) {
+      attributes.value = response.content
+    } else if (response && response.data && Array.isArray(response.data)) {
+      attributes.value = response.data
+    } else {
+      attributes.value = []
+    }
+
+    console.log('✅ Attributes loaded successfully:', attributes.value.length, 'items')
     activeActionMenu.value = null
   } catch (error: any) {
-    console.error('❌ Error loading brands:', error)
-    showError('Không thể tải danh sách thương hiệu. Vui lòng thử lại.')
+    console.error('❌ Error loading attributes:', error)
+    showError('Không thể tải danh sách thuộc tính. Vui lòng thử lại.')
+    attributes.value = []
   } finally {
     loading.value = false
   }
 }
 
 const refreshData = (): void => {
-  console.log('🔄 Refreshing brand data...')
-  loadBrands()
+  console.log('🔄 Refreshing attribute data...')
+  loadAttributes()
 }
 
 // ================================
@@ -997,19 +1099,21 @@ const nextPage = (): void => {
 const openCreateModal = (): void => {
   console.log('➕ Opening create modal')
   isEditMode.value = false
-  selectedBrand.value = null
-  form.name = ''
+  selectedAttribute.value = null
+  form.key = ''
+  form.value = ''
   form.description = ''
   showModal.value = true
   activeActionMenu.value = null
 }
 
-const openEditModal = (brand: Brand): void => {
-  console.log('✏️ Opening edit modal for brand:', brand.id)
+const openEditModal = (attribute: Attribute): void => {
+  console.log('✏️ Opening edit modal for attribute:', attribute.id)
   isEditMode.value = true
-  selectedBrand.value = brand
-  form.name = brand.name
-  form.description = brand.description || ''
+  selectedAttribute.value = attribute
+  form.key = attribute.key
+  form.value = attribute.value
+  form.description = attribute.description || ''
   showModal.value = true
   activeActionMenu.value = null
 }
@@ -1018,8 +1122,9 @@ const closeModal = (): void => {
   console.log('❌ Closing modal')
   showModal.value = false
   isEditMode.value = false
-  selectedBrand.value = null
-  form.name = ''
+  selectedAttribute.value = null
+  form.key = ''
+  form.value = ''
   form.description = ''
 }
 
@@ -1030,28 +1135,68 @@ const handleSubmit = async (): Promise<void> => {
   try {
     submitting.value = true
 
-    // ✅ SỬA: Tạo object thay vì dùng BrandForm constructor
-    const brandData = {
-      name: form.name.trim(),
+    // Validate form
+    if (!form.key.trim()) {
+      showError('Vui lòng nhập key thuộc tính')
+      return
+    }
+
+    if (!form.value.trim()) {
+      showError('Vui lòng nhập value thuộc tính')
+      return
+    }
+
+    // ✅ SỬA: Tạo object thay vì dùng AttributeForm constructor
+    const attributeData = {
+      key: form.key.trim(),
+      value: form.value.trim(),
       description: form.description?.trim() || undefined,
     }
 
-    if (isEditMode.value && selectedBrand.value) {
-      console.log('✏️ Updating brand:', selectedBrand.value.id, brandData)
-      await updateBrandApi(selectedBrand.value.id, brandData)
-      showSuccess('Cập nhật thương hiệu thành công')
+    if (isEditMode.value && selectedAttribute.value) {
+      console.log('✏️ Updating attribute:', selectedAttribute.value.id, attributeData)
+
+      const response = await updateAttributeApi(selectedAttribute.value.id, attributeData)
+      console.log('✅ Update response:', response)
+
+      showSuccess('Cập nhật thuộc tính thành công')
     } else {
-      console.log('➕ Creating new brand:', brandData)
-      await createBrandApi(brandData)
-      showSuccess('Thêm thương hiệu mới thành công')
+      console.log('➕ Creating new attribute:', attributeData)
+
+      // Check if attribute already exists
+      const existingAttribute = attributes.value.find(
+        (attr) => attr.key === attributeData.key && attr.value === attributeData.value,
+      )
+
+      if (existingAttribute) {
+        showError('Thuộc tính với key và value này đã tồn tại')
+        return
+      }
+
+      const response = await createAttributeApi(attributeData)
+      console.log('✅ Create response:', response)
+
+      showSuccess('Thêm thuộc tính mới thành công')
     }
 
     closeModal()
-    await loadBrands() // Reload data
+    await loadAttributes() // Reload data
   } catch (error: any) {
     console.error('❌ Error submitting form:', error)
     const action = isEditMode.value ? 'cập nhật' : 'thêm'
-    showError(`Không thể ${action} thương hiệu: ${error?.message || 'Có lỗi xảy ra'}`)
+
+    // Handle specific error messages
+    let errorMsg = `Không thể ${action} thuộc tính`
+
+    if (error?.response?.data?.message) {
+      errorMsg += `: ${error.response.data.message}`
+    } else if (error?.message) {
+      errorMsg += `: ${error.message}`
+    } else {
+      errorMsg += ': Có lỗi xảy ra'
+    }
+
+    showError(errorMsg)
   } finally {
     submitting.value = false
   }
@@ -1060,9 +1205,9 @@ const handleSubmit = async (): Promise<void> => {
 // ================================
 // DELETE METHODS
 // ================================
-const confirmDelete = (brand: Brand): void => {
-  console.log('🗑️ Confirm delete brand:', brand.id)
-  brandToDelete.value = brand
+const confirmDelete = (attribute: Attribute): void => {
+  console.log('🗑️ Confirm delete attribute:', attribute.id)
+  attributeToDelete.value = attribute
   showDeleteModal.value = true
   activeActionMenu.value = null
 }
@@ -1070,24 +1215,37 @@ const confirmDelete = (brand: Brand): void => {
 const closeDeleteModal = (): void => {
   console.log('❌ Closing delete modal')
   showDeleteModal.value = false
-  brandToDelete.value = null
+  attributeToDelete.value = null
 }
 
 const handleDelete = async (): Promise<void> => {
-  if (!brandToDelete.value) return
+  if (!attributeToDelete.value) return
 
   try {
     deleting.value = true
-    console.log('🗑️ Deleting brand:', brandToDelete.value.id)
+    console.log('🗑️ Deleting attribute:', attributeToDelete.value.id)
 
-    await deleteBrandApi(brandToDelete.value.id)
-    showSuccess('Xóa thương hiệu thành công')
+    const response = await deleteAttributeApi(attributeToDelete.value.id)
+    console.log('✅ Delete response:', response)
+
+    showSuccess('Xóa thuộc tính thành công')
 
     closeDeleteModal()
-    await loadBrands() // Reload data
+    await loadAttributes() // Reload data
   } catch (error: any) {
-    console.error('❌ Error deleting brand:', error)
-    showError(`Không thể xóa thương hiệu: ${error?.message || 'Có lỗi xảy ra'}`)
+    console.error('❌ Error deleting attribute:', error)
+
+    let errorMsg = 'Không thể xóa thuộc tính'
+
+    if (error?.response?.data?.message) {
+      errorMsg += `: ${error.response.data.message}`
+    } else if (error?.message) {
+      errorMsg += `: ${error.message}`
+    } else {
+      errorMsg += ': Có lỗi xảy ra'
+    }
+
+    showError(errorMsg)
   } finally {
     deleting.value = false
   }
@@ -1096,8 +1254,8 @@ const handleDelete = async (): Promise<void> => {
 // ================================
 // UI INTERACTION METHODS
 // ================================
-const toggleActionMenu = (brandId: string): void => {
-  activeActionMenu.value = activeActionMenu.value === brandId ? null : brandId
+const toggleActionMenu = (attributeId: string): void => {
+  activeActionMenu.value = activeActionMenu.value === attributeId ? null : attributeId
 }
 
 // ================================
@@ -1113,14 +1271,20 @@ const handleClickOutside = (event: Event): void => {
 // ================================
 // LIFECYCLE HOOKS
 // ================================
-onMounted(() => {
-  console.log('🚀 BrandManagerList component mounted')
-  loadBrands()
+onMounted(async () => {
+  console.log('🚀 AttributeManagerList component mounted')
+
+  try {
+    await loadAttributes()
+  } catch (error) {
+    console.error('❌ Error during initial data load:', error)
+  }
+
   document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
-  console.log('💀 BrandManagerList component unmounted')
+  console.log('💀 AttributeManagerList component unmounted')
   document.removeEventListener('click', handleClickOutside)
 })
 </script>

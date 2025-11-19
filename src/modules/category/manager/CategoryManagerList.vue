@@ -1,4 +1,3 @@
-// filepath: [BrandManagerList.vue](http://_vscodecontentref_/0)
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header Section -->
@@ -6,8 +5,8 @@
       <div class="px-6 py-4">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">Quản lý thương hiệu</h1>
-            <p class="text-gray-600 mt-1">Quản lý tất cả thương hiệu sản phẩm trong hệ thống</p>
+            <h1 class="text-2xl font-bold text-gray-900">Quản lý danh mục</h1>
+            <p class="text-gray-600 mt-1">Quản lý tất cả danh mục sản phẩm trong hệ thống</p>
           </div>
           <div class="flex items-center space-x-3">
             <!-- Refresh Button -->
@@ -32,7 +31,7 @@
               Làm mới
             </button>
 
-            <!-- Add Brand Button -->
+            <!-- Add Category Button -->
             <button
               @click="openCreateModal"
               class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -45,7 +44,7 @@
                   d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
-              Thêm thương hiệu
+              Thêm danh mục
             </button>
           </div>
         </div>
@@ -78,7 +77,7 @@
                 v-model="searchQuery"
                 type="text"
                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Tìm kiếm theo tên thương hiệu..."
+                placeholder="Tìm kiếm theo tên danh mục..."
                 @input="debouncedSearch"
               />
             </div>
@@ -118,13 +117,13 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                   />
                 </svg>
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-blue-600">Tổng thương hiệu</p>
-                <p class="text-2xl font-bold text-blue-900">{{ totalBrands }}</p>
+                <p class="text-sm font-medium text-blue-600">Tổng danh mục</p>
+                <p class="text-2xl font-bold text-blue-900">{{ totalCategories }}</p>
               </div>
             </div>
           </div>
@@ -148,7 +147,7 @@
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-green-600">Đang hiển thị</p>
-                <p class="text-2xl font-bold text-green-900">{{ filteredBrands.length }}</p>
+                <p class="text-2xl font-bold text-green-900">{{ filteredCategories.length }}</p>
               </div>
             </div>
           </div>
@@ -180,14 +179,14 @@
       </div>
     </div>
 
-    <!-- Brands Table -->
+    <!-- Categories Table -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
       <div class="px-6 py-4 border-b border-gray-200">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold text-gray-900">
-            Danh sách thương hiệu
+            Danh sách danh mục
             <span class="text-sm font-normal text-gray-500 ml-2">
-              ({{ filteredBrands.length }} kết quả)
+              ({{ filteredCategories.length }} kết quả)
             </span>
           </h2>
         </div>
@@ -214,7 +213,7 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="!filteredBrands.length" class="p-12 text-center">
+      <div v-else-if="!filteredCategories.length" class="p-12 text-center">
         <svg
           class="w-12 h-12 text-gray-400 mx-auto mb-4"
           fill="none"
@@ -225,15 +224,15 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
           />
         </svg>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Không có thương hiệu nào</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Không có danh mục nào</h3>
         <p class="text-gray-600 mb-4">
           {{
             searchQuery
-              ? 'Không tìm thấy thương hiệu phù hợp với từ khóa tìm kiếm.'
-              : 'Chưa có thương hiệu nào trong hệ thống.'
+              ? 'Không tìm thấy danh mục phù hợp với từ khóa tìm kiếm.'
+              : 'Chưa có danh mục nào trong hệ thống.'
           }}
         </p>
         <button
@@ -249,11 +248,11 @@
               d="M12 6v6m0 0v6m0-6h6m-6 0H6"
             />
           </svg>
-          Thêm thương hiệu đầu tiên
+          Thêm danh mục đầu tiên
         </button>
       </div>
 
-      <!-- Brands Grid/Table -->
+      <!-- Categories Grid/Table -->
       <div v-else class="overflow-x-auto">
         <!-- Grid View for desktop -->
         <div class="hidden md:block">
@@ -267,7 +266,7 @@
                     @click="handleSort('name')"
                     class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
                   >
-                    <span>Tên thương hiệu</span>
+                    <span>Tên danh mục</span>
                     <div class="flex flex-col">
                       <svg
                         :class="[
@@ -323,25 +322,25 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr
-                v-for="brand in paginatedBrands"
-                :key="brand.id"
+                v-for="category in paginatedCategories"
+                :key="category.id"
                 class="hover:bg-gray-50 transition-colors duration-200"
               >
-                <!-- Brand Name -->
+                <!-- Category Name -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
                       <div
-                        class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
+                        class="h-10 w-10 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center"
                       >
                         <span class="text-sm font-medium text-white">
-                          {{ brand.name.substring(0, 2).toUpperCase() }}
+                          {{ category.name.substring(0, 2).toUpperCase() }}
                         </span>
                       </div>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ brand.name }}</div>
-                      <div class="text-sm text-gray-500">Thương hiệu</div>
+                      <div class="text-sm font-medium text-gray-900">{{ category.name }}</div>
+                      <div class="text-sm text-gray-500">Danh mục</div>
                     </div>
                   </div>
                 </td>
@@ -349,8 +348,8 @@
                 <!-- Description -->
                 <td class="px-6 py-4">
                   <div class="text-sm text-gray-900 max-w-xs">
-                    <div v-if="brand.description" class="truncate">
-                      {{ brand.description }}
+                    <div v-if="category.description" class="truncate">
+                      {{ category.description }}
                     </div>
                     <div v-else class="text-gray-500 italic">Không có mô tả</div>
                   </div>
@@ -358,14 +357,14 @@
 
                 <!-- ID -->
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ brand.id }}</code>
+                  <code class="bg-gray-100 px-2 py-1 rounded text-xs">{{ category.id }}</code>
                 </td>
 
                 <!-- Actions -->
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="relative inline-block text-left">
                     <button
-                      @click="toggleActionMenu(brand.id)"
+                      @click="toggleActionMenu(category.id)"
                       class="text-gray-400 hover:text-gray-600 focus:outline-none"
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,12 +378,12 @@
                     </button>
 
                     <div
-                      v-if="activeActionMenu === brand.id"
+                      v-if="activeActionMenu === category.id"
                       class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
                     >
                       <div class="py-1">
                         <button
-                          @click="openEditModal(brand)"
+                          @click="openEditModal(category)"
                           class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
                           <svg
@@ -403,7 +402,7 @@
                           Chỉnh sửa
                         </button>
                         <button
-                          @click="confirmDelete(brand)"
+                          @click="confirmDelete(category)"
                           class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                         >
                           <svg
@@ -433,25 +432,28 @@
         <!-- Card View for mobile -->
         <div class="md:hidden p-4 space-y-4">
           <div
-            v-for="brand in paginatedBrands"
-            :key="brand.id"
+            v-for="category in paginatedCategories"
+            :key="category.id"
             class="bg-white border border-gray-200 rounded-lg p-4 space-y-3"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-3">
                 <div
-                  class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
+                  class="h-10 w-10 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center"
                 >
                   <span class="text-sm font-medium text-white">
-                    {{ brand.name.substring(0, 2).toUpperCase() }}
+                    {{ category.name.substring(0, 2).toUpperCase() }}
                   </span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-medium text-gray-900">{{ brand.name }}</h3>
-                  <p class="text-xs text-gray-500">ID: {{ brand.id }}</p>
+                  <h3 class="text-sm font-medium text-gray-900">{{ category.name }}</h3>
+                  <p class="text-xs text-gray-500">ID: {{ category.id }}</p>
                 </div>
               </div>
-              <button @click="toggleActionMenu(brand.id)" class="text-gray-400 hover:text-gray-600">
+              <button
+                @click="toggleActionMenu(category.id)"
+                class="text-gray-400 hover:text-gray-600"
+              >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round"
@@ -463,17 +465,17 @@
               </button>
             </div>
 
-            <div v-if="brand.description" class="text-sm text-gray-600">
-              {{ brand.description }}
+            <div v-if="category.description" class="text-sm text-gray-600">
+              {{ category.description }}
             </div>
             <div v-else class="text-sm text-gray-500 italic">Không có mô tả</div>
 
             <div
-              v-if="activeActionMenu === brand.id"
+              v-if="activeActionMenu === category.id"
               class="flex space-x-2 pt-2 border-t border-gray-200"
             >
               <button
-                @click="openEditModal(brand)"
+                @click="openEditModal(category)"
                 class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -487,7 +489,7 @@
                 Sửa
               </button>
               <button
-                @click="confirmDelete(brand)"
+                @click="confirmDelete(category)"
                 class="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100"
               >
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -506,12 +508,15 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="filteredBrands.length > itemsPerPage" class="px-6 py-4 border-t border-gray-200">
+      <div
+        v-if="filteredCategories.length > itemsPerPage"
+        class="px-6 py-4 border-t border-gray-200"
+      >
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-700">
             Hiển thị {{ (currentPage - 1) * itemsPerPage + 1 }} -
-            {{ Math.min(currentPage * itemsPerPage, filteredBrands.length) }}
-            trong tổng số {{ filteredBrands.length }} kết quả
+            {{ Math.min(currentPage * itemsPerPage, filteredCategories.length) }}
+            trong tổng số {{ filteredCategories.length }} kết quả
           </div>
 
           <div class="flex items-center space-x-2">
@@ -537,7 +542,7 @@
       </div>
     </div>
 
-    <!-- Create/Edit Brand Modal -->
+    <!-- Create/Edit Category Modal -->
     <div
       v-if="showModal"
       class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
@@ -548,7 +553,7 @@
         <div class="mt-3">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900">
-              {{ isEditMode ? 'Chỉnh sửa thương hiệu' : 'Thêm thương hiệu mới' }}
+              {{ isEditMode ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}
             </h3>
             <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -563,17 +568,17 @@
           </div>
 
           <form @submit.prevent="handleSubmit" class="space-y-4">
-            <!-- Brand Name -->
+            <!-- Category Name -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Tên thương hiệu <span class="text-red-500">*</span>
+                Tên danh mục <span class="text-red-500">*</span>
               </label>
               <input
                 v-model="form.name"
                 type="text"
                 required
                 class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Nhập tên thương hiệu..."
+                placeholder="Nhập tên danh mục..."
               />
             </div>
 
@@ -584,7 +589,7 @@
                 v-model="form.description"
                 rows="3"
                 class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Nhập mô tả thương hiệu..."
+                placeholder="Nhập mô tả danh mục..."
               ></textarea>
             </div>
 
@@ -639,8 +644,8 @@
 
           <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">Xác nhận xóa</h3>
           <p class="text-gray-600 text-center mb-6">
-            Bạn có chắc chắn muốn xóa thương hiệu
-            <strong class="text-gray-900">{{ brandToDelete?.name }}</strong
+            Bạn có chắc chắn muốn xóa danh mục
+            <strong class="text-gray-900">{{ categoryToDelete?.name }}</strong
             >? Hành động này không thể hoàn tác.
           </p>
 
@@ -785,8 +790,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
-import { getAllBrandsApi, createBrandApi, updateBrandApi, deleteBrandApi } from '../brand.api'
-import type { Brand, BrandForm } from '../brand.type'
+import {
+  getAllCategoriesApi,
+  createCategoryApi,
+  updateCategoryApi,
+  deleteCategoryApi,
+} from '../category.api'
+import type { Category, CategoryForm } from '../category.type'
 
 // ✅ Custom debounce function
 function debounce<T extends (...args: any[]) => any>(
@@ -808,7 +818,7 @@ const submitting = ref(false)
 const deleting = ref(false)
 
 // Data
-const brands = ref<Brand[]>([])
+const categories = ref<Category[]>([])
 
 // Search & Filter
 const searchQuery = ref('')
@@ -824,15 +834,15 @@ const itemsPerPage = ref(10)
 // Modals
 const showModal = ref(false)
 const isEditMode = ref(false)
-const selectedBrand = ref<Brand | null>(null)
+const selectedCategory = ref<Category | null>(null)
 
 const showDeleteModal = ref(false)
-const brandToDelete = ref<Brand | null>(null)
+const categoryToDelete = ref<Category | null>(null)
 
 // UI State
 const activeActionMenu = ref<string | null>(null)
 
-// ✅ FIXED: Form data - BỎ type annotation reactive<BrandForm>
+// ✅ FIXED: Form data - BỎ type annotation reactive<CategoryForm>
 const form = reactive({
   name: '',
   description: '',
@@ -847,7 +857,7 @@ const errorMessage = ref('')
 // ================================
 // COMPUTED PROPERTIES
 // ================================
-const totalBrands = computed(() => brands.value.length)
+const totalCategories = computed(() => categories.value.length)
 
 const todayAdded = computed(() => {
   // For demo purposes, return a static number
@@ -855,24 +865,24 @@ const todayAdded = computed(() => {
   return Math.floor(Math.random() * 5)
 })
 
-const filteredBrands = computed(() => {
-  let result = [...brands.value]
+const filteredCategories = computed(() => {
+  let result = [...categories.value]
 
   // Search filter
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase().trim()
     result = result.filter(
-      (brand) =>
-        brand.name.toLowerCase().includes(query) ||
-        (brand.description && brand.description.toLowerCase().includes(query)) ||
-        brand.id.toLowerCase().includes(query),
+      (category) =>
+        category.name.toLowerCase().includes(query) ||
+        (category.description && category.description.toLowerCase().includes(query)) ||
+        category.id.toLowerCase().includes(query),
     )
   }
 
   // Sorting
   result.sort((a, b) => {
-    let aValue = a[sortConfig.field as keyof Brand] || ''
-    let bValue = b[sortConfig.field as keyof Brand] || ''
+    let aValue = a[sortConfig.field as keyof Category] || ''
+    let bValue = b[sortConfig.field as keyof Category] || ''
 
     if (typeof aValue === 'string') aValue = aValue.toLowerCase()
     if (typeof bValue === 'string') bValue = bValue.toLowerCase()
@@ -887,12 +897,12 @@ const filteredBrands = computed(() => {
   return result
 })
 
-const totalPages = computed(() => Math.ceil(filteredBrands.value.length / itemsPerPage.value))
+const totalPages = computed(() => Math.ceil(filteredCategories.value.length / itemsPerPage.value))
 
-const paginatedBrands = computed(() => {
+const paginatedCategories = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
-  return filteredBrands.value.slice(start, end)
+  return filteredCategories.value.slice(start, end)
 })
 
 // ================================
@@ -917,27 +927,27 @@ const showError = (message: string) => {
 // ================================
 // API METHODS
 // ================================
-const loadBrands = async (): Promise<void> => {
+const loadCategories = async (): Promise<void> => {
   try {
     loading.value = true
-    console.log('🔄 Loading brands from API...')
+    console.log('🔄 Loading categories from API...')
 
-    const response = await getAllBrandsApi()
-    brands.value = response || []
+    const response = await getAllCategoriesApi()
+    categories.value = response || []
 
-    console.log('✅ Brands loaded successfully:', response)
+    console.log('✅ Categories loaded successfully:', response)
     activeActionMenu.value = null
   } catch (error: any) {
-    console.error('❌ Error loading brands:', error)
-    showError('Không thể tải danh sách thương hiệu. Vui lòng thử lại.')
+    console.error('❌ Error loading categories:', error)
+    showError('Không thể tải danh sách danh mục. Vui lòng thử lại.')
   } finally {
     loading.value = false
   }
 }
 
 const refreshData = (): void => {
-  console.log('🔄 Refreshing brand data...')
-  loadBrands()
+  console.log('🔄 Refreshing category data...')
+  loadCategories()
 }
 
 // ================================
@@ -997,19 +1007,19 @@ const nextPage = (): void => {
 const openCreateModal = (): void => {
   console.log('➕ Opening create modal')
   isEditMode.value = false
-  selectedBrand.value = null
+  selectedCategory.value = null
   form.name = ''
   form.description = ''
   showModal.value = true
   activeActionMenu.value = null
 }
 
-const openEditModal = (brand: Brand): void => {
-  console.log('✏️ Opening edit modal for brand:', brand.id)
+const openEditModal = (category: Category): void => {
+  console.log('✏️ Opening edit modal for category:', category.id)
   isEditMode.value = true
-  selectedBrand.value = brand
-  form.name = brand.name
-  form.description = brand.description || ''
+  selectedCategory.value = category
+  form.name = category.name
+  form.description = category.description || ''
   showModal.value = true
   activeActionMenu.value = null
 }
@@ -1018,7 +1028,7 @@ const closeModal = (): void => {
   console.log('❌ Closing modal')
   showModal.value = false
   isEditMode.value = false
-  selectedBrand.value = null
+  selectedCategory.value = null
   form.name = ''
   form.description = ''
 }
@@ -1030,28 +1040,28 @@ const handleSubmit = async (): Promise<void> => {
   try {
     submitting.value = true
 
-    // ✅ SỬA: Tạo object thay vì dùng BrandForm constructor
-    const brandData = {
+    // ✅ SỬA: Tạo object thay vì dùng CategoryForm constructor
+    const categoryData = {
       name: form.name.trim(),
       description: form.description?.trim() || undefined,
     }
 
-    if (isEditMode.value && selectedBrand.value) {
-      console.log('✏️ Updating brand:', selectedBrand.value.id, brandData)
-      await updateBrandApi(selectedBrand.value.id, brandData)
-      showSuccess('Cập nhật thương hiệu thành công')
+    if (isEditMode.value && selectedCategory.value) {
+      console.log('✏️ Updating category:', selectedCategory.value.id, categoryData)
+      await updateCategoryApi(selectedCategory.value.id, categoryData)
+      showSuccess('Cập nhật danh mục thành công')
     } else {
-      console.log('➕ Creating new brand:', brandData)
-      await createBrandApi(brandData)
-      showSuccess('Thêm thương hiệu mới thành công')
+      console.log('➕ Creating new category:', categoryData)
+      await createCategoryApi(categoryData)
+      showSuccess('Thêm danh mục mới thành công')
     }
 
     closeModal()
-    await loadBrands() // Reload data
+    await loadCategories() // Reload data
   } catch (error: any) {
     console.error('❌ Error submitting form:', error)
     const action = isEditMode.value ? 'cập nhật' : 'thêm'
-    showError(`Không thể ${action} thương hiệu: ${error?.message || 'Có lỗi xảy ra'}`)
+    showError(`Không thể ${action} danh mục: ${error?.message || 'Có lỗi xảy ra'}`)
   } finally {
     submitting.value = false
   }
@@ -1060,9 +1070,9 @@ const handleSubmit = async (): Promise<void> => {
 // ================================
 // DELETE METHODS
 // ================================
-const confirmDelete = (brand: Brand): void => {
-  console.log('🗑️ Confirm delete brand:', brand.id)
-  brandToDelete.value = brand
+const confirmDelete = (category: Category): void => {
+  console.log('🗑️ Confirm delete category:', category.id)
+  categoryToDelete.value = category
   showDeleteModal.value = true
   activeActionMenu.value = null
 }
@@ -1070,24 +1080,24 @@ const confirmDelete = (brand: Brand): void => {
 const closeDeleteModal = (): void => {
   console.log('❌ Closing delete modal')
   showDeleteModal.value = false
-  brandToDelete.value = null
+  categoryToDelete.value = null
 }
 
 const handleDelete = async (): Promise<void> => {
-  if (!brandToDelete.value) return
+  if (!categoryToDelete.value) return
 
   try {
     deleting.value = true
-    console.log('🗑️ Deleting brand:', brandToDelete.value.id)
+    console.log('🗑️ Deleting category:', categoryToDelete.value.id)
 
-    await deleteBrandApi(brandToDelete.value.id)
-    showSuccess('Xóa thương hiệu thành công')
+    await deleteCategoryApi(categoryToDelete.value.id)
+    showSuccess('Xóa danh mục thành công')
 
     closeDeleteModal()
-    await loadBrands() // Reload data
+    await loadCategories() // Reload data
   } catch (error: any) {
-    console.error('❌ Error deleting brand:', error)
-    showError(`Không thể xóa thương hiệu: ${error?.message || 'Có lỗi xảy ra'}`)
+    console.error('❌ Error deleting category:', error)
+    showError(`Không thể xóa danh mục: ${error?.message || 'Có lỗi xảy ra'}`)
   } finally {
     deleting.value = false
   }
@@ -1096,8 +1106,8 @@ const handleDelete = async (): Promise<void> => {
 // ================================
 // UI INTERACTION METHODS
 // ================================
-const toggleActionMenu = (brandId: string): void => {
-  activeActionMenu.value = activeActionMenu.value === brandId ? null : brandId
+const toggleActionMenu = (categoryId: string): void => {
+  activeActionMenu.value = activeActionMenu.value === categoryId ? null : categoryId
 }
 
 // ================================
@@ -1114,13 +1124,13 @@ const handleClickOutside = (event: Event): void => {
 // LIFECYCLE HOOKS
 // ================================
 onMounted(() => {
-  console.log('🚀 BrandManagerList component mounted')
-  loadBrands()
+  console.log('🚀 CategoryManagerList component mounted')
+  loadCategories()
   document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
-  console.log('💀 BrandManagerList component unmounted')
+  console.log('💀 CategoryManagerList component unmounted')
   document.removeEventListener('click', handleClickOutside)
 })
 </script>

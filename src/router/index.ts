@@ -11,6 +11,9 @@ import { ordersManagerRoutes } from '@/modules/orders/orders.manager.routes'
 import { productManagerRoutes } from '@/modules/products/product.manager.routes'
 import { reviewsRoutes } from '@/modules/reviews/reviews.routes'
 import { brandManagerRoutes } from '@/modules/brand/brand.manager.routes'
+import { categoryManagerRoutes } from '@/modules/category/category.manager.routes'
+import { colorManagerRoutes } from '@/modules/color/color.manager.routes'
+import { attributeManagerRoutes } from '@/modules/attribute/attribute.manager.routes'
 //import { paymentsRoutes } from '@/modules/payments/payments.routes'
 
 const router = createRouter({
@@ -26,6 +29,9 @@ const router = createRouter({
     ...productManagerRoutes,
     ...reviewsRoutes,
     ...brandManagerRoutes,
+    ...categoryManagerRoutes,
+    ...colorManagerRoutes,
+    ...attributeManagerRoutes,
     //...paymentsRoutes,
 
     ...routes,
