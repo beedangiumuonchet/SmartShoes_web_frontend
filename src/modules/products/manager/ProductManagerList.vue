@@ -127,18 +127,16 @@
     <!-- Stock -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Tồn kho</label>
-      <div class="flex flex-col gap-1">
-        <label class="flex items-center gap-2 text-sm">
-          <input type="radio" value="" v-model="filters.inStock" /> Tất cả
-        </label>
-        <label class="flex items-center gap-2 text-sm">
-          <input type="radio" :value="true" v-model="filters.inStock" /> Còn hàng
-        </label>
-        <label class="flex items-center gap-2 text-sm">
-          <input type="radio" :value="false" v-model="filters.inStock" /> Hết hàng
-        </label>
-      </div>
+      <select
+        v-model="filters.inStock"
+        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      >
+        <option value="">Tất cả</option>
+        <option :value="true">Còn hàng</option>
+        <option :value="false">Hết hàng</option>
+      </select>
     </div>
+
 
     <!-- Ngày tạo từ -->
     <div>
@@ -638,7 +636,7 @@
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="text-xs text-gray-600">Kích cỡ</label>
-              <input v-model="variant.size" class="w-full border rounded px-2 py-1" />
+              <input v-model="variant.size" class="w-full border rounded px-2 py-1" :disabled="isEdit" />
             </div>
 
             <div>
@@ -655,7 +653,7 @@
           <!-- Màu -->
           <div class="mt-3">
             <label class="text-xs text-gray-600">Màu</label>
-            <select v-model="variant.colorId" class="w-full border rounded px-2 py-1">
+            <select v-model="variant.colorId" class="w-full border rounded px-2 py-1" :disabled="isEdit">
               <option value="">Chọn màu</option>
               <option v-for="color in colors" :key="color.id" :value="color.id">{{ color.name }}</option>
             </select>
@@ -663,33 +661,45 @@
 
           <!-- Ảnh -->
           <div class="mt-3">
-            <div class="flex justify-between items-center mb-2">
-              <label class="text-xs text-gray-600">Ảnh</label>
-              <button @click="addImage(vIdx)" class="text-blue-600 text-xs">+ Thêm ảnh</button>
-            </div>
-            <div v-for="(img, iIdx) in variant.images" :key="iIdx" class="flex gap-2 items-center mb-1">
-  <!-- Hiển thị ảnh preview nếu có -->
-  <img v-if="img.url" :src="img.url" alt="Preview" class="w-12 h-12 rounded object-cover border" />
+  <div class="flex justify-between items-center mb-2">
+    <label class="text-xs text-gray-600">Ảnh</label>
+    <button @click="addImage(vIdx)" class="text-blue-600 text-xs">+ Thêm ảnh</button>
+  </div>
 
-  <!-- Input chọn file -->
-  <input type="file" accept="image/*" @change="onFileSelect($event, vIdx, iIdx)" class="text-xs" />
+  <div
+    v-for="(img, iIdx) in variant.images"
+    :key="iIdx"
+    class="flex gap-3 items-center mb-2"
+  >
+    <!-- Preview -->
+    <img
+      v-if="img.url"
+      :src="img.url"
+      class="w-12 h-12 rounded object-cover border"
+    />
 
-  <!-- Hoặc nhập thủ công -->
-  <input
-    v-model="img.url"
-    placeholder="Hoặc dán link ảnh..."
-    class="flex-1 border rounded px-2 py-1 text-xs"
-  />
+    <!-- File input -->
+    <input
+      type="file"
+      accept="image/*"
+      @change="onFileSelect($event, vIdx, iIdx)"
+      class="text-xs"
+    />
 
-  <label class="flex items-center gap-1 text-xs">
-    <input type="checkbox" v-model="img.isMain" />
-    Ảnh chính
-  </label>
+    <!-- Ảnh chính -->
+    <label class="flex items-center gap-1 text-xs">
+      <input
+        type="checkbox"
+        v-model="img.isMain"
+        @change="setMainImage(vIdx)"
+      />
+      Ảnh chính
+    </label>
 
-  <button @click="removeImage(vIdx, iIdx)" class="text-red-500 text-xs">✕</button>
+    <button @click="removeImage(vIdx, iIdx)" class="text-red-500 text-xs">✕</button>
+  </div>
 </div>
 
-          </div>
         </div>
       </div>
 
@@ -732,6 +742,7 @@ import { AxiosHttpClient } from '@/common/utils/axios'
 import { getAllColorsApi, createColorApi } from '@/modules/color/color.api'
 import { getAllAttributesApi, createAttributeApi } from '@/modules/attribute/attribute.api'
 import { uploadImageApi } from '../../upfile/upfile.api' 
+import { id } from '@nuxt/ui/runtime/locale/index.js'
 
 /* --------- state --------- */
 const products = ref<Product[]>([])
@@ -913,7 +924,7 @@ const onFileSelect = async (event, vIdx, iIdx) => {
   try {
     // Gọi API upload
     const res = await uploadImageApi(file)
-    const url = res?.data || res // tùy backend bạn trả BaseResponse hay string
+    const url = res.result // tùy backend bạn trả BaseResponse hay string
 
     // Gán URL nhận được vào variant.images
     form.value.variants[vIdx].images[iIdx].url = url
@@ -967,6 +978,11 @@ const fetchProducts = async () => {
     if (filters.value.maxPrice) params.maxPrice = filters.value.maxPrice
     if (filters.value.inStock !== undefined) params.inStock = filters.value.inStock
 
+      if (filters.value.brandId) {
+        await fetchProductsByBrand()
+        return
+      }
+
     const res = await getAllProductsApi(params)
     const { content, pageObj } = normalizeGetProductsResponse(res)
     
@@ -995,6 +1011,83 @@ const fetchFilters = async () => {
     console.error('Lỗi tải bộ lọc:', err)
   }
 }
+
+const fetchProductsByBrand = async () => {
+  try {
+    const params: Record<string, any> = {}
+
+    if (filters.value.q) params.q = filters.value.q
+    if (filters.value.categoryId) params.categoryId = filters.value.categoryId
+    if (filters.value.sortBy) params.sortBy = filters.value.sortBy
+
+    if (filters.value.page !== undefined) params.page = filters.value.page
+    if (filters.value.size !== undefined) params.size = filters.value.size
+
+    // optional filters
+    if (filters.value.status) params.status = filters.value.status
+    if (filters.value.minPrice) params.minPrice = filters.value.minPrice
+    if (filters.value.maxPrice) params.maxPrice = filters.value.maxPrice
+    if (filters.value.inStock !== undefined) params.inStock = filters.value.inStock
+
+    // === Gọi API theo brand theo đúng chuẩn getAll ===
+    const res = await getProductsByBrandApi(filters.value.brandId!, params)
+
+    const { content, pageObj } = normalizeGetProductsResponse(res)
+
+    products.value = content
+    pagination.value = {
+      page: pageObj.page ?? 0,
+      size: pageObj.size ?? filters.value.size ?? 10,
+      totalElements: pageObj.totalElements ?? content.length,
+      totalPages: pageObj.totalPages ?? 1,
+      hasNext: pageObj.hasNext ?? false,
+      hasPrevious: pageObj.hasPrevious ?? false,
+    }
+  } catch (err) {
+    console.error("Lỗi tải sản phẩm theo brand:", err)
+    products.value = []
+  }
+}
+
+const fetchProductsByCategory = async () => {
+  try {
+    const params: Record<string, any> = {}
+
+    if (filters.value.q) params.q = filters.value.q
+    if (filters.value.brandId) params.brandId = filters.value.brandId
+    if (filters.value.sortBy) params.sortBy = filters.value.sortBy
+
+    if (filters.value.page !== undefined) params.page = filters.value.page
+    if (filters.value.size !== undefined) params.size = filters.value.size
+
+    // optional filters
+    if (filters.value.status) params.status = filters.value.status
+    if (filters.value.minPrice) params.minPrice = filters.value.minPrice
+    if (filters.value.maxPrice) params.maxPrice = filters.value.maxPrice
+    if (filters.value.inStock !== undefined) params.inStock = filters.value.inStock
+
+    // === Gọi API theo category theo đúng chuẩn getAll ===
+    const res = await getProductsByCategoryApi(filters.value.categoryId!, params)
+
+    const { content, pageObj } = normalizeGetProductsResponse(res)
+
+    products.value = content
+    pagination.value = {
+      page: pageObj.page ?? 0,
+      size: pageObj.size ?? filters.value.size ?? 10,
+      totalElements: pageObj.totalElements ?? content.length,
+      totalPages: pageObj.totalPages ?? 1,
+      hasNext: pageObj.hasNext ?? false,
+      hasPrevious: pageObj.hasPrevious ?? false,
+    }
+  } catch (err) {
+    console.error("Lỗi tải sản phẩm theo category:", err)
+    products.value = []
+  }
+}
+
+
+
 
 const sortedProducts = computed(() => {
   if (!sortColumn.value) return products.value
@@ -1043,14 +1136,43 @@ const toggleSort = (column: string) => {
 
 /* --------- image helper (main image) --------- */
 const getMainImage = (product: Product) => {
-  const mainImageUrl =
-    product.variants?.flatMap((v) => v.images ?? [])?.find((i) => i.isMain)?.url ||
-    product.variants?.[0]?.images?.[0]?.url ||
+  const variants = product.variants || []
+
+  if (variants.length === 0) {
+    return 'https://via.placeholder.com/200x200?text=No+Image'
+  }
+
+  // 1. Tìm variant có ID nhỏ nhất
+  const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+
+  // 2. Tìm ảnh isMain trong variant nhỏ nhất
+  let selectedImage =
+    smallestVariant.images?.find((img: any) => img.isMain) ||
+    smallestVariant.images?.[0] ||
     null
-  if (!mainImageUrl) return 'https://via.placeholder.com/200x200?text=No+Image'
-  const match = mainImageUrl.match(/\/d\/([^/]+)/)
-  return match ? `http://localhost:8080/api/v1/images/${match[1]}` : mainImageUrl
+
+  // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
+  if (!selectedImage) {
+    const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
+    if (variantWithImage) {
+      selectedImage =
+        variantWithImage.images.find((img: any) => img.isMain) ||
+        variantWithImage.images[0]
+    }
+  }
+
+  // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
+  if (!selectedImage?.url) {
+    return 'https://via.placeholder.com/200x200?text=No+Image'
+  }
+
+  const url = selectedImage.url
+
+  // 5. Convert Google Drive link → direct link (giống code cũ)
+  const match = url.match(/\/d\/([^/]+)/)
+  return match ? `http://localhost:8080/api/v1/images/${match[1]}` : url
 }
+
 
 /* --------- format helpers --------- */
 const formatPrice = (price: number) =>
@@ -1111,6 +1233,7 @@ const openEditModal = (product: Product) => {
       }
     })),
     variants: (product.variants ?? []).map(v => ({
+      id: v.id ?? null,
       size: v.size ?? '',
       price: v.price ?? 0,
       stock: v.stock ?? 0,
@@ -1141,6 +1264,8 @@ const deleteProductApi = async (id: string) => {
 
 const save = async () => {
   try {
+
+    console.log('💾 Dữ liệu gửi lên backend:', JSON.stringify(form.value, null, 2));
     // 🔹 Kiểm tra dữ liệu bắt buộc
     if (!form.value.name.trim()) {
       alert('Vui lòng nhập tên sản phẩm!')
@@ -1165,6 +1290,7 @@ const save = async () => {
       // đảm bảo có ít nhất 1 ảnh chính
       setMainImage(v)
       return {
+        id: v.id || null,
         size: v.size,
         price: Number(v.price) || 0,
         stock: Number(v.stock) || 0,
@@ -1283,6 +1409,27 @@ watch(
   },
   { deep: true }
 )
+
+watch(() => filters.value.brandId, async (newBrandId) => {
+  if (!newBrandId) {
+    // Nếu chọn "Tất cả"
+    await fetchProducts()
+    return
+  }
+
+  await fetchProductsByBrand()
+})
+
+watch(() => filters.value.categoryId, async (newCategoryId) => {
+  if (!newCategoryId) {
+    // Nếu chọn "Tất cả"
+    await fetchProducts()
+    return
+  }
+
+  await fetchProductsByCategory()
+})
+
 
 </script>
 
