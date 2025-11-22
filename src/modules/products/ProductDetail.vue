@@ -27,31 +27,32 @@
       </div>
     </div> -->
     <!-- Left: Images -->
-<div>
-  <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-    <img
-      :src="selectedImage"
-      alt="Product Image"
-      class="w-full h-[500px] object-cover transition-transform duration-500 hover:scale-105"
-    />
-  </div>
+    <div>
+      <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+        <img
+          :src="selectedImage"
+          alt="Product Image"
+          class="w-full h-[500px] object-cover transition-transform duration-500 hover:scale-105"
+        />
+      </div>
 
-  <!-- Danh sách ảnh thumbnail -->
-  <div class="flex gap-3 mt-4 justify-center flex-wrap">
-    <img
-      v-for="(img, i) in displayedImages"
-      :key="i"
-      :src="getDirectImageUrl(img.url)"
-      :alt="'image-' + i"
-      @click="selectedImage = getDirectImageUrl(img.url)"
-      class="w-20 h-20 rounded-xl object-cover cursor-pointer border transition-all duration-300"
-      :class="selectedImage === getDirectImageUrl(img.url)
-        ? 'border-blue-500 scale-105'
-        : 'border-gray-200 hover:scale-105'"
-    />
-  </div>
-</div>
-
+      <!-- Danh sách ảnh thumbnail -->
+      <div class="flex gap-3 mt-4 justify-center flex-wrap">
+        <img
+          v-for="(img, i) in displayedImages"
+          :key="i"
+          :src="getDirectImageUrl(img.url)"
+          :alt="'image-' + i"
+          @click="selectedImage = getDirectImageUrl(img.url)"
+          class="w-20 h-20 rounded-xl object-cover cursor-pointer border transition-all duration-300"
+          :class="
+            selectedImage === getDirectImageUrl(img.url)
+              ? 'border-blue-500 scale-105'
+              : 'border-gray-200 hover:scale-105'
+          "
+        />
+      </div>
+    </div>
 
     <!-- Right: Info -->
     <div>
@@ -78,7 +79,9 @@
         >
           {{ product.category.name }}
         </RouterLink>
-        <span v-else>{{ product.category?.name || product.categoryName || 'Không rõ phân loại' }}</span>
+        <span v-else>{{
+          product.category?.name || product.categoryName || 'Không rõ phân loại'
+        }}</span>
       </p>
 
       <!-- Giá và tồn kho -->
@@ -89,26 +92,20 @@
         <span class="text-gray-500 text-sm">Còn lại: {{ currentVariant.stock }}</span>
       </div> -->
       <div v-if="currentVariant" class="flex items-center space-x-3 mb-6">
-  <span class="text-3xl font-bold text-blue-600">
-    {{ formatPrice(currentVariant.priceSale ?? currentVariant.price) }}
-  </span>
+        <span class="text-3xl font-bold text-blue-600">
+          {{ formatPrice(currentVariant.priceSale ?? currentVariant.price) }}
+        </span>
 
-  <span
-    v-if="isOnSale"
-    class="text-gray-500 line-through text-lg"
-  >
-    {{ formatPrice(currentVariant.price) }} 
-  </span>
+        <span v-if="isOnSale" class="text-gray-500 line-through text-lg">
+          {{ formatPrice(currentVariant.price) }}
+        </span>
 
-  <span
-    v-if="isOnSale"
-    class="text-red-500 font-semibold text-sm"
-  >
-    -{{ salePercent }}%
-  </span>
+        <span v-if="isOnSale" class="text-red-500 font-semibold text-sm">
+          -{{ salePercent }}%
+        </span>
 
-  <span class="text-gray-500 text-sm ml-2">Còn lại: {{ currentVariant.stock }}</span>
-</div>
+        <span class="text-gray-500 text-sm ml-2">Còn lại: {{ currentVariant.stock }}</span>
+      </div>
       <div v-else class="text-gray-500 mb-6 italic">
         Vui lòng chọn đủ size và màu để xem chi tiết sản phẩm.
       </div>
@@ -118,21 +115,21 @@
         <h3 class="font-semibold text-gray-800 mb-2">Chọn size</h3>
         <div class="flex flex-wrap gap-2">
           <button
-              v-for="size in allSizes"
-              :key="size"
-              @click="selectSize(size)"
-              :disabled="!availableSizes.includes(size)"
-              class="px-4 py-2 rounded-lg border transition-all duration-200"
-              :class="selectedSize === size
+            v-for="size in allSizes"
+            :key="size"
+            @click="selectSize(size)"
+            :disabled="!availableSizes.includes(size)"
+            class="px-4 py-2 rounded-lg border transition-all duration-200"
+            :class="
+              selectedSize === size
                 ? 'bg-blue-600 text-white border-blue-600'
                 : !availableSizes.includes(size)
                   ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-              "
-            >
-              {{ size }}
+            "
+          >
+            {{ size }}
           </button>
-
         </div>
       </div>
 
@@ -146,16 +143,16 @@
             @click="selectColor(color)"
             :disabled="!availableColors.includes(color)"
             class="px-4 py-2 rounded-lg border transition-all duration-200"
-            :class="selectedColor === color
-              ? 'bg-blue-600 text-white border-blue-600'
-              : !availableColors.includes(color)
-                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+            :class="
+              selectedColor === color
+                ? 'bg-blue-600 text-white border-blue-600'
+                : !availableColors.includes(color)
+                  ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
             "
           >
             {{ color }}
           </button>
-
         </div>
       </div>
 
@@ -283,7 +280,244 @@
       </div>
     </div>
   </div>
+  <!-- ========== REVIEWS SECTION - THÊM MỚI ========== -->
+  <div
+    v-if="product"
+    class="max-w-7xl mx-auto px-4 py-12 border-t border-gray-200"
+    data-reviews-section
+  >
+    <!-- Reviews Header với Star Filter -->
+    <div
+      class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 space-y-4 lg:space-y-0"
+    >
+      <div class="flex items-center space-x-4">
+        <div
+          class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center"
+        >
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+            ></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">Đánh giá sản phẩm</h2>
+          <p class="text-gray-600">
+            {{ filteredReviews.length }} đánh giá
+            <span v-if="selectedStarFilter > 0" class="text-yellow-600">
+              ({{ selectedStarFilter }} sao)
+            </span>
+          </p>
+        </div>
+      </div>
 
+      <!-- Reviews Summary & Star Filter -->
+      <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+        <!-- Star Filter Buttons -->
+        <div class="flex items-center space-x-2">
+          <span class="text-sm font-medium text-gray-600">Lọc:</span>
+          <button
+            @click="filterByStar(0)"
+            :class="
+              selectedStarFilter === 0
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            "
+            class="px-3 py-1 rounded-full text-sm font-medium transition-colors"
+          >
+            Tất cả
+          </button>
+          <button
+            v-for="star in [5, 4, 3, 2, 1]"
+            :key="star"
+            @click="filterByStar(star)"
+            :class="
+              selectedStarFilter === star
+                ? 'bg-yellow-500 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            "
+            class="px-3 py-1 rounded-full text-sm font-medium transition-colors flex items-center space-x-1"
+          >
+            <span>{{ star }}</span>
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Reviews Summary -->
+        <div v-if="reviews.length > 0" class="text-right">
+          <div class="flex items-center justify-end space-x-2 mb-1">
+            <div class="flex">
+              <svg
+                v-for="n in 5"
+                :key="n"
+                class="w-5 h-5"
+                :class="n <= averageRating ? 'text-yellow-400' : 'text-gray-300'"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                />
+              </svg>
+            </div>
+            <span class="text-xl font-bold text-gray-900">{{ averageRating.toFixed(1) }}/5</span>
+          </div>
+          <p class="text-sm text-gray-500">Trung bình từ {{ reviews.length }} đánh giá</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Loading State -->
+    <div v-if="loadingReviews" class="text-center py-12">
+      <div class="inline-flex items-center space-x-2 text-gray-600">
+        <svg class="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        <span>Đang tải đánh giá...</span>
+      </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div v-else-if="paginatedReviews.length > 0" class="space-y-6">
+      <div
+        v-for="review in paginatedReviews"
+        :key="review.id"
+        class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-300"
+      >
+        <!-- Review Header -->
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center space-x-3">
+            <!-- User Avatar -->
+            <div
+              class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center"
+            >
+              <span class="text-white font-semibold text-sm">
+                {{ review.user?.name?.charAt(0).toUpperCase() || 'U' }}
+              </span>
+            </div>
+
+            <!-- User Info -->
+            <div>
+              <p class="font-semibold text-gray-900">
+                {{ review.user?.name || 'Khách hàng' }}
+              </p>
+              <p class="text-sm text-gray-500">
+                {{ formatReviewDate(review.createdAt) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Rating Stars -->
+          <div class="flex items-center space-x-1">
+            <div class="flex">
+              <svg
+                v-for="n in 5"
+                :key="n"
+                class="w-4 h-4"
+                :class="n <= review.rating ? 'text-yellow-400' : 'text-gray-300'"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                />
+              </svg>
+            </div>
+            <span class="ml-2 text-sm font-medium text-gray-700">{{ review.rating }}/5</span>
+          </div>
+        </div>
+
+        <!-- Review Content -->
+        <div class="text-gray-700 leading-relaxed">
+          <p>{{ review.comment }}</p>
+        </div>
+      </div>
+
+      <!-- Reviews Pagination -->
+      <div v-if="totalReviewPages > 1" class="flex items-center justify-center space-x-2 mt-8">
+        <button
+          @click="prevReviewPage"
+          :disabled="currentReviewPage <= 1"
+          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            ></path>
+          </svg>
+        </button>
+
+        <div class="flex space-x-1">
+          <button
+            v-for="page in visibleReviewPages"
+            :key="page"
+            @click="goToReviewPage(page)"
+            :class="
+              page === currentReviewPage
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            "
+            class="px-3 py-2 border border-gray-300 rounded-lg font-medium transition-colors"
+          >
+            {{ page }}
+          </button>
+        </div>
+
+        <button
+          @click="nextReviewPage"
+          :disabled="currentReviewPage >= totalReviewPages"
+          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- No Reviews State -->
+    <div v-else class="text-center py-12">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+          ></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">Chưa có đánh giá nào</h3>
+      <p class="text-gray-600">Sản phẩm này chưa có đánh giá từ khách hàng.</p>
+    </div>
+  </div>
   <div v-else class="text-center py-20 text-gray-500">Đang tải dữ liệu sản phẩm...</div>
 </template>
 
@@ -294,7 +528,9 @@ import { getProductByIdApi, getProductBySlugApi } from './product.api'
 import { getOrCreateUserCart, addCartDetail } from '@/modules/carts/carts.api'
 import { CartDetailRequest } from '@/modules/carts/carts.type'
 import { getCurrentUser } from '@/common/guards/roleGuard.guard'
-
+// Cập nhật import này ở đầu file
+import { formatReviewDate, getReviewsByProduct } from '@/modules/reviews/reviews.api'
+import type { Review } from '@/modules/reviews/reviews.type'
 const route = useRoute()
 const product = ref<any>(null)
 const selectedSize = ref<string | null>(null)
@@ -303,7 +539,109 @@ const selectedImage = ref<string>('')
 const quantity = ref<number>(1)
 const isAddingToCart = ref<boolean>(false)
 const showSuccessMessage = ref<boolean>(false)
+// ========== REVIEWS STATES - THÊM MỚI ==========
+const reviews = ref<Review[]>([])
+const loadingReviews = ref<boolean>(true)
+const currentReviewPage = ref<number>(1)
+const reviewsPerPage = 5
+const selectedStarFilter = ref<number>(0) // 0 = tất cả, 1-5 = filter theo sao
 
+// Reviews Computed
+const averageRating = computed(() => {
+  if (reviews.value.length === 0) return 0
+  const total = reviews.value.reduce((sum, review) => sum + review.rating, 0)
+  return total / reviews.value.length
+})
+
+const filteredReviews = computed(() => {
+  if (selectedStarFilter.value === 0) {
+    return reviews.value
+  }
+  return reviews.value.filter((review) => review.rating === selectedStarFilter.value)
+})
+
+const totalReviewPages = computed(() => Math.ceil(filteredReviews.value.length / reviewsPerPage))
+
+const paginatedReviews = computed(() => {
+  const start = (currentReviewPage.value - 1) * reviewsPerPage
+  const end = start + reviewsPerPage
+  return filteredReviews.value.slice(start, end)
+})
+
+const visibleReviewPages = computed(() => {
+  const total = totalReviewPages.value
+  const current = currentReviewPage.value
+  const range = 2
+
+  let start = Math.max(1, current - range)
+  let end = Math.min(total, current + range)
+
+  if (end - start < 4) {
+    if (start === 1) {
+      end = Math.min(total, start + 4)
+    } else if (end === total) {
+      start = Math.max(1, end - 4)
+    }
+  }
+
+  const pages = []
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+  return pages
+})
+// ========== REVIEWS METHODS - THÊM MỚI ==========
+const loadReviews = async (): Promise<void> => {
+  if (!product.value?.id) return
+
+  try {
+    loadingReviews.value = true
+    console.log('🔄 Loading reviews for product:', product.value.id)
+
+    const response = await getReviewsByProduct(product.value.id, {
+      page: 0,
+      size: 100, // Load nhiều để handle pagination + filter ở frontend
+      sortBy: 'createdAt',
+      sortDirection: 'desc',
+    })
+
+    reviews.value = response.content || []
+    console.log('✅ Reviews loaded:', reviews.value.length, 'reviews')
+  } catch (error) {
+    console.error('❌ Error loading reviews:', error)
+    reviews.value = []
+  } finally {
+    loadingReviews.value = false
+  }
+}
+
+// Star Filter Method
+const filterByStar = (star: number): void => {
+  selectedStarFilter.value = star
+  currentReviewPage.value = 1 // Reset về trang đầu
+  console.log('⭐ Filtering by star:', star === 0 ? 'All' : `${star} stars`)
+}
+
+// Reviews Pagination Methods
+const goToReviewPage = (page: number): void => {
+  currentReviewPage.value = page
+  document.querySelector('[data-reviews-section]')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
+}
+
+const prevReviewPage = (): void => {
+  if (currentReviewPage.value > 1) {
+    goToReviewPage(currentReviewPage.value - 1)
+  }
+}
+
+const nextReviewPage = (): void => {
+  if (currentReviewPage.value < totalReviewPages.value) {
+    goToReviewPage(currentReviewPage.value + 1)
+  }
+}
 const normalize = (str: string) =>
   str
     ?.normalize('NFD')
@@ -312,22 +650,28 @@ const normalize = (str: string) =>
     ?.trim()
 
 const allSizes = computed(() => {
-  const sizes = [...new Set(product.value?.variants?.map(v => v.size) || [])]
-  const allNumeric = sizes.every(s => !isNaN(Number(s)))
-  return allNumeric ? sizes.sort((a, b) => Number(a) - Number(b)) : sizes.sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }))
+  const sizes = [...new Set(product.value?.variants?.map((v) => v.size) || [])]
+  const allNumeric = sizes.every((s) => !isNaN(Number(s)))
+  return allNumeric
+    ? sizes.sort((a, b) => Number(a) - Number(b))
+    : sizes.sort((a, b) => a.localeCompare(b, 'vi', { numeric: true }))
 })
 
-const allColors = computed(() => [...new Set(product.value?.variants?.map(v => v.colorName) || [])])
+const allColors = computed(() => [
+  ...new Set(product.value?.variants?.map((v) => v.colorName) || []),
+])
 
 // Kiểm tra size còn khả dụng với color đã chọn
 const availableSizes = computed(() => {
   if (!product.value?.variants?.length) return []
 
-  return allSizes.value.filter(size => {
+  return allSizes.value.filter((size) => {
     // Tìm variant cùng size và color (nếu đã chọn color)
-    const variants = product.value.variants.filter(v => {
+    const variants = product.value.variants.filter((v) => {
       const matchSize = normalize(v.size) === normalize(size)
-      const matchColor = selectedColor.value ? normalize(v.colorName) === normalize(selectedColor.value) : true
+      const matchColor = selectedColor.value
+        ? normalize(v.colorName) === normalize(selectedColor.value)
+        : true
       const hasStock = v.stock > 0
       return matchSize && matchColor && hasStock
     })
@@ -339,10 +683,12 @@ const availableSizes = computed(() => {
 const availableColors = computed(() => {
   if (!product.value?.variants?.length) return []
 
-  return allColors.value.filter(color => {
-    const variants = product.value.variants.filter(v => {
+  return allColors.value.filter((color) => {
+    const variants = product.value.variants.filter((v) => {
       const matchColor = normalize(v.colorName) === normalize(color)
-      const matchSize = selectedSize.value ? normalize(v.size) === normalize(selectedSize.value) : true
+      const matchSize = selectedSize.value
+        ? normalize(v.size) === normalize(selectedSize.value)
+        : true
       const hasStock = v.stock > 0
       return matchColor && matchSize && hasStock
     })
@@ -358,9 +704,7 @@ const displayedImages = computed(() => {
   }
 
   // Nếu chưa chọn, hiển thị ảnh chính (main images)
-  const mainImgs =
-    product.value?.variants
-      ?.flatMap((v) => v.images?.filter((i) => i.isMain)) || []
+  const mainImgs = product.value?.variants?.flatMap((v) => v.images?.filter((i) => i.isMain)) || []
 
   // Nếu không có ảnh main, fallback ảnh đầu tiên của variant đầu
   if (!mainImgs.length && product.value?.variants?.length) {
@@ -370,9 +714,11 @@ const displayedImages = computed(() => {
   return mainImgs
 })
 
-
 const isOnSale = computed(() => {
-  return currentVariant.value?.priceSale != null && currentVariant.value.priceSale < currentVariant.value.price
+  return (
+    currentVariant.value?.priceSale != null &&
+    currentVariant.value.priceSale < currentVariant.value.price
+  )
 })
 
 const salePercent = computed(() => {
@@ -381,8 +727,6 @@ const salePercent = computed(() => {
   const sale = currentVariant.value?.priceSale ?? 0
   return Math.round(((original - sale) / original) * 100)
 })
-
-
 
 const currentVariant = computed(() => {
   const size = unref(selectedSize)
@@ -405,7 +749,6 @@ const canAddToCart = computed(() => {
     !isAddingToCart.value
   )
 })
-
 
 const selectSize = (size: string) => {
   if (selectedSize.value === size) {
@@ -433,7 +776,6 @@ const selectColor = (color: string) => {
   }
 }
 
-
 const increaseQuantity = () => {
   if (currentVariant.value && quantity.value < currentVariant.value.stock) {
     quantity.value++
@@ -449,7 +791,6 @@ const decreaseQuantity = () => {
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
 
-
 function getDirectImageUrl(driveUrl: string) {
   // Tách ID ảnh từ link Google Drive
   const match = driveUrl?.match(/\/d\/([^/]+)/)
@@ -459,8 +800,6 @@ function getDirectImageUrl(driveUrl: string) {
   // Gọi ảnh qua API backend (nó sẽ tự cache local)
   return `http://localhost:8080/api/v1/images/${driveId}`
 }
-
-
 
 const addToCart = async () => {
   if (!currentVariant.value || !canAddToCart.value) {
@@ -535,7 +874,6 @@ onMounted(async () => {
     const slug = route.params.slug as string
     const res = await getProductBySlugApi(slug)
 
-
     console.log('=== API RESPONSE DEBUG ===')
     console.log('Full response:', res)
     console.log('===========================')
@@ -553,13 +891,14 @@ onMounted(async () => {
     if (product.value?.variants?.length) {
       const firstVariant = product.value.variants.find((v) => v.images?.length)
       selectedImage.value = getDirectImageUrl(
-      firstVariant?.images?.find((i: any) => i.isMain)?.url ||
-      firstVariant?.images?.[0]?.url ||
-      ''
-    )
+        firstVariant?.images?.find((i: any) => i.isMain)?.url ||
+          firstVariant?.images?.[0]?.url ||
+          '',
+      )
 
       console.log('✅ Ảnh sản phẩm đã chọn:', selectedImage.value)
     }
+    await loadReviews()
   } catch (err) {
     console.error('❌ Lỗi tải sản phẩm:', err)
   }
@@ -567,9 +906,8 @@ onMounted(async () => {
 watch(currentVariant, (newVal) => {
   if (newVal?.images?.length) {
     selectedImage.value = getDirectImageUrl(
-      newVal.images.find((i) => i.isMain)?.url || newVal.images[0].url
+      newVal.images.find((i) => i.isMain)?.url || newVal.images[0].url,
     )
   }
 })
-
 </script>
