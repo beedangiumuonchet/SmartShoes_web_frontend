@@ -6,6 +6,8 @@ import type {
   ProductFilter,
   ProductVariantWithProduct,
   ProductVariant,
+  AiSearchRequest,
+  AiSearchResponse,
 } from './product.type'
 import { useCookies } from '@vueuse/integrations/useCookies'
 import { getCurrentUser } from '@/common/guards/roleGuard.guard'
@@ -65,7 +67,7 @@ export const getProductByIdApi = async (id: string) => {
   }
 }
 
-  /**
+/**
  * 🟢 Lấy chi tiết sản phẩm theo SLUG
  */
 export const getProductBySlugApi = async (slug: string) => {
@@ -82,7 +84,6 @@ export const getProductBySlugApi = async (slug: string) => {
     throw error
   }
 }
-
 
 /**
  * 🟢 Lấy chi tiết variant theo ID - NEW API
@@ -221,14 +222,66 @@ export const updateProductApi = async (id: string, formData: Partial<Product>) =
   console.log('Current User:', currentUser)
 
   try {
-    const response = await axiosHttpClient.put<IApiResponse<Product>>(
-      `/products/${id}`,
-      formData
-    )
+    const response = await axiosHttpClient.put<IApiResponse<Product>>(`/products/${id}`, formData)
     console.log('✅ Update product success:', response)
     return response
   } catch (error) {
     console.error('❌ Update product error:', error)
+    throw error
+  }
+}
+/**
+ * 🤖 Tìm kiếm sản phẩm bằng AI
+ * POST /api/products/ai/search
+ */
+export const searchProductsWithAiApi = async (searchRequest: AiSearchRequest) => {
+  console.log('=== AI SEARCH PRODUCTS ===')
+  console.log('Search Request:', searchRequest)
+  console.log('Token exists:', !!cookie.get('jwt_token'))
+  console.log('Full URL:', `${import.meta.env.VITE_API_URL}/products/ai/search`)
+  console.log('===========================')
+
+  // Validate required fields
+  if (!searchRequest.query || searchRequest.query.trim() === '') {
+    throw new Error('Query is required for AI search')
+  }
+
+  // Create clean request object with defaults
+  const cleanRequest: AiSearchRequest = {
+    query: searchRequest.query.trim(),
+    threshold: searchRequest.threshold || 0.3,
+    max_candidates: searchRequest.max_candidates || 10,
+    rerank: searchRequest.rerank !== undefined ? searchRequest.rerank : true,
+  }
+
+  console.log('Clean AI search request:', cleanRequest)
+
+  try {
+    const response = await axiosHttpClient.post<AiSearchResponse>(
+      '/products/ai/search',
+      cleanRequest,
+    )
+
+    console.log('✅ AI search success:', response)
+    console.log('🎯 Search results summary:', {
+      mode: response.mode,
+      resultsCount: response.results?.length || 0,
+      topScore: response.results?.[0]?.score || 0,
+      productIds: response.results?.map((r) => r.product_id) || [],
+    })
+
+    return response
+  } catch (error: any) {
+    console.error('❌ AI search error:', error)
+
+    if (error?.response?.data) {
+      console.error('📍 AI search error details:', {
+        status: error.response.status,
+        data: error.response.data,
+        query: cleanRequest.query,
+      })
+    }
+
     throw error
   }
 }
