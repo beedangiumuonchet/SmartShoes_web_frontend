@@ -47,13 +47,14 @@ export interface ProductVariantWithProduct extends ProductVariant {
 export interface Color {
   id: string
   name: string
-  code: string // Mã màu hex, vd: #FFB6C1
+  // code: string // Mã màu hex, vd: #FFB6C1
 }
 
 export interface ProductImage {
   id: string
   url: string
   isMain: boolean
+  file?: File 
 }
 
 export interface ProductAttribute {
@@ -68,18 +69,41 @@ export interface Attribute {
 }
 
 // ==================== FILTER & PAGINATION ====================
+// export interface ProductFilter {
+//   page?: number
+//   size?: number
+//   q?: string
+//   status?: string
+//   minPrice?: number
+//   maxPrice?: number
+//   inStock?: boolean
+//   sortBy?: string
+//   sortDirection?: 'asc' | 'desc'
+//   [key: string]: any
+// }
+
 export interface ProductFilter {
   page?: number
   size?: number
+
   q?: string
   status?: string
-  minPrice?: number
-  maxPrice?: number
-  inStock?: boolean
-  sortBy?: string
+
+  minPrice?: number | null
+  maxPrice?: number | null
+
+  inStock?: boolean | null
+
+  brandIds?: string[]
+  categoryIds?: string[]
+  colorIds?: string[]
+  sizes?: string[]
+
+  sortBy?: 'price' | 'name' | 'createdAt'
   sortDirection?: 'asc' | 'desc'
-  [key: string]: any
 }
+
+
 
 export interface PaginationResponse<T> {
   content: T[]

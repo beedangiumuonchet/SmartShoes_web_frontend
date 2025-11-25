@@ -564,7 +564,12 @@ const handleShopNow = () => {
 }
 
 const handleCategoryClick = (category: any) => {
-  router.push(`/category/${category.id}`)
+  router.push({
+    path: '/products',
+    query: {
+      categoryId: category.id
+    }
+  })
 }
 
 const handleProductClick = (product: any) => {
@@ -572,8 +577,14 @@ const handleProductClick = (product: any) => {
 }
 
 const handleBrandClick = (brand: any) => {
-  router.push(`/brands/${brand.id}`)
+  router.push({
+    path: '/products',
+    query: {
+      brandId: brand.id
+    }
+  })
 }
+
 
 const handleViewAll = () => {
   router.push('/products')

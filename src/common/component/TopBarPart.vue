@@ -44,6 +44,22 @@
                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                 @keyup.enter="handleSearch"
               />
+              <div class="absolute inset-y-0 right-0 pr-3 flex items-center space-x-2">
+  <label 
+    class="flex items-center cursor-pointer bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg px-3 py-1 space-x-2 transition-all"
+    title="Tìm kiếm sản phẩm bằng ảnh"
+  >
+    <input type="file" class="hidden" @change="handleFileChange" accept="image/*" />
+    <!-- Icon máy ảnh -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h4l2-3h6l2 3h4v13H3V7z" />
+      <circle cx="12" cy="13" r="4" stroke-width="2" stroke="currentColor"/>
+    </svg>
+    <span class="text-sm text-gray-700">Tìm bằng ảnh</span>
+  </label>
+</div>
+
+
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg
                   class="h-5 w-5 text-gray-400"
@@ -198,6 +214,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { getCurrentUser, removeToken } from '@/common/guards/roleGuard.guard'
 import { getUserCart, getCartItemCount } from '@/modules/carts/carts.api'
 import type { Cart } from '@/modules/carts/carts.type'
+import { searchProductsByImageApi } from '@/modules/products/product.api'
+import type { Product } from '@/modules/products/product.type'
 
 // Router
 const router = useRouter()
@@ -205,6 +223,8 @@ const route = useRoute()
 
 // State
 const searchQuery = ref('')
+const imageFile = ref<File | null>(null)
+
 const showUserMenu = ref(false)
 const cartItemsCount = ref(0)
 
@@ -220,6 +240,45 @@ const handleSearch = () => {
   console.log('Search:', searchQuery.value)
   // Implement search functionality
 }
+
+// 🔹 Tìm kiếm theo ảnh
+const handleFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    imageFile.value = target.files[0]
+    handleImageSearch()
+  }
+}
+
+const handleImageSearch = async () => {
+  if (!imageFile.value) return
+
+  try {
+    const res = await searchProductsByImageApi(imageFile.value)
+    const results = res
+
+    // ⭐ Lưu data vào sessionStorage
+    sessionStorage.setItem("imageSearchResults", JSON.stringify(results))
+
+    // router.push({
+    //   path: '/products',
+    //   query: {
+    //     fromImageSearch: "1"
+    //   }
+    // })
+router.replace({
+  path: '/products',
+  query: { fromImageSearch: "1" }
+}).then(() => {
+  window.location.reload()
+})
+
+  } catch (err) {
+    console.error('❌ Lỗi tìm kiếm sản phẩm theo ảnh:', err)
+  }
+}
+
+
 
 const getUserInitials = () => {
   const user = currentUser.value
