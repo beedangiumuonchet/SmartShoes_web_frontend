@@ -36,18 +36,19 @@
       <p class="text-gray-500 mb-4">
         <RouterLink
           v-if="product.brand"
-          :to="`/brand/${product.brand.id}`"
+          :to="{ path: '/products', query: { brandId: product.brand.id } }"
           class="text-blue-600 hover:underline"
         >
           {{ product.brand.name }}
         </RouterLink>
+
         <span v-else>{{ product.brand?.name || product.brandName || 'Không rõ thương hiệu' }}</span>
 
         ·
 
         <RouterLink
           v-if="product.category"
-          :to="`/category/${product.category.id}`"
+          :to="{ path: '/products', query: { categoryId: product.category.id } }"
           class="text-blue-600 hover:underline"
         >
           {{ product.category.name }}
