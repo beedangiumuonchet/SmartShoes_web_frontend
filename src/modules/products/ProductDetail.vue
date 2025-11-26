@@ -590,7 +590,7 @@ const visibleReviewPages = computed(() => {
   }
   return pages
 })
-// ========== REVIEWS METHODS - THÊM MỚI ==========
+// ========== REVIEWS METHODS - CẬP NHẬT ==========
 const loadReviews = async (): Promise<void> => {
   if (!product.value?.id) return
 
@@ -600,13 +600,69 @@ const loadReviews = async (): Promise<void> => {
 
     const response = await getReviewsByProduct(product.value.id, {
       page: 0,
-      size: 100, // Load nhiều để handle pagination + filter ở frontend
+      size: 100,
       sortBy: 'createdAt',
       sortDirection: 'desc',
     })
 
-    reviews.value = response.content || []
-    console.log('✅ Reviews loaded:', reviews.value.length, 'reviews')
+    const reviewsData = response.content || []
+    console.log('✅ Raw reviews loaded:', reviewsData.length, 'reviews')
+
+    // ✅ THÊM MỚI - Fetch user info cho từng review
+    const reviewsWithUserInfo = await Promise.allSettled(
+      reviewsData.map(async (review) => {
+        try {
+          // Import getUserById từ users.api.ts
+          const { getUserById } = await import('@/modules/users/users.api')
+          const userInfo = await getUserById(review.userId)
+
+          console.log('👤 User info for review:', {
+            reviewId: review.id,
+            userId: review.userId,
+            userName: `${userInfo.firstName} ${userInfo.lastName}`,
+          })
+
+          return {
+            ...review,
+            user: {
+              id: userInfo.id,
+              name: `${userInfo.firstName} ${userInfo.lastName}`.trim() || userInfo.username,
+              email: userInfo.email,
+            },
+          }
+        } catch (error) {
+          console.warn(`⚠️ Failed to fetch user info for userId: ${review.userId}`, error)
+          // Fallback nếu không lấy được user info
+          return {
+            ...review,
+            user: {
+              id: review.userId,
+              name: 'Khách hàng',
+              email: '',
+            },
+          }
+        }
+      }),
+    )
+
+    // ✅ Lọc ra những review thành công
+    const successfulReviews = reviewsWithUserInfo
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => (result as PromiseFulfilledResult<Review>).value)
+
+    reviews.value = successfulReviews
+    console.log('✅ Reviews with user info loaded:', reviews.value.length, 'reviews')
+
+    // ✅ Log sample để check data
+    if (reviews.value.length > 0) {
+      console.log('📋 Sample review with user:', {
+        id: reviews.value[0].id,
+        comment: reviews.value[0].comment.substring(0, 50),
+        rating: reviews.value[0].rating,
+        userName: reviews.value[0].user?.name,
+        userEmail: reviews.value[0].user?.email,
+      })
+    }
   } catch (error) {
     console.error('❌ Error loading reviews:', error)
     reviews.value = []
