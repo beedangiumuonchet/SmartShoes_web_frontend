@@ -1,9 +1,9 @@
 <template>
-  <div class="max-w-[1440px] mx-auto px-6 py-10">
+  <div class="max-w-7xl mx-auto px-4 py-10">
     <!-- Tiêu đề -->
     <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Danh sách sản phẩm</h1>
 
-    <!-- ========== AI SEARCH SECTION ========== -->
+    <!-- ========== AI SEARCH SECTION - THÊM MỚI ========== -->
     <div
       class="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 rounded-2xl shadow-xl p-8 mb-8"
     >
@@ -122,7 +122,7 @@
           </div>
         </div>
 
-        <!-- AI Fallback Suggestions -->
+        <!-- ✅ THÊM MỚI - AI Fallback Suggestions -->
         <div v-if="aiSuggestions.length > 0 && aiSearchMode === 'fallback'" class="mt-6">
           <div class="text-center mb-4">
             <div class="mb-3">
@@ -180,6 +180,7 @@
             </button>
           </div>
 
+          <!-- Hint message -->
           <div class="mt-4 text-center">
             <p class="text-white/60 text-xs">
               💡 <strong>Mẹo:</strong> Thử mô tả chi tiết hơn như "giày thể thao Nike màu trắng size
@@ -188,7 +189,7 @@
           </div>
         </div>
 
-        <!-- Normal Suggestions -->
+        <!-- ✅ THÊM MỚI - Hiển thị khi có suggestions nhưng không phải fallback mode -->
         <div v-else-if="aiSuggestions.length > 0" class="mt-6">
           <div class="text-center mb-4">
             <p class="text-white/90 text-sm font-medium mb-2">✨ Gợi ý thêm từ AI:</p>
@@ -369,31 +370,6 @@
                 {{ product.category?.name || 'Không rõ danh mục' }}
               </p>
 
-              <!-- AI Text Preview - CHỈ HIỂN THỊ KHI CÓ AI RESULTS -->
-              <div v-if="isShowingAiResults && aiProductTexts[product.id]" class="mb-3">
-                <p class="text-xs text-purple-600 bg-purple-50 p-2 rounded-lg line-clamp-2">
-                  AI: {{ aiProductTexts[product.id] }}
-                </p>
-              </div>
-
-              <!-- AI Stock & Status Info -->
-              <div v-if="isShowingAiResults" class="mb-3 flex items-center justify-between text-xs">
-                <span v-if="aiProductStocks[product.id] !== undefined" class="text-gray-600">
-                  Tồn: {{ aiProductStocks[product.id] }}
-                </span>
-                <span
-                  v-if="aiProductStatuses[product.id]"
-                  class="px-2 py-1 rounded-full text-xs font-medium"
-                  :class="{
-                    'bg-green-100 text-green-700': aiProductStatuses[product.id] === 'ACTIVE',
-                    'bg-gray-100 text-gray-600': aiProductStatuses[product.id] === 'INACTIVE',
-                    'bg-red-100 text-red-700': aiProductStatuses[product.id] === 'OUT_OF_STOCK',
-                  }"
-                >
-                  {{ getStatusLabel(aiProductStatuses[product.id]) }}
-                </span>
-              </div>
-
               <div class="flex items-center justify-between">
                 <span class="text-blue-600 font-semibold">{{
                   formatPrice(getProductMinPrice(product))
@@ -485,10 +461,10 @@
 
               <button
                 v-if="!isShowingAiResults"
-                @click="runSuggestion('giày thể thao nam nữ')"
+                @click="runSuggestion('giày đá bóng cỏ tự nhiên')"
                 class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
               >
-                Thử AI: "giày thể thao"
+                Thử AI: "giày đá bóng cỏ tự nhiên"
               </button>
             </div>
           </div>
@@ -500,7 +476,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import {
   getAllProductsApi,
   getProductByIdApi,
@@ -508,66 +484,64 @@ import {
 } from '../products/product.api'
 import { getAllBrandsApi } from '../brand/brand.api'
 import { getAllCategoriesApi } from '../category/category.api'
+import { getAllColorsApi } from '../color/color.api' // ✅ THÊM MỚI
 import type {
   Product,
   Brand,
   Category,
   ProductFilter,
-  Color,
   AiSearchRequest,
   ResultItem,
+  Color, // ✅ THÊM MỚI
 } from '../products/product.type'
-import { getAllColorsApi } from '../color/color.api'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const products = ref<Product[]>([])
 const brands = ref<Brand[]>([])
 const categories = ref<Category[]>([])
-const colors = ref<Color[]>([])
-const route = useRoute()
+const colors = ref<Color[]>([]) // ✅ THÊM MỚI
 
+// ✅ THÊM MỚI - UI Toggle states
 const showBrand = ref(false)
 const showCategory = ref(false)
 const showColor = ref(false)
 
+// ✅ CẬP NHẬT - Filters với structure mới
 const filters = ref<ProductFilter>({
   page: 0,
   size: 20,
-
   q: '',
   status: 'ACTIVE',
-
   minPrice: null,
   maxPrice: null,
-
   inStock: null,
-
   brandIds: [],
   categoryIds: [],
-  colorIds: [],
+  colorIds: [], // ✅ THÊM MỚI
   sizes: [],
-
   sortBy: 'createdAt',
   sortDirection: 'desc',
 })
-// ========== AI SEARCH STATES - THÊM MỚI ==========
+
+// ✅ THÊM MỚI - Sort handling
+const selectedSort = ref('createdAt-desc')
+
+// ========== AI SEARCH STATES - GIỮ NGUYÊN ==========
 const aiSearchQuery = ref<string>('')
 const isAiSearching = ref<boolean>(false)
 const aiSearchResults = ref<ResultItem[]>([])
 const aiSearchMode = ref<string>('')
 const aiLastSearchQuery = ref<string>('')
 const isShowingAiResults = ref<boolean>(false)
-const aiSuggestions = ref<string[]>([]) // ✅ THÊM MỚI - AI suggestions
-
-const runExample = (example: string) => {
-  aiSearchQuery.value = example
-  handleAiSearch()
-}
+const aiSuggestions = ref<string[]>([])
 
 // AI Search mapping để lưu score và text theo product ID
 const aiProductScores = ref<Record<string, number>>({})
 const aiProductTexts = ref<Record<string, string>>({})
-const aiProductStocks = ref<Record<string, number>>({}) // ✅ THÊM MỚI - stock info
-const aiProductStatuses = ref<Record<string, string>>({}) // ✅ THÊM MỚI - status info
+const aiProductStocks = ref<Record<string, number>>({})
+const aiProductStatuses = ref<Record<string, string>>({})
 
 // AI Search Examples
 const aiSearchExamples = ref<string[]>([
@@ -579,191 +553,47 @@ const aiSearchExamples = ref<string[]>([
   'Giày bóng đá sân cỏ tự nhiên',
 ])
 
-// ========== AI SEARCH METHODS - THÊM MỚI ==========
-const handleAiSearch = async (): Promise<void> => {
-  const query = aiSearchQuery.value.trim()
-
-  if (!query) {
-    alert('Vui lòng nhập từ khóa tìm kiếm AI')
-    return
-  }
-
-  try {
-    isAiSearching.value = true
-    console.log('🤖 Starting AI search for:', query)
-
-    const aiSearchRequest: AiSearchRequest = {
-      query: query,
-      threshold: 0.15, // Threshold thấp để có nhiều kết quả
-      max_candidates: 16, // Tối đa 16 sản phẩm
-      rerank: true,
-    }
-
-    const response = await searchProductsWithAiApi(aiSearchRequest)
-
-    console.log('✅ AI search response:', response)
-
-    aiSearchResults.value = response.results || []
-    aiSearchMode.value = response.mode || 'unknown'
-    aiLastSearchQuery.value = query
-    isShowingAiResults.value = true
-    aiSuggestions.value = response.suggestions || [] // ✅ ĐÃ CÓ - Lưu suggestions
-
-    // ✅ THÊM MỚI - Log fallback info chi tiết
-    if (response.mode === 'fallback') {
-      console.log('🤔 Fallback mode activated!')
-      console.log('📝 Suggestions received:', aiSuggestions.value)
-    }
-
-    if (aiSearchResults.value.length === 0) {
-      if (aiSuggestions.value.length > 0) {
-        alert('Không tìm thấy sản phẩm phù hợp. Hãy thử các gợi ý bên dưới!')
-      } else {
-        alert('Không tìm thấy sản phẩm phù hợp với AI. Thử với từ khóa khác!')
-      }
-      return
-    }
-
-    // Fetch detailed product info for AI results
-    await fetchAiResultProducts()
-  } catch (error: any) {
-    console.error('❌ AI search error:', error)
-
-    let errorMessage = 'Có lỗi xảy ra khi tìm kiếm AI'
-    if (error?.response?.data?.message) {
-      errorMessage = error.response.data.message
-    } else if (error?.message) {
-      errorMessage = error.message
-    }
-
-    alert(`Tìm kiếm AI thất bại: ${errorMessage}`)
-  } finally {
-    isAiSearching.value = false
-  }
-}
-
-const runSuggestion = (suggestion: string): void => {
-  aiSearchQuery.value = suggestion
-  handleAiSearch()
-}
-
-const fetchAiResultProducts = async (): Promise<void> => {
-  try {
-    console.log('🔍 Fetching detailed products for AI results...')
-
-    // Reset mapping objects
-    aiProductScores.value = {}
-    aiProductTexts.value = {}
-    aiProductStocks.value = {} // ✅ THÊM MỚI
-    aiProductStatuses.value = {} // ✅ THÊM MỚI
-
-    // Fetch all products concurrently
-    const productPromises = aiSearchResults.value.map(async (result) => {
-      try {
-        const product = await getProductByIdApi(result.product_id)
-
-        // Store AI metadata
-        aiProductScores.value[result.product_id] = result.score
-        aiProductTexts.value[result.product_id] = result.text
-        aiProductStocks.value[result.product_id] = result.stock || 0 // ✅ THÊM MỚI
-        aiProductStatuses.value[result.product_id] = result.status || 'UNKNOWN' // ✅ THÊM MỚI
-
-        return product
-      } catch (error) {
-        console.warn(`⚠️ Failed to fetch product ${result.product_id}:`, error)
-        return null
-      }
-    })
-
-    const productResults = await Promise.allSettled(productPromises)
-    const fetchedProducts: Product[] = []
-
-    productResults.forEach((result) => {
-      if (result.status === 'fulfilled' && result.value) {
-        fetchedProducts.push(result.value)
-      }
-    })
-
-    // Sort products by AI score (highest first)
-    fetchedProducts.sort((a, b) => {
-      const scoreA = aiProductScores.value[a.id] || 0
-      const scoreB = aiProductScores.value[b.id] || 0
-      return scoreB - scoreA
-    })
-
-    products.value = fetchedProducts
-
-    console.log('✅ AI search products loaded:', {
-      totalResults: aiSearchResults.value.length,
-      productsFound: fetchedProducts.length,
-      mode: aiSearchMode.value,
-      suggestionsCount: aiSuggestions.value.length, // ✅ THÊM MỚI
-    })
-  } catch (error) {
-    console.error('❌ Error fetching AI result products:', error)
-    products.value = []
-  }
-}
-const clearAiSearch = (): void => {
-  clearAiSearchData()
-  // Load normal products
-  fetchProducts()
-}
-
-const clearAiSearchData = (): void => {
-  aiSearchQuery.value = ''
-  aiSearchResults.value = []
-  aiSearchMode.value = ''
-  aiLastSearchQuery.value = ''
-  isShowingAiResults.value = false
-  aiSuggestions.value = [] // ✅ THÊM MỚI
-  aiProductScores.value = {}
-  aiProductTexts.value = {}
-  aiProductStocks.value = {} // ✅ THÊM MỚI
-  aiProductStatuses.value = {} // ✅ THÊM MỚI
-}
+// ✅ CẬP NHẬT - fetchProducts với structure mới
 const fetchProducts = async () => {
   try {
     const res = await getAllProductsApi(filters.value)
     products.value = res.content ?? []
-    console.log('✅ Loaded', products.value)
+    console.log('✅ Products loaded:', products.value)
   } catch (err) {
-    console.error('❌ Fetch failed:', err)
+    console.error('❌ Lỗi tải danh sách sản phẩm:', err)
   }
 }
 
+// ✅ CẬP NHẬT - fetchFilters thêm colors
 const fetchFilters = async () => {
   try {
-    const [brandRes, catRes, corRes] = await Promise.all([
+    const [brandRes, catRes, colorRes] = await Promise.all([
       getAllBrandsApi(),
       getAllCategoriesApi(),
       getAllColorsApi(),
     ])
     brands.value = brandRes || []
     categories.value = catRes || []
-    colors.value = corRes.data ?? corRes
+    colors.value = colorRes.data ?? colorRes
   } catch (err) {
     console.error('❌ Lỗi tải bộ lọc:', err)
   }
 }
 
-const selectedSort = ref('createdAt-desc')
-
+// ✅ CẬP NHẬT - resetFilters
 const resetFilters = () => {
   filters.value.brandIds = []
   filters.value.categoryIds = []
   filters.value.colorIds = []
   filters.value.minPrice = null
   filters.value.maxPrice = null
+  selectedSort.value = 'createdAt-desc'
 
-  selectedSort.value = 'createdAt-desc' // reset sort về mặc định
-
-  // Gọi fetchProducts nếu muốn tự động load lại danh sách
-  fetchProducts()
-  clearAiSearchData()
+  clearAiSearchData() // ✅ Clear AI data nếu có
   fetchProducts()
 }
 
+// ✅ THÊM MỚI - handleSortChange
 const handleSortChange = () => {
   const [sortBy, sortDirection] = selectedSort.value.split('-')
   filters.value.sortBy = sortBy
@@ -782,13 +612,7 @@ const handleSortChange = () => {
   }
 }
 
-// const getMainImage = (product: Product) => {
-//   const img =
-//     product.variants?.flatMap((v) => v.images)?.find((i) => i.isMain)?.url ||
-//     product.variants?.[0]?.images?.[0]?.url ||
-//     'https://via.placeholder.com/400x400?text=No+Image'
-//   return img
-// }
+// ✅ CẬP NHẬT - getMainImage với logic mới
 const getMainImage = (product: Product) => {
   const variants = product.variants || []
 
@@ -817,31 +641,180 @@ const getMainImage = (product: Product) => {
     return 'https://via.placeholder.com/200x200?text=No+Image'
   }
 
-  const url = selectedImage.url
-
-  // 5. Convert Google Drive link → direct link (giống code cũ)
-  const match = url.match(/\/d\/([^/]+)/)
-  return match ? `http://localhost:8080/api/v1/images/${match[1]}` : url
+  return selectedImage.url
 }
 
+// ✅ THÊM MỚI - getDirectImageUrl
 function getDirectImageUrl(driveUrl: string) {
-  // Tách ID ảnh từ link Google Drive
   const match = driveUrl?.match(/\/d\/([^/]+)/)
   if (!match) return driveUrl
 
   const driveId = match[1]
-  // Gọi ảnh qua API backend (nó sẽ tự cache local)
   return `http://localhost:8080/api/v1/images/${driveId}`
 }
 
+// ✅ THÊM MỚI - getProductMinPrice
 const getProductMinPrice = (product: Product) => {
   const variants = product.variants || []
   if (!variants.length) return 0
-
-  // Lấy giá nhỏ nhất
   return Math.min(...variants.map((v) => v.price || Infinity))
 }
 
+// ✅ THÊM MỚI - getStatusLabel cho AI results
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'ACTIVE':
+      return 'Đang bán'
+    case 'INACTIVE':
+      return 'Ngừng bán'
+    case 'OUT_OF_STOCK':
+      return 'Hết hàng'
+    default:
+      return 'Không rõ'
+  }
+}
+
+// ========== AI SEARCH METHODS - GIỮ NGUYÊN ==========
+const handleAiSearch = async (): Promise<void> => {
+  const query = aiSearchQuery.value.trim()
+
+  if (!query) {
+    alert('Vui lòng nhập từ khóa tìm kiếm AI')
+    return
+  }
+
+  try {
+    isAiSearching.value = true
+    console.log('🤖 Starting AI search for:', query)
+
+    const aiSearchRequest: AiSearchRequest = {
+      query: query,
+      threshold: 0.15,
+      max_candidates: 16,
+      rerank: true,
+    }
+
+    const response = await searchProductsWithAiApi(aiSearchRequest)
+    console.log('✅ AI search response:', response)
+
+    aiSearchResults.value = response.results || []
+    aiSearchMode.value = response.mode || 'unknown'
+    aiLastSearchQuery.value = query
+    isShowingAiResults.value = true
+    aiSuggestions.value = response.suggestions || []
+
+    if (response.mode === 'fallback') {
+      console.log('🤔 Fallback mode activated!')
+      console.log('📝 Suggestions received:', aiSuggestions.value)
+    }
+
+    if (aiSearchResults.value.length === 0) {
+      if (aiSuggestions.value.length > 0) {
+        alert('Không tìm thấy sản phẩm phù hợp. Hãy thử các gợi ý bên dưới!')
+      } else {
+        alert('Không tìm thấy sản phẩm phù hợp với AI. Thử với từ khóa khác!')
+      }
+      return
+    }
+
+    await fetchAiResultProducts()
+  } catch (error: any) {
+    console.error('❌ AI search error:', error)
+    let errorMessage = 'Có lỗi xảy ra khi tìm kiếm AI'
+    if (error?.response?.data?.message) {
+      errorMessage = error.response.data.message
+    } else if (error?.message) {
+      errorMessage = error.message
+    }
+    alert(`Tìm kiếm AI thất bại: ${errorMessage}`)
+  } finally {
+    isAiSearching.value = false
+  }
+}
+
+const runExample = (example: string) => {
+  aiSearchQuery.value = example
+  handleAiSearch()
+}
+
+const runSuggestion = (suggestion: string): void => {
+  aiSearchQuery.value = suggestion
+  handleAiSearch()
+}
+
+const fetchAiResultProducts = async (): Promise<void> => {
+  try {
+    console.log('🔍 Fetching detailed products for AI results...')
+
+    aiProductScores.value = {}
+    aiProductTexts.value = {}
+    aiProductStocks.value = {}
+    aiProductStatuses.value = {}
+
+    const productPromises = aiSearchResults.value.map(async (result) => {
+      try {
+        const product = await getProductByIdApi(result.product_id)
+
+        aiProductScores.value[result.product_id] = result.score
+        aiProductTexts.value[result.product_id] = result.text
+        aiProductStocks.value[result.product_id] = result.stock || 0
+        aiProductStatuses.value[result.product_id] = result.status || 'UNKNOWN'
+
+        return product
+      } catch (error) {
+        console.warn(`⚠️ Failed to fetch product ${result.product_id}:`, error)
+        return null
+      }
+    })
+
+    const productResults = await Promise.allSettled(productPromises)
+    const fetchedProducts: Product[] = []
+
+    productResults.forEach((result) => {
+      if (result.status === 'fulfilled' && result.value) {
+        fetchedProducts.push(result.value)
+      }
+    })
+
+    fetchedProducts.sort((a, b) => {
+      const scoreA = aiProductScores.value[a.id] || 0
+      const scoreB = aiProductScores.value[b.id] || 0
+      return scoreB - scoreA
+    })
+
+    products.value = fetchedProducts
+
+    console.log('✅ AI search products loaded:', {
+      totalResults: aiSearchResults.value.length,
+      productsFound: fetchedProducts.length,
+      mode: aiSearchMode.value,
+      suggestionsCount: aiSuggestions.value.length,
+    })
+  } catch (error) {
+    console.error('❌ Error fetching AI result products:', error)
+    products.value = []
+  }
+}
+
+const clearAiSearch = (): void => {
+  clearAiSearchData()
+  fetchProducts()
+}
+
+const clearAiSearchData = (): void => {
+  aiSearchQuery.value = ''
+  aiSearchResults.value = []
+  aiSearchMode.value = ''
+  aiLastSearchQuery.value = ''
+  isShowingAiResults.value = false
+  aiSuggestions.value = []
+  aiProductScores.value = {}
+  aiProductTexts.value = {}
+  aiProductStocks.value = {}
+  aiProductStatuses.value = {}
+}
+
+// ✅ Utility functions - GIỮ NGUYÊN
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
 
@@ -858,27 +831,10 @@ const statusLabel = (status: string) => {
   }
 }
 
-// onMounted(async () => {
-//   await fetchFilters()
-
-//   if (route.query.brandId) {
-//     filters.value.brandIds = Array.isArray(route.query.brandId)
-//       ? route.query.brandId
-//       : [route.query.brandId]
-//   }
-
-//   if (route.query.categoryId) {
-//     filters.value.categoryIds = Array.isArray(route.query.categoryId)
-//       ? route.query.categoryId
-//       : [route.query.categoryId]
-//   }
-
-//   await fetchProducts()
-// })
+// ✅ CẬP NHẬT - onMounted với logic mới
 onMounted(async () => {
   await fetchFilters()
 
-  // nếu có filter query thì vẫn set bình thường
   if (route.query.brandId) {
     filters.value.brandIds = Array.isArray(route.query.brandId)
       ? route.query.brandId
@@ -904,22 +860,6 @@ onMounted(async () => {
   // ⭐ Còn lại → fetch bình thường
   await fetchProducts()
 })
-
-// watch(
-//   () => route.query.fromImageSearch,
-//   (newVal) => {
-//     if (newVal === "1") {
-//       const raw = sessionStorage.getItem("imageSearchResults")
-//       if (raw) {
-//         products.value = JSON.parse(raw)
-//         console.log("🎯 Load products from image search:", products.value)
-//       }
-//     } else {
-//       fetchProducts()
-//     }
-//   },
-//   { immediate: true }
-// )
 </script>
 <style scoped>
 .line-clamp-2 {
