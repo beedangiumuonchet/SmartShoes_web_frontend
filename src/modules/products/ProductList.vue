@@ -3,7 +3,7 @@
     <!-- Tiêu đề -->
     <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Danh sách sản phẩm</h1>
 
-    <!-- ========== AI SEARCH SECTION - THÊM MỚI ========== -->
+    <!-- ========== AI SEARCH SECTION ========== -->
     <div
       class="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 rounded-2xl shadow-xl p-8 mb-8"
     >
@@ -21,20 +21,6 @@
             </svg>
           </div>
           <h2 class="text-2xl font-bold text-white">🤖 Tìm kiếm thông minh với AI</h2>
-    <h1 class="text-3xl font-bold text-gray-800 mb-10 text-center">Danh sách sản phẩm</h1>
-
-    <div class="flex flex-col md:flex-row gap-8">
-      <!-- Sidebar filter -->
-      <div class="md:w-1/5 sticky top-24 h-fit bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-4">
-
-      <!-- THƯƠNG HIỆU -->
-      <div class="border-b pb-3">
-        <div
-          class="flex items-center justify-between cursor-pointer py-1"
-          @click="showBrand = !showBrand"
-        >
-          <h3 class="font-semibold text-gray-800 text-sm">Thương hiệu</h3>
-          <span class="text-xs text-gray-600">{{ showBrand ? "▲" : "▼" }}</span>
         </div>
         <p class="text-blue-100 text-sm max-w-2xl mx-auto">
           Mô tả sản phẩm bằng ngôn ngữ tự nhiên, AI sẽ hiểu và tìm kiếm chính xác những gì bạn cần!
@@ -101,22 +87,7 @@
             </svg>
             <span class="text-lg">{{ isAiSearching ? 'Đang tìm...' : 'Tìm kiếm AI' }}</span>
           </button>
-        <div v-show="showBrand" class="mt-2 space-y-1 pl-1">
-          <div
-            v-for="b in brands"
-            :key="b.id"
-            class="flex items-center gap-2"
-          >
-            <input
-              type="checkbox"
-              :value="b.id"
-              v-model="filters.brandIds"
-              class="w-4 h-4"
-            />
-            <label class="text-sm text-gray-700">{{ b.name }}</label>
-          </div>
         </div>
-      </div>
 
         <!-- Quick AI Search Examples -->
         <div class="flex flex-wrap gap-3 mt-6 justify-center">
@@ -151,7 +122,7 @@
           </div>
         </div>
 
-        <!-- ✅ THÊM MỚI - AI Fallback Suggestions -->
+        <!-- AI Fallback Suggestions -->
         <div v-if="aiSuggestions.length > 0 && aiSearchMode === 'fallback'" class="mt-6">
           <div class="text-center mb-4">
             <div class="mb-3">
@@ -209,7 +180,6 @@
             </button>
           </div>
 
-          <!-- Hint message -->
           <div class="mt-4 text-center">
             <p class="text-white/60 text-xs">
               💡 <strong>Mẹo:</strong> Thử mô tả chi tiết hơn như "giày thể thao Nike màu trắng size
@@ -218,7 +188,7 @@
           </div>
         </div>
 
-        <!-- ✅ THÊM MỚI - Hiển thị khi có suggestions nhưng không phải fallback mode -->
+        <!-- Normal Suggestions -->
         <div v-else-if="aiSuggestions.length > 0" class="mt-6">
           <div class="text-center mb-4">
             <p class="text-white/90 text-sm font-medium mb-2">✨ Gợi ý thêm từ AI:</p>
@@ -234,366 +204,303 @@
             >
               {{ suggestion }}
             </button>
-      <!-- THỂ LOẠI -->
-      <div class="border-b pb-3">
-        <div
-          class="flex items-center justify-between cursor-pointer py-1"
-          @click="showCategory = !showCategory"
-        >
-          <h3 class="font-semibold text-gray-800 text-sm">Thể loại</h3>
-          <span class="text-xs text-gray-600">{{ showCategory ? "▲" : "▼" }}</span>
-        </div>
-
-        <div v-show="showCategory" class="mt-2 space-y-1 pl-1">
-          <div
-            v-for="c in categories"
-            :key="c.id"
-            class="flex items-center gap-2"
-          >
-            <input
-              type="checkbox"
-              :value="c.id"
-              v-model="filters.categoryIds"
-              class="w-4 h-4"
-            />
-            <label class="text-sm text-gray-700">{{ c.name }}</label>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Bộ lọc -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-10">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Tìm kiếm -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Từ khóa</label>
-            <input
-              v-model="filters.q"
-              type="text"
-              placeholder="Nhập tên sản phẩm..."
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-
-          <!-- Thương hiệu -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Thương hiệu</label>
-            <select
-              v-model="filters.brandId"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Tất cả</option>
-              <option v-for="brand in brands" :key="brand.id" :value="brand.id">
-                {{ brand.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Danh mục -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
-            <select
-              v-model="filters.categoryId"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Tất cả</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                {{ cat.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Sắp xếp -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sắp xếp</label>
-            <select
-              v-model="filters.sortBy"
-              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Mặc định</option>
-              <option value="createdAt">Mới nhất</option>
-              <option value="price">Giá</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Nút áp dụng -->
-        <div class="mt-6 text-right">
-          <button
-            @click="fetchProducts"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all"
-          >
-            Áp dụng bộ lọc
-          </button>
-        </div>
-      </div>
-
-      <!-- Danh sách sản phẩm -->
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="flex flex-col md:flex-row gap-8">
+      <!-- Sidebar filter -->
       <div
-        v-if="products.length"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+        class="md:w-1/5 sticky top-24 h-fit bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-4"
       >
-        <RouterLink
-          v-for="product in products"
-          :key="product.id"
-          :to="`/products/${product.id}`"
-          class="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg transition-all overflow-hidden group"
-        >
-          <!-- Ảnh -->
-          <div class="relative w-full h-64 overflow-hidden">
-            <img
-              :src="getMainImage(product)"
-              alt="Product Image"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-
-          <!-- Thông tin -->
-          <div class="p-4">
-            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-2">
-              {{ product.name }}
-            </h3>
-            <p class="text-sm text-gray-500 mb-2">
-              {{ product.brand?.name || 'Không rõ thương hiệu' }} ·
-              {{ product.category?.name || 'Không rõ danh mục' }}
-            </p>
-
-            <div class="flex items-center justify-between">
-              <span class="text-blue-600 font-semibold text-lg">
-                {{ formatPrice(product.variants?.[0]?.price || 0) }}
-              </span>
-              <span
-                class="px-2 py-1 rounded-lg text-xs font-medium"
-                :class="
-                  product.status === 'ACTIVE'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-200 text-gray-500'
-                "
-              >
-                {{ statusLabel(product.status) }}
-              </span>
-            </div>
-          </div>
-        </RouterLink>
-      </div>
-
-      <!-- Loading / Empty -->
-      <!-- Loading / Empty States -->
-      <div v-else-if="isAiSearching" class="text-center py-20">
-        <div class="inline-flex items-center space-x-2 text-purple-600">
-          <svg class="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          <span class="text-lg">Đang tìm kiếm bằng AI...</span>
-        </div>
-      </div>
-
-      <!-- ✅ CẬP NHẬT - Empty State với fallback message -->
-      <div v-else class="text-center py-20">
-        <div class="space-y-4">
-          <!-- Icon -->
-          <svg
-            class="w-16 h-16 text-gray-400 mx-auto"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-
-          <!-- Main message -->
-          <h3 class="text-xl font-medium text-gray-900">
-            {{
-              isShowingAiResults ? 'Không tìm thấy sản phẩm với AI' : 'Không tìm thấy sản phẩm nào'
-            }}
-          </h3>
-
-          <!-- Fallback specific message -->
-          <div v-if="isShowingAiResults && aiSearchMode === 'fallback'" class="space-y-3">
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
-              <div class="flex items-center space-x-2 text-yellow-800 mb-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-                <span class="font-medium text-sm">Chế độ Fallback được kích hoạt</span>
-              </div>
-              <p class="text-yellow-700 text-sm">
-                AI không tìm thấy sản phẩm phù hợp với từ khóa
-                <strong>"{{ aiLastSearchQuery }}"</strong>. Hãy thử các gợi ý ở phía trên hoặc mô tả
-                chi tiết hơn.
-              </p>
-            </div>
-          </div>
-
-          <!-- Normal message -->
-          <p v-else class="text-gray-500">
-            {{
-              isShowingAiResults
-                ? 'Thử thay đổi từ khóa tìm kiếm AI hoặc sử dụng bộ lọc thông thường'
-                : 'Thử thay đổi bộ lọc hoặc sử dụng tìm kiếm AI thông minh'
-            }}
-          </p>
-
-          <!-- Action buttons -->
-          <div class="flex justify-center space-x-3 mt-6">
-            <button
-              v-if="isShowingAiResults"
-              @click="clearAiSearch"
-              class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
-            >
-              Xóa kết quả AI
-            </button>
-
-            <button
-              @click="resetFilters"
-              class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-            >
-              Đặt lại bộ lọc
-            </button>
-
-            <!-- Quick suggest button -->
-            <button
-              v-if="!isShowingAiResults"
-              @click="runSuggestion('giày thể thao nam nữ')"
-              class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-            >
-              Thử AI: "giày thể thao"
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-      <!-- MÀU SẮC -->
-      <div class="border-b pb-3">
-        <div
-          class="flex items-center justify-between cursor-pointer py-1"
-          @click="showColor = !showColor"
-        >
-          <h3 class="font-semibold text-gray-800 text-sm">Màu sắc</h3>
-          <span class="text-xs text-gray-600">{{ showColor ? "▲" : "▼" }}</span>
-        </div>
-
-        <div v-show="showColor" class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 pl-1">
+        <!-- THƯƠNG HIỆU -->
+        <div class="border-b pb-3">
           <div
-            v-for="color in colors"
-            :key="color.id"
-            class="flex items-center gap-2"
+            class="flex items-center justify-between cursor-pointer py-1"
+            @click="showBrand = !showBrand"
           >
-            <input
-              type="checkbox"
-              :value="color.id"
-              v-model="filters.colorIds"
-              class="w-4 h-4"
-            />
-            <label class="text-sm text-gray-700">{{ color.name }}</label>
+            <h3 class="font-semibold text-gray-800 text-sm">Thương hiệu</h3>
+            <span class="text-xs text-gray-600">{{ showBrand ? '▲' : '▼' }}</span>
+          </div>
+          <div v-show="showBrand" class="mt-2 space-y-1 pl-1">
+            <div v-for="b in brands" :key="b.id" class="flex items-center gap-2">
+              <input type="checkbox" :value="b.id" v-model="filters.brandIds" class="w-4 h-4" />
+              <label class="text-sm text-gray-700">{{ b.name }}</label>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- GIÁ -->
-      <div>
-        <h3 class="font-semibold text-gray-800 text-sm mb-1">Giá (VNĐ)</h3>
-        <div class="flex gap-2">
-          <input
-            type="number"
-            v-model.number="filters.minPrice"
-            placeholder="Từ"
-            class="w-1/2 border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400"
-          />
-          <input
-            type="number"
-            v-model.number="filters.maxPrice"
-            placeholder="Đến"
-            class="w-1/2 border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400"
-          />
+        <!-- THỂ LOẠI -->
+        <div class="border-b pb-3">
+          <div
+            class="flex items-center justify-between cursor-pointer py-1"
+            @click="showCategory = !showCategory"
+          >
+            <h3 class="font-semibold text-gray-800 text-sm">Thể loại</h3>
+            <span class="text-xs text-gray-600">{{ showCategory ? '▲' : '▼' }}</span>
+          </div>
+          <div v-show="showCategory" class="mt-2 space-y-1 pl-1">
+            <div v-for="c in categories" :key="c.id" class="flex items-center gap-2">
+              <input type="checkbox" :value="c.id" v-model="filters.categoryIds" class="w-4 h-4" />
+              <label class="text-sm text-gray-700">{{ c.name }}</label>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <!-- SẮP XẾP GIÁ -->
-        <select
-          v-model="selectedSort"
-          @change="handleSortChange"
-          class="w-full border rounded-lg px-3 py-2 text-sm"
+        <!-- MÀU SẮC -->
+        <div class="border-b pb-3">
+          <div
+            class="flex items-center justify-between cursor-pointer py-1"
+            @click="showColor = !showColor"
+          >
+            <h3 class="font-semibold text-gray-800 text-sm">Màu sắc</h3>
+            <span class="text-xs text-gray-600">{{ showColor ? '▲' : '▼' }}</span>
+          </div>
+          <div v-show="showColor" class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 pl-1">
+            <div v-for="color in colors" :key="color.id" class="flex items-center gap-2">
+              <input type="checkbox" :value="color.id" v-model="filters.colorIds" class="w-4 h-4" />
+              <label class="text-sm text-gray-700">{{ color.name }}</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- GIÁ -->
+        <div class="border-b pb-3">
+          <h3 class="font-semibold text-gray-800 text-sm mb-1">Giá (VNĐ)</h3>
+          <div class="flex gap-2">
+            <input
+              type="number"
+              v-model.number="filters.minPrice"
+              placeholder="Từ"
+              class="w-1/2 border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400"
+            />
+            <input
+              type="number"
+              v-model.number="filters.maxPrice"
+              placeholder="Đến"
+              class="w-1/2 border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        </div>
+
+        <!-- SẮP XẾP GIÁ -->
+        <div class="border-b pb-3">
+          <h3 class="font-semibold text-gray-800 text-sm mb-1">Sắp xếp</h3>
+          <select
+            v-model="selectedSort"
+            @change="handleSortChange"
+            class="w-full border rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="createdAt-desc">Mặc định (Mới nhất)</option>
+            <option value="price-asc">Giá tăng dần</option>
+            <option value="price-desc">Giá giảm dần</option>
+          </select>
+        </div>
+
+        <!-- APPLY BTN -->
+        <button
+          @click="fetchProducts"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all"
         >
-          <option value="createdAt-desc">Mặc định (Mới nhất)</option>
-          <option value="price-asc">Giá tăng dần</option>
-          <option value="price-desc">Giá giảm dần</option>
-        </select>
+          Áp dụng bộ lọc
+        </button>
 
-
-
-      <!-- APPLY BTN -->
-      <button
-        @click="fetchProducts"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all"
-      >
-        Áp dụng bộ lọc
-      </button>
-          <!-- RESET BTN -->
-      <button
-        @click="resetFilters"
-        class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg transition-all"
-      >
-        Đặt lại bộ lọc
-      </button>
-    </div>
-
-
-
-
+        <!-- RESET BTN -->
+        <button
+          @click="resetFilters"
+          class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg transition-all"
+        >
+          Đặt lại bộ lọc
+        </button>
+      </div>
 
       <!-- Products grid -->
-      <div class="md:w-4/5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <RouterLink
-          v-for="product in products"
-          :key="product.id"
-          :to="`/products/${product.slug}`"
-          class="bg-white border border-gray-200 rounded-2xl shadow hover:shadow-lg overflow-hidden transition-transform group hover:scale-105"
-        >
-          <div class="relative w-full min-h-[300px] overflow-hidden">
-            <img :src="getDirectImageUrl(getMainImage(product))" alt="Product Image" class="w-full h-full object-cover" />
+      <div class="md:w-4/5">
+        <!-- Loading / Empty States -->
+        <div v-if="isAiSearching" class="text-center py-20">
+          <div class="inline-flex items-center space-x-2 text-purple-600">
+            <svg class="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <span class="text-lg">Đang tìm kiếm bằng AI...</span>
           </div>
-          <div class="p-4 space-y-2">
-            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-2">{{ product.name }}</h3>
-            <p class="text-sm text-gray-500">{{ product.brand?.name || 'Không rõ thương hiệu' }} · {{ product.category?.name || 'Không rõ danh mục' }}</p>
-            <div class="flex items-center justify-between">
-              <span class="text-blue-600 font-semibold">{{ formatPrice(getProductMinPrice(product)) }}</span>
-              <span class="px-2 py-1 rounded-lg text-xs font-medium" :class="product.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'">{{ statusLabel(product.status) }}</span>
+        </div>
+
+        <!-- Products Grid -->
+        <div
+          v-else-if="products.length"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <RouterLink
+            v-for="product in products"
+            :key="product.id"
+            :to="`/products/${product.slug}`"
+            class="bg-white border border-gray-200 rounded-2xl shadow hover:shadow-lg overflow-hidden transition-transform group hover:scale-105"
+          >
+            <div class="relative w-full min-h-[300px] overflow-hidden">
+              <img
+                :src="getDirectImageUrl(getMainImage(product))"
+                alt="Product Image"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="p-4 space-y-2">
+              <h3
+                class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-2"
+              >
+                {{ product.name }}
+              </h3>
+              <p class="text-sm text-gray-500">
+                {{ product.brand?.name || 'Không rõ thương hiệu' }} ·
+                {{ product.category?.name || 'Không rõ danh mục' }}
+              </p>
+
+              <!-- AI Text Preview - CHỈ HIỂN THỊ KHI CÓ AI RESULTS -->
+              <div v-if="isShowingAiResults && aiProductTexts[product.id]" class="mb-3">
+                <p class="text-xs text-purple-600 bg-purple-50 p-2 rounded-lg line-clamp-2">
+                  AI: {{ aiProductTexts[product.id] }}
+                </p>
+              </div>
+
+              <!-- AI Stock & Status Info -->
+              <div v-if="isShowingAiResults" class="mb-3 flex items-center justify-between text-xs">
+                <span v-if="aiProductStocks[product.id] !== undefined" class="text-gray-600">
+                  Tồn: {{ aiProductStocks[product.id] }}
+                </span>
+                <span
+                  v-if="aiProductStatuses[product.id]"
+                  class="px-2 py-1 rounded-full text-xs font-medium"
+                  :class="{
+                    'bg-green-100 text-green-700': aiProductStatuses[product.id] === 'ACTIVE',
+                    'bg-gray-100 text-gray-600': aiProductStatuses[product.id] === 'INACTIVE',
+                    'bg-red-100 text-red-700': aiProductStatuses[product.id] === 'OUT_OF_STOCK',
+                  }"
+                >
+                  {{ getStatusLabel(aiProductStatuses[product.id]) }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-blue-600 font-semibold">{{
+                  formatPrice(getProductMinPrice(product))
+                }}</span>
+                <span
+                  class="px-2 py-1 rounded-lg text-xs font-medium"
+                  :class="
+                    product.status === 'ACTIVE'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-200 text-gray-500'
+                  "
+                  >{{ statusLabel(product.status) }}</span
+                >
+              </div>
+            </div>
+          </RouterLink>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="text-center py-20">
+          <div class="space-y-4">
+            <svg
+              class="w-16 h-16 text-gray-400 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+
+            <h3 class="text-xl font-medium text-gray-900">
+              {{
+                isShowingAiResults
+                  ? 'Không tìm thấy sản phẩm với AI'
+                  : 'Không tìm thấy sản phẩm nào'
+              }}
+            </h3>
+
+            <!-- Fallback specific message -->
+            <div v-if="isShowingAiResults && aiSearchMode === 'fallback'" class="space-y-3">
+              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
+                <div class="flex items-center space-x-2 text-yellow-800 mb-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    />
+                  </svg>
+                  <span class="font-medium text-sm">Chế độ Fallback được kích hoạt</span>
+                </div>
+                <p class="text-yellow-700 text-sm">
+                  AI không tìm thấy sản phẩm phù hợp với từ khóa
+                  <strong>"{{ aiLastSearchQuery }}"</strong>. Hãy thử các gợi ý ở phía trên hoặc mô
+                  tả chi tiết hơn.
+                </p>
+              </div>
+            </div>
+
+            <p v-else class="text-gray-500">
+              {{
+                isShowingAiResults
+                  ? 'Thử thay đổi từ khóa tìm kiếm AI hoặc sử dụng bộ lọc thông thường'
+                  : 'Thử thay đổi bộ lọc hoặc sử dụng tìm kiếm AI thông minh'
+              }}
+            </p>
+
+            <div class="flex justify-center space-x-3 mt-6">
+              <button
+                v-if="isShowingAiResults"
+                @click="clearAiSearch"
+                class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+              >
+                Xóa kết quả AI
+              </button>
+
+              <button
+                @click="resetFilters"
+                class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              >
+                Đặt lại bộ lọc
+              </button>
+
+              <button
+                v-if="!isShowingAiResults"
+                @click="runSuggestion('giày thể thao nam nữ')"
+                class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+              >
+                Thử AI: "giày thể thao"
+              </button>
             </div>
           </div>
-        </RouterLink>
-        <div v-if="!products.length" class="text-center py-20 text-gray-500 text-lg col-span-full">Không tìm thấy sản phẩm nào.</div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { RouterLink,useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import {
   getAllProductsApi,
   getProductByIdApi,
@@ -606,7 +513,7 @@ import type {
   Brand,
   Category,
   ProductFilter,
-  Color
+  Color,
   AiSearchRequest,
   ResultItem,
 } from '../products/product.type'
@@ -618,9 +525,9 @@ const categories = ref<Category[]>([])
 const colors = ref<Color[]>([])
 const route = useRoute()
 
-const showBrand = ref(false);
-const showCategory = ref(false);
-const showColor = ref(false);
+const showBrand = ref(false)
+const showCategory = ref(false)
+const showColor = ref(false)
 
 const filters = ref<ProductFilter>({
   page: 0,
@@ -671,16 +578,7 @@ const aiSearchExamples = ref<string[]>([
   'Giày da công sở màu nâu lịch sự',
   'Giày bóng đá sân cỏ tự nhiên',
 ])
-const resetFilters = () => {
-  filters.value = {
-    q: '',
-    brandId: '',
-    categoryId: '',
-    sortBy: '',
-  }
-  clearAiSearchData()
-  fetchProducts()
-}
+
 // ========== AI SEARCH METHODS - THÊM MỚI ==========
 const handleAiSearch = async (): Promise<void> => {
   const query = aiSearchQuery.value.trim()
@@ -834,10 +732,13 @@ const fetchProducts = async () => {
   }
 }
 
-
 const fetchFilters = async () => {
   try {
-    const [brandRes, catRes, corRes] = await Promise.all([getAllBrandsApi(), getAllCategoriesApi(), getAllColorsApi()])
+    const [brandRes, catRes, corRes] = await Promise.all([
+      getAllBrandsApi(),
+      getAllCategoriesApi(),
+      getAllColorsApi(),
+    ])
     brands.value = brandRes || []
     categories.value = catRes || []
     colors.value = corRes.data ?? corRes
@@ -846,40 +747,40 @@ const fetchFilters = async () => {
   }
 }
 
-const selectedSort = ref("createdAt-desc")
+const selectedSort = ref('createdAt-desc')
 
 const resetFilters = () => {
-  filters.value.brandIds = [];
-  filters.value.categoryIds = [];
-  filters.value.colorIds = [];
-  filters.value.minPrice = null;
-  filters.value.maxPrice = null;
+  filters.value.brandIds = []
+  filters.value.categoryIds = []
+  filters.value.colorIds = []
+  filters.value.minPrice = null
+  filters.value.maxPrice = null
 
-  selectedSort.value = "createdAt-desc"; // reset sort về mặc định
+  selectedSort.value = 'createdAt-desc' // reset sort về mặc định
 
   // Gọi fetchProducts nếu muốn tự động load lại danh sách
-  fetchProducts();
-};
+  fetchProducts()
+  clearAiSearchData()
+  fetchProducts()
+}
 
 const handleSortChange = () => {
-  const [sortBy, sortDirection] = selectedSort.value.split("-");
-  filters.value.sortBy = sortBy;
-  filters.value.sortDirection = sortDirection;
+  const [sortBy, sortDirection] = selectedSort.value.split('-')
+  filters.value.sortBy = sortBy
+  filters.value.sortDirection = sortDirection
 
   // Nếu sort theo price thì sắp xếp ngay trên frontend
-  if (sortBy === "price") {
+  if (sortBy === 'price') {
     products.value.sort((a, b) => {
-      const priceA = getProductMinPrice(a);
-      const priceB = getProductMinPrice(b);
-      return sortDirection === "asc" ? priceA - priceB : priceB - priceA;
-    });
+      const priceA = getProductMinPrice(a)
+      const priceB = getProductMinPrice(b)
+      return sortDirection === 'asc' ? priceA - priceB : priceB - priceA
+    })
   } else {
     // Nếu sort theo createdAt, gọi backend
-    fetchProducts();
+    fetchProducts()
   }
-};
-
-
+}
 
 // const getMainImage = (product: Product) => {
 //   const img =
@@ -900,17 +801,14 @@ const getMainImage = (product: Product) => {
 
   // 2. Tìm ảnh isMain trong variant nhỏ nhất
   let selectedImage =
-    smallestVariant.images?.find((img: any) => img.isMain) ||
-    smallestVariant.images?.[0] ||
-    null
+    smallestVariant.images?.find((img: any) => img.isMain) || smallestVariant.images?.[0] || null
 
   // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
   if (!selectedImage) {
     const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
     if (variantWithImage) {
       selectedImage =
-        variantWithImage.images.find((img: any) => img.isMain) ||
-        variantWithImage.images[0]
+        variantWithImage.images.find((img: any) => img.isMain) || variantWithImage.images[0]
     }
   }
 
@@ -937,13 +835,12 @@ function getDirectImageUrl(driveUrl: string) {
 }
 
 const getProductMinPrice = (product: Product) => {
-  const variants = product.variants || [];
-  if (!variants.length) return 0;
+  const variants = product.variants || []
+  if (!variants.length) return 0
 
   // Lấy giá nhỏ nhất
-  return Math.min(...variants.map(v => v.price || Infinity));
-};
-
+  return Math.min(...variants.map((v) => v.price || Infinity))
+}
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
@@ -995,11 +892,11 @@ onMounted(async () => {
   }
 
   // ⭐ Nếu đến từ image search → lấy data từ sessionStorage
-  if (route.query.fromImageSearch === "1") {
-    const raw = sessionStorage.getItem("imageSearchResults")
+  if (route.query.fromImageSearch === '1') {
+    const raw = sessionStorage.getItem('imageSearchResults')
     if (raw) {
       products.value = JSON.parse(raw)
-      console.log("🎯 Load products from image search:", products.value)
+      console.log('🎯 Load products from image search:', products.value)
       return
     }
   }
@@ -1023,7 +920,6 @@ onMounted(async () => {
 //   },
 //   { immediate: true }
 // )
-
 </script>
 <style scoped>
 .line-clamp-2 {
