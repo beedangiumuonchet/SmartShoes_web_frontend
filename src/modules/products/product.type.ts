@@ -68,6 +68,27 @@ export interface Attribute {
   value: string
 }
 
+export interface AiSearchRequest {
+  query: string
+  threshold?: number
+  max_candidates?: number
+  rerank?: boolean
+}
+
+export interface AiSearchResponse {
+  mode: string
+  results: ResultItem[]
+  suggestions?: string[]
+}
+
+export interface ResultItem {
+  product_id: string
+  text: string
+  score: number
+  stock?: number // BE thêm khi còn hàng
+  status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK'
+}
+
 // ==================== FILTER & PAGINATION ====================
 // export interface ProductFilter {
 //   page?: number
