@@ -19,31 +19,6 @@
           :alt="'image-' + i"
           @click="selectedImage = getDirectImageUrl(img.url)"
           class="w-20 h-20 rounded-xl object-cover cursor-pointer border transition-all duration-300"
-          :class="selectedImage === getDirectImageUrl(img.url)
-            ? 'border-blue-500 scale-105'
-            : 'border-gray-200 hover:scale-105'"
-        />
-      </div>
-    </div> -->
-    <!-- Left: Images -->
-    <div>
-      <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
-        <img
-          :src="selectedImage"
-          alt="Product Image"
-          class="w-full h-[500px] object-cover transition-transform duration-500 hover:scale-105"
-        />
-      </div>
-
-      <!-- Danh sách ảnh thumbnail -->
-      <div class="flex gap-3 mt-4 justify-center flex-wrap">
-        <img
-          v-for="(img, i) in displayedImages"
-          :key="i"
-          :src="getDirectImageUrl(img.url)"
-          :alt="'image-' + i"
-          @click="selectedImage = getDirectImageUrl(img.url)"
-          class="w-20 h-20 rounded-xl object-cover cursor-pointer border transition-all duration-300"
           :class="
             selectedImage === getDirectImageUrl(img.url)
               ? 'border-blue-500 scale-105'
@@ -269,14 +244,13 @@
         <h3 class="font-semibold text-gray-800 mb-2">Thông tin chi tiết</h3>
         <ul class="space-y-1 text-gray-700">
           <li
-  v-for="(attr, index) in groupedAttributes"
-  :key="index"
-  class="flex justify-between border-b py-1 text-sm"
->
-  <span class="font-medium">{{ attr.key }}:</span>
-  <span>{{ attr.values.join(', ') }}</span>
-</li>
-
+            v-for="(attr, index) in groupedAttributes"
+            :key="index"
+            class="flex justify-between border-b py-1 text-sm"
+          >
+            <span class="font-medium">{{ attr.key }}:</span>
+            <span>{{ attr.values.join(', ') }}</span>
+          </li>
         </ul>
       </div>
     </div>
@@ -753,7 +727,6 @@ const availableColors = computed(() => {
   })
 })
 
-
 const displayedImages = computed(() => {
   // Nếu user đã chọn màu → dùng ảnh theo màu
   if (selectedColor.value && imagesByColor.value[selectedColor.value]) {
@@ -775,7 +748,6 @@ const displayedImages = computed(() => {
   return mainImgs
 })
 
-
 const imagesByColor = computed(() => {
   if (!product.value?.variants) return {}
 
@@ -786,8 +758,8 @@ const imagesByColor = computed(() => {
     if (!map[color]) map[color] = []
 
     // Thêm ảnh vào màu nếu chưa tồn tại
-    v.images?.forEach(img => {
-      if (!map[color].some(i => i.url === img.url)) {
+    v.images?.forEach((img) => {
+      if (!map[color].some((i) => i.url === img.url)) {
         map[color].push(img)
       }
     })
@@ -795,8 +767,6 @@ const imagesByColor = computed(() => {
 
   return map
 })
-
-
 
 const isOnSale = computed(() => {
   return (
@@ -865,7 +835,7 @@ const groupedAttributes = computed(() => {
 
   const map = new Map()
 
-  product.value.attributes.forEach(attr => {
+  product.value.attributes.forEach((attr) => {
     const key = attr.attribute.key
     const value = attr.attribute.value
 
@@ -881,11 +851,9 @@ const groupedAttributes = computed(() => {
 
   return Array.from(map, ([key, values]) => ({
     key,
-    values
+    values,
   }))
 })
-
-
 
 const increaseQuantity = () => {
   if (currentVariant.value && quantity.value < currentVariant.value.stock) {
@@ -1026,10 +994,8 @@ watch(selectedColor, (color) => {
   if (!color) return
   const imgs = imagesByColor.value[color]
   if (imgs?.length) {
-    const main = imgs.find(i => i.isMain)
+    const main = imgs.find((i) => i.isMain)
     selectedImage.value = getDirectImageUrl(main?.url || imgs[0].url)
   }
 })
-
-
 </script>
