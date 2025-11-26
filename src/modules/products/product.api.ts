@@ -193,40 +193,126 @@ export const getProductsByCategoryApi = async (categoryId: string, params?: Prod
 /**
  * 🟢 Tạo mới sản phẩm (nếu cần)
  */
-export const createProductApi = async (formData: Partial<Product>) => {
-  console.log('=== CREATE PRODUCT ===')
-  console.log('Form Data:', formData)
+// export const createProductApi = async (formData: Partial<Product>) => {
+//   console.log('=== CREATE PRODUCT ===')
+//   console.log('Form Data:', formData)
 
-  const currentUser = getCurrentUser()
-  console.log('Current User:', currentUser)
+//   const currentUser = getCurrentUser()
+//   console.log('Current User:', currentUser)
+
+//   try {
+//     const response = await axiosHttpClient.post<IApiResponse<Product>>('/products', formData)
+//     console.log('✅ Create product success:', response)
+//     return response
+//   } catch (error) {
+//     console.error('❌ Create product error:', error)
+//     throw error
+//   }
+// }
+export const createProductApi = async (formData: FormData) => {
+  console.log("=== CREATE PRODUCT ===");
+  console.log("Form Data:", formData);
+
+  const currentUser = getCurrentUser();
+  console.log("Current User:", currentUser);
 
   try {
-    const response = await axiosHttpClient.post<IApiResponse<Product>>('/products', formData)
-    console.log('✅ Create product success:', response)
-    return response
+    const response = await axiosHttpClient.post<IApiResponse<Product>>(
+      "/products",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log("✅ Create product success:", response);
+    return response;
   } catch (error) {
-    console.error('❌ Create product error:', error)
-    throw error
+    console.error("❌ Create product error:", error);
+    throw error;
   }
-}
+};
 
 /**
  * 🟡 Cập nhật sản phẩm theo ID
  */
-export const updateProductApi = async (id: string, formData: Partial<Product>) => {
-  console.log('=== UPDATE PRODUCT ===')
-  console.log('Product ID:', id)
-  console.log('Form Data:', formData)
+// export const updateProductApi = async (id: string, formData: Partial<Product>) => {
+//   console.log('=== UPDATE PRODUCT ===')
+//   console.log('Product ID:', id)
+//   console.log('Form Data:', formData)
 
-  const currentUser = getCurrentUser()
-  console.log('Current User:', currentUser)
+//   const currentUser = getCurrentUser()
+//   console.log('Current User:', currentUser)
+
+//   try {
+//     const response = await axiosHttpClient.put<IApiResponse<Product>>(
+//       `/products/${id}`,
+//       formData
+//     )
+//     console.log('✅ Update product success:', response)
+//     return response
+//   } catch (error) {
+//     console.error('❌ Update product error:', error)
+//     throw error
+//   }
+// }
+export const updateProductApi = async (id: string, formData: FormData) => {
+  console.log("=== UPDATE PRODUCT ===");
+  console.log("Product ID:", id);
+  console.log("Form Data:", formData);
+
+  const currentUser = getCurrentUser();
+  console.log("Current User:", currentUser);
 
   try {
-    const response = await axiosHttpClient.put<IApiResponse<Product>>(`/products/${id}`, formData)
-    console.log('✅ Update product success:', response)
+    const response = await axiosHttpClient.put<IApiResponse<Product>>(
+      `/products/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log("✅ Update product success:", response);
+    return response;
+  } catch (error) {
+    console.error("❌ Update product error:", error);
+    throw error;
+  }
+};
+
+/**
+ * 🟢 Tìm sản phẩm dựa trên ảnh (CBIR)
+ */
+export const searchProductsByImageApi = async (file: File) => {
+  console.log('=== SEARCH PRODUCTS BY IMAGE ===')
+  console.log('File:', file)
+  console.log('Token exists:', !!cookie.get('jwt_token'))
+  console.log('Full URL:', `${import.meta.env.VITE_API_URL}/products/search-image`)
+  console.log('===============================')
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await axiosHttpClient.post<IApiResponse<Product[]>>(
+      '/products/search-image',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
+
+    console.log('✅ Search products by image success:', response)
     return response
   } catch (error) {
-    console.error('❌ Update product error:', error)
+    console.error('❌ Search products by image error:', error)
     throw error
   }
 }

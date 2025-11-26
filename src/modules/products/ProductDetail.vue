@@ -1,7 +1,7 @@
 <template>
   <div v-if="product" class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-2 gap-12">
     <!-- Left: Images -->
-    <!-- <div>
+    <div>
       <div class="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
         <img
           :src="selectedImage"
@@ -10,19 +10,18 @@
         />
       </div>
 
-      <div class="flex gap-3 mt-4 justify-center">
+      <!-- Danh sách ảnh thumbnail -->
+      <div class="flex gap-3 mt-4 justify-center flex-wrap">
         <img
-          v-for="(img, i) in currentVariant?.images || mainImages"
+          v-for="(img, i) in displayedImages"
           :key="i"
           :src="getDirectImageUrl(img.url)"
           :alt="'image-' + i"
-          @click="selectedImage = img.url"
+          @click="selectedImage = getDirectImageUrl(img.url)"
           class="w-20 h-20 rounded-xl object-cover cursor-pointer border transition-all duration-300"
-          :class="
-            selectedImage === img.url
-              ? 'border-blue-500 scale-105'
-              : 'border-gray-200 hover:scale-105'
-          "
+          :class="selectedImage === getDirectImageUrl(img.url)
+            ? 'border-blue-500 scale-105'
+            : 'border-gray-200 hover:scale-105'"
         />
       </div>
     </div> -->
@@ -63,18 +62,19 @@
       <p class="text-gray-500 mb-4">
         <RouterLink
           v-if="product.brand"
-          :to="`/brand/${product.brand.id}`"
+          :to="{ path: '/products', query: { brandId: product.brand.id } }"
           class="text-blue-600 hover:underline"
         >
           {{ product.brand.name }}
         </RouterLink>
+
         <span v-else>{{ product.brand?.name || product.brandName || 'Không rõ thương hiệu' }}</span>
 
         ·
 
         <RouterLink
           v-if="product.category"
-          :to="`/category/${product.category.id}`"
+          :to="{ path: '/products', query: { categoryId: product.category.id } }"
           class="text-blue-600 hover:underline"
         >
           {{ product.category.name }}
@@ -269,13 +269,14 @@
         <h3 class="font-semibold text-gray-800 mb-2">Thông tin chi tiết</h3>
         <ul class="space-y-1 text-gray-700">
           <li
-            v-for="attr in product.attributes"
-            :key="attr.id"
-            class="flex justify-between border-b py-1 text-sm"
-          >
-            <span class="font-medium">{{ attr.attribute.key }}:</span>
-            <span>{{ attr.attribute.value }}</span>
-          </li>
+  v-for="(attr, index) in groupedAttributes"
+  :key="index"
+  class="flex justify-between border-b py-1 text-sm"
+>
+  <span class="font-medium">{{ attr.key }}:</span>
+  <span>{{ attr.values.join(', ') }}</span>
+</li>
+
         </ul>
       </div>
     </div>
@@ -752,9 +753,14 @@ const availableColors = computed(() => {
   })
 })
 
-// 🖼️ Danh sách ảnh hiển thị (phụ thuộc vào variant được chọn)
+
 const displayedImages = computed(() => {
-  // Nếu đã chọn variant (size + color hợp lệ)
+  // Nếu user đã chọn màu → dùng ảnh theo màu
+  if (selectedColor.value && imagesByColor.value[selectedColor.value]) {
+    return imagesByColor.value[selectedColor.value]
+  }
+
+  // Nếu đã chọn variant → fallback
   if (currentVariant.value?.images?.length) {
     return currentVariant.value.images
   }
@@ -762,13 +768,35 @@ const displayedImages = computed(() => {
   // Nếu chưa chọn, hiển thị ảnh chính (main images)
   const mainImgs = product.value?.variants?.flatMap((v) => v.images?.filter((i) => i.isMain)) || []
 
-  // Nếu không có ảnh main, fallback ảnh đầu tiên của variant đầu
   if (!mainImgs.length && product.value?.variants?.length) {
     return product.value.variants[0].images || []
   }
 
   return mainImgs
 })
+
+
+const imagesByColor = computed(() => {
+  if (!product.value?.variants) return {}
+
+  const map: Record<string, any[]> = {}
+
+  for (const v of product.value.variants) {
+    const color = v.colorName
+    if (!map[color]) map[color] = []
+
+    // Thêm ảnh vào màu nếu chưa tồn tại
+    v.images?.forEach(img => {
+      if (!map[color].some(i => i.url === img.url)) {
+        map[color].push(img)
+      }
+    })
+  }
+
+  return map
+})
+
+
 
 const isOnSale = computed(() => {
   return (
@@ -831,6 +859,33 @@ const selectColor = (color: string) => {
     selectedSize.value = null
   }
 }
+
+const groupedAttributes = computed(() => {
+  if (!product.value?.attributes) return []
+
+  const map = new Map()
+
+  product.value.attributes.forEach(attr => {
+    const key = attr.attribute.key
+    const value = attr.attribute.value
+
+    if (!map.has(key)) {
+      map.set(key, [value])
+    } else {
+      // tránh push trùng value
+      if (!map.get(key).includes(value)) {
+        map.get(key).push(value)
+      }
+    }
+  })
+
+  return Array.from(map, ([key, values]) => ({
+    key,
+    values
+  }))
+})
+
+
 
 const increaseQuantity = () => {
   if (currentVariant.value && quantity.value < currentVariant.value.stock) {
@@ -959,11 +1014,22 @@ onMounted(async () => {
     console.error('❌ Lỗi tải sản phẩm:', err)
   }
 })
-watch(currentVariant, (newVal) => {
-  if (newVal?.images?.length) {
-    selectedImage.value = getDirectImageUrl(
-      newVal.images.find((i) => i.isMain)?.url || newVal.images[0].url,
-    )
+// watch(currentVariant, (newVal) => {
+//   if (newVal?.images?.length) {
+//     selectedImage.value = getDirectImageUrl(
+//       newVal.images.find((i) => i.isMain)?.url || newVal.images[0].url
+//     )
+//   }
+// })
+
+watch(selectedColor, (color) => {
+  if (!color) return
+  const imgs = imagesByColor.value[color]
+  if (imgs?.length) {
+    const main = imgs.find(i => i.isMain)
+    selectedImage.value = getDirectImageUrl(main?.url || imgs[0].url)
   }
 })
+
+
 </script>

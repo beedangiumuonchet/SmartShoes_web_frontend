@@ -69,9 +69,9 @@
     <!-- Categories Section -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold text-gray-900 mb-4">Danh mục sản phẩm</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Danh mục thể loại sản phẩm</h2>
         <p class="text-gray-600 max-w-2xl mx-auto">
-          Khám phá bộ sưu tập giày thể thao đa dạng từ các thương hiệu hàng đầu
+          Lựa chọn thể loại để khám phá các sản phẩm phù hợp với nhu cầu của bạn
         </p>
       </div>
 
@@ -450,22 +450,46 @@ const fetchFeaturedProducts = async () => {
     const data = response.content || []
 
     featuredProducts.value = data.map((p: any, index: number) => {
-      // Lấy ảnh đầu tiên của biến thể đầu tiên
-      const imgUrl = p.variants?.[0]?.images?.[0]?.url || null
-      const directUrl = getDirectImageUrl(imgUrl)
+      const variants = p.variants || []
 
-      console.log(`Ảnh sản phẩm [${index}] (${p.name}):`, directUrl)
+      let mainImageUrl: string | null = null
+
+      if (variants.length > 0) {
+        // --- 1. Lấy variant có ID nhỏ nhất ---
+        const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+
+        // --- 2. Lấy ảnh isMain hoặc ảnh đầu tiên ---
+        let selectedImage =
+          smallestVariant.images?.find((img: any) => img.isMain) ||
+          smallestVariant.images?.[0] ||
+          null
+
+        // --- 3. Nếu variant nhỏ nhất không có ảnh → tìm ảnh từ variant khác ---
+        if (!selectedImage) {
+          const variantWithImage = variants.find(v => v.images && v.images.length > 0)
+          if (variantWithImage) {
+            selectedImage =
+              variantWithImage.images.find((img: any) => img.isMain) ||
+              variantWithImage.images[0]
+          }
+        }
+
+        // --- 4. Nếu vẫn không có ảnh → null ---
+        mainImageUrl = selectedImage ? getDirectImageUrl(selectedImage.url) : null
+      }
+
+      console.log(`Ảnh sản phẩm [${index}] (${p.name}):`, mainImageUrl)
 
       return {
         id: p.id,
         name: p.name,
         brand: p.brandName,
         slug: p.slug,
-        price: p.variants?.[0]?.price || 0,
-        originalPrice: p.variants?.[0]?.originalPrice || null,
-        discount: p.variants?.[0]?.discount || null,
+        price: variants?.[0]?.price || 0,
+        originalPrice: variants?.[0]?.originalPrice || null,
+        discount: variants?.[0]?.discount || null,
         rating: p.rating || 4.5,
-        mainImage: directUrl,
+        mainImage: mainImageUrl,
         isWishlisted: false,
       }
     })
@@ -473,6 +497,7 @@ const fetchFeaturedProducts = async () => {
     console.error('Lỗi khi tải sản phẩm nổi bật:', error)
   }
 }
+
 
 
 
@@ -539,7 +564,12 @@ const handleShopNow = () => {
 }
 
 const handleCategoryClick = (category: any) => {
-  router.push(`/category/${category.id}`)
+  router.push({
+    path: '/products',
+    query: {
+      categoryId: category.id
+    }
+  })
 }
 
 const handleProductClick = (product: any) => {
@@ -547,8 +577,14 @@ const handleProductClick = (product: any) => {
 }
 
 const handleBrandClick = (brand: any) => {
-  router.push(`/brands/${brand.id}`)
+  router.push({
+    path: '/products',
+    query: {
+      brandId: brand.id
+    }
+  })
 }
+
 
 const handleViewAll = () => {
   router.push('/products')
