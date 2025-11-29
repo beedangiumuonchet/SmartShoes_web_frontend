@@ -208,6 +208,12 @@ const navigationItems = ref<NavigationMenuItem[][]>([
       icon: 'i-heroicons-cube',
     },
     {
+      label: 'Khuyến mãi',
+      to: '/manager/promotions',
+      icon: 'i-heroicons-percent-badge'
+
+    },
+    {
       label: 'Đơn Hàng',
       to: '/manager/orders',
       icon: 'i-heroicons-shopping-cart',
