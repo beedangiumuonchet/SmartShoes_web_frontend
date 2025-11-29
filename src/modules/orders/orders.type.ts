@@ -100,6 +100,19 @@ export class UpdateStatusRequest {
   }
 }
 
+// ✅ THÊM MỚI - Update shipping request
+export class UpdateShippingRequest {
+  shippingName: string
+  shippingPhone: string
+  shippingAddress: string
+
+  constructor(shippingName: string = '', shippingPhone: string = '', shippingAddress: string = '') {
+    this.shippingName = shippingName
+    this.shippingPhone = shippingPhone
+    this.shippingAddress = shippingAddress
+  }
+}
+
 // NEW: Form request để filter và phân trang orders
 export class OrderFilterRequest {
   q?: string // tìm theo mã đơn / user name / email

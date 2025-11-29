@@ -839,12 +839,6 @@ onMounted(() => {
                     </div>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Vai trò</label>
-                    <div class="p-3 bg-gray-50 rounded-lg border">
-                      <p class="text-gray-900">{{ userRoles }}</p>
-                    </div>
-                  </div>
-                  <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
                     <div class="p-3 bg-gray-50 rounded-lg border">
                       <span
@@ -860,48 +854,6 @@ onMounted(() => {
                 </div>
 
                 <!-- Additional Info -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >ID người dùng</label
-                    >
-                    <div class="p-3 bg-gray-50 rounded-lg border">
-                      <p class="text-gray-900 font-mono text-sm">
-                        {{ profile?.userId || 'Chưa có' }}
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Tạo lúc</label>
-                    <div class="p-3 bg-gray-50 rounded-lg border">
-                      <p class="text-gray-900">{{ formatDate(profile?.createdAt) }}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Cập nhật lần cuối</label
-                    >
-                    <div class="p-3 bg-gray-50 rounded-lg border">
-                      <p class="text-gray-900">{{ formatDate(profile?.updatedAt) }}</p>
-                    </div>
-                  </div>
-                  <div v-if="profile?.iat">
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Token được cấp lúc</label
-                    >
-                    <div class="p-3 bg-gray-50 rounded-lg border">
-                      <p class="text-gray-900">{{ tokenIssuedAt }}</p>
-                    </div>
-                  </div>
-                  <div v-if="profile?.exp">
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Token hết hạn lúc</label
-                    >
-                    <div class="p-3 bg-gray-50 rounded-lg border">
-                      <p class="text-gray-900">{{ tokenExpiry }}</p>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <!-- Edit Mode -->

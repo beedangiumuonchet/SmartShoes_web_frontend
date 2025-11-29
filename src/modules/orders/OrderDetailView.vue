@@ -335,30 +335,49 @@
             </div>
           </div>
 
-          <!-- Shipping Information -->
+          <!-- Shipping Information - With Edit Button -->
           <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <svg
-                class="w-6 h-6 text-blue-500 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                <svg
+                  class="w-6 h-6 text-blue-500 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                Thông tin giao hàng
+              </h2>
+
+              <!-- Edit Button - Chỉ hiển thị khi có thể edit -->
+              <button
+                v-if="canEditShipping"
+                @click="openEditShippingDialog"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                ></path>
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                ></path>
-              </svg>
-              Thông tin giao hàng
-            </h2>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Chỉnh sửa
+              </button>
+            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -374,9 +393,37 @@
                 <p class="text-base text-gray-900 font-medium">{{ order.shippingAddress }}</p>
               </div>
             </div>
+
+            <!-- Status Notice cho PENDING/PAID -->
+            <div
+              v-if="canEditShipping"
+              class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
+            >
+              <div class="flex items-start space-x-2">
+                <svg
+                  class="w-5 h-5 text-blue-500 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div>
+                  <h4 class="text-sm font-medium text-blue-900">Có thể chỉnh sửa địa chỉ</h4>
+                  <p class="text-sm text-blue-800 mt-1">
+                    Đơn hàng đang ở trạng thái "{{ getStatusLabel(order.status) }}", bạn có thể
+                    chỉnh sửa thông tin giao hàng.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-
         <!-- Right Column: Order Summary & Actions -->
         <div class="lg:col-span-1">
           <div
@@ -526,6 +573,119 @@
         </div>
       </div>
     </div>
+    <!-- Edit Shipping Dialog -->
+    <div
+      v-if="showEditShippingDialog"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-semibold text-gray-900">Chỉnh sửa thông tin giao hàng</h3>
+          <button
+            @click="closeEditShippingDialog"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <form @submit.prevent="updateShippingInfo" class="space-y-4">
+          <!-- Tên người nhận -->
+          <div>
+            <label for="shipping-name" class="block text-sm font-medium text-gray-700 mb-2">
+              Tên người nhận <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="shipping-name"
+              v-model="shippingForm.shippingName"
+              type="text"
+              required
+              maxlength="100"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Nhập tên người nhận"
+            />
+          </div>
+
+          <!-- Số điện thoại -->
+          <div>
+            <label for="shipping-phone" class="block text-sm font-medium text-gray-700 mb-2">
+              Số điện thoại <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="shipping-phone"
+              v-model="shippingForm.shippingPhone"
+              type="tel"
+              required
+              maxlength="15"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Nhập số điện thoại"
+            />
+          </div>
+
+          <!-- Địa chỉ -->
+          <div>
+            <label for="shipping-address" class="block text-sm font-medium text-gray-700 mb-2">
+              Địa chỉ giao hàng <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              id="shipping-address"
+              v-model="shippingForm.shippingAddress"
+              required
+              maxlength="500"
+              rows="3"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+              placeholder="Nhập địa chỉ giao hàng chi tiết"
+            ></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3 pt-4">
+            <button
+              type="submit"
+              :disabled="isUpdatingShipping"
+              class="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white font-medium rounded-lg transition-colors"
+            >
+              <span v-if="isUpdatingShipping" class="flex items-center justify-center">
+                <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Đang cập nhật...
+              </span>
+              <span v-else>Cập nhật thông tin</span>
+            </button>
+
+            <button
+              type="button"
+              @click="closeEditShippingDialog"
+              class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors"
+            >
+              Hủy
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- Success Toast -->
     <div
@@ -568,9 +728,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getOrder, cancelOrder } from './orders.api'
+import { getOrder, cancelOrder, updateOrderShipping } from './orders.api'
 import { getCurrentUser } from '@/common/guards/roleGuard.guard'
-import { ORDER_STATUS_LABELS, OrderStatus, type Order, type OrderDetail } from './orders.type'
+import {
+  ORDER_STATUS_LABELS,
+  OrderStatus,
+  type Order,
+  type OrderDetail,
+  UpdateShippingRequest,
+} from './orders.type'
 import { CartDetailRequest } from '../carts/carts.type'
 import { getOrCreateUserCart, addCartDetail } from '../carts/carts.api'
 // ✅ Import API để lấy variant với product - SAME AS CARTVIEW
@@ -585,6 +751,14 @@ const loadingReviews = ref(false)
 const productReviews = ref<Map<string, Review[]>>(new Map())
 const route = useRoute()
 const router = useRouter()
+
+const showEditShippingDialog = ref(false)
+const isUpdatingShipping = ref(false)
+const shippingForm = ref({
+  shippingName: '',
+  shippingPhone: '',
+  shippingAddress: '',
+})
 
 // ================================
 // STATE MANAGEMENT
@@ -671,6 +845,93 @@ const orderSummary = computed(() => {
     itemCount,
   }
 })
+const canEditShipping = computed(() => {
+  if (!order.value || !currentUser.value?.userId) return false
+
+  // Kiểm tra order có phải của user hiện tại không
+  const isOwner = order.value.userId === currentUser.value.userId
+
+  // Kiểm tra status có phải PENDING hoặc PAID không
+  const canEditStatus = [OrderStatus.PENDING, OrderStatus.PAID].includes(order.value.status)
+
+  return isOwner && canEditStatus
+})
+
+const openEditShippingDialog = () => {
+  if (!order.value || !canEditShipping.value) return
+
+  // Load thông tin hiện tại vào form
+  shippingForm.value = {
+    shippingName: order.value.shippingName,
+    shippingPhone: order.value.shippingPhone,
+    shippingAddress: order.value.shippingAddress,
+  }
+
+  showEditShippingDialog.value = true
+}
+
+const closeEditShippingDialog = () => {
+  showEditShippingDialog.value = false
+  // Reset form
+  shippingForm.value = {
+    shippingName: '',
+    shippingPhone: '',
+    shippingAddress: '',
+  }
+}
+
+const updateShippingInfo = async () => {
+  if (!order.value || !canEditShipping.value) return
+
+  // Validation
+  if (!shippingForm.value.shippingName.trim()) {
+    showError('Tên người nhận không được để trống')
+    return
+  }
+
+  if (!shippingForm.value.shippingPhone.trim()) {
+    showError('Số điện thoại không được để trống')
+    return
+  }
+
+  if (!shippingForm.value.shippingAddress.trim()) {
+    showError('Địa chỉ giao hàng không được để trống')
+    return
+  }
+
+  try {
+    isUpdatingShipping.value = true
+
+    const request = new UpdateShippingRequest(
+      shippingForm.value.shippingName.trim(),
+      shippingForm.value.shippingPhone.trim(),
+      shippingForm.value.shippingAddress.trim(),
+    )
+
+    console.log('🔄 Updating shipping info for order:', order.value.id)
+
+    const updatedOrder = await updateOrderShipping(order.value.id, request)
+
+    // Cập nhật order trong component
+    order.value = updatedOrder
+
+    showEditShippingDialog.value = false
+    showSuccess('Cập nhật thông tin giao hàng thành công!')
+  } catch (error: any) {
+    console.error('❌ Update shipping error:', error)
+
+    let errorMsg = 'Có lỗi xảy ra khi cập nhật thông tin giao hàng'
+    if (error?.response?.data?.message) {
+      errorMsg = error.response.data.message
+    } else if (error?.message) {
+      errorMsg = error.message
+    }
+
+    showError(errorMsg)
+  } finally {
+    isUpdatingShipping.value = false
+  }
+}
 
 // ================================
 // ✅ THÊM: REVIEW COMPUTED PROPERTIES

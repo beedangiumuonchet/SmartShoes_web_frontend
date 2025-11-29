@@ -12,6 +12,7 @@ import {
   OrderFilterRequest,
   buildOrderFilterParams,
   createOrderFilter,
+  UpdateShippingRequest,
   type OrderStatus,
   type BuyNowResponse,
   type FromCartResponse,
@@ -646,6 +647,87 @@ export const getMyOrders = async (): Promise<Order[]> => {
     throw new Error('Cannot get userId from current user token')
   }
   return await getUserOrders(currentUser.userId)
+}
+
+/**
+ * API để cập nhật thông tin giao hàng của order
+ */
+export const updateOrderShipping = async (
+  orderId: string,
+  request: UpdateShippingRequest,
+): Promise<Order> => {
+  console.log('=== UPDATE ORDER SHIPPING ===')
+  console.log('Order ID:', orderId)
+  console.log('Request:', request)
+  console.log('Token exists:', !!cookie.get('jwt_token'))
+  console.log('=============================')
+
+  try {
+    const response = await axiosHttpClient.put(`/orders/${orderId}/shipping`, request)
+    console.log('✅ Update order shipping success:', response)
+
+    // Handle BE response structure - tương tự như các API khác
+    if (response && isRecord(response)) {
+      if (isValidOrder(response)) {
+        return response
+      } else if (
+        hasProperty(response, 'data') &&
+        response.data &&
+        isRecord(response.data) &&
+        isValidOrder(response.data)
+      ) {
+        return response.data
+      } else if (
+        hasProperty(response, 'result') &&
+        response.result &&
+        isRecord(response.result) &&
+        isValidOrder(response.result)
+      ) {
+        return response.result
+      } else if (hasProperty(response, 'success') && response.success) {
+        if (
+          hasProperty(response, 'data') &&
+          response.data &&
+          isRecord(response.data) &&
+          isValidOrder(response.data)
+        ) {
+          return response.data
+        } else if (
+          hasProperty(response, 'result') &&
+          response.result &&
+          isRecord(response.result) &&
+          isValidOrder(response.result)
+        ) {
+          return response.result
+        }
+      } else if (
+        hasProperty(response, 'message') &&
+        hasProperty(response, 'data') &&
+        response.data &&
+        isRecord(response.data) &&
+        isValidOrder(response.data)
+      ) {
+        return response.data
+      }
+    }
+
+    throw new Error('Invalid update shipping response structure')
+  } catch (error) {
+    console.error('❌ Update order shipping error:', error)
+
+    // Log chi tiết lỗi
+    if (error && isRecord(error) && hasProperty(error, 'response')) {
+      const httpError = error as any
+      console.error('HTTP Error details:', {
+        status: httpError.response?.status,
+        url: httpError.config?.url,
+        method: httpError.config?.method,
+        data: httpError.response?.data,
+      })
+    }
+
+    throw error
+  }
 }
 
 /**

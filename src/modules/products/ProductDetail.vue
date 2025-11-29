@@ -883,6 +883,7 @@ function getDirectImageUrl(driveUrl: string) {
 const addToCart = async () => {
   if (!currentVariant.value || !canAddToCart.value) {
     console.warn('Cannot add to cart: invalid variant or conditions')
+    window.dispatchEvent(new CustomEvent('cart-updated'))
     return
   }
 
