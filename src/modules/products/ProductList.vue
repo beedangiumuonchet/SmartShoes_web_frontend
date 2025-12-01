@@ -516,7 +516,7 @@ const filters = ref<ProductFilter>({
   status: 'ACTIVE',
   minPrice: null,
   maxPrice: null,
-  inStock: null,
+  inStock: true,
   brandIds: [],
   categoryIds: [],
   colorIds: [], // ✅ THÊM MỚI

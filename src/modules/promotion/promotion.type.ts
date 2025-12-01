@@ -1,14 +1,17 @@
 // types/promotion.type.ts
-export type PromotionStatus = 'ACTIVE' | 'INACTIVE' | 'EXPIRED'
+import type { ProductVariant } from '../products/product.type'
+
+export type PromotionStatus = 'ACTIVE' | 'INACTIVE' | 'EXPIRED' | 'UPCOMING'
 
 export interface Promotion {
   id: string
   name: string
   description?: string
   percent: number
-  start_date: string
-  end_date: string
+  startDate: string
+  endDate: string
   status: PromotionStatus
+  products?: PromotionProductVariant[] 
 }
 
 export class PromotionForm {
@@ -35,3 +38,18 @@ export class PromotionForm {
     this.description = description
   }
 }
+
+export interface PromotionProductVariant {
+  id: string
+  status: string
+  promotion: Promotion
+  productVariant: ProductVariant
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface PromotionProductRequest {
+  promotionId: string
+  productVariantId: string
+}
+

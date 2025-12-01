@@ -124,7 +124,11 @@ export interface ProductFilter {
   sortDirection?: 'asc' | 'desc'
 }
 
-
+export interface TopProductDTO {
+  product: Product;
+  soldQuantity: number;
+  soldRevenue: number;
+}
 
 export interface PaginationResponse<T> {
   content: T[]
