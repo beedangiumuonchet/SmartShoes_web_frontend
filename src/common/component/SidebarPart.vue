@@ -225,9 +225,16 @@ const navigationItems = ref<NavigationMenuItem[][]>([
     },
     {
       label: 'Báo Cáo',
-      to: '/manager/reports',
       icon: 'i-heroicons-chart-bar',
+      children: [
+        {
+          label: 'Báo cáo theo sản phẩm',
+          to: '/manager/report/top-products',
+          icon: 'i-heroicons-chart-bar',
+        }
+      ],
     },
+
     {
       label: 'Cài Đặt',
       to: '/manager/settings',
