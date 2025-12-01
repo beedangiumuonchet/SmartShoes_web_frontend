@@ -792,3 +792,144 @@ export const getUserPaymentsWithPagination = async (
   })
   return await getAllPayments(filter)
 }
+/**
+ * ✅ THÊM MỚI - Type guard để kiểm tra Order Payment structure từ BE
+ */
+function isValidOrderPayment(obj: Record<string, unknown>): boolean {
+  const hasRequiredFields =
+    hasProperty(obj, 'id') &&
+    hasProperty(obj, 'amount') &&
+    hasProperty(obj, 'paymentMethod') &&
+    hasProperty(obj, 'status') &&
+    hasProperty(obj, 'orderId') &&
+    hasProperty(obj, 'createdAt')
+
+  const hasValidTypes =
+    typeof obj.id === 'string' &&
+    typeof obj.amount === 'number' &&
+    typeof obj.paymentMethod === 'string' &&
+    typeof obj.status === 'string' &&
+    typeof obj.orderId === 'string' &&
+    typeof obj.createdAt === 'string'
+
+  return hasRequiredFields && hasValidTypes
+}
+
+/**
+ * ✅ THÊM MỚI - Helper để normalize Order Payment từ BE thành Payment interface
+ */
+function normalizeOrderPayment(obj: Record<string, unknown>): Payment | null {
+  try {
+    if (!isValidOrderPayment(obj)) {
+      return null
+    }
+
+    return {
+      id: obj.id as string,
+      amount: obj.amount as number,
+      paymentMethod: obj.paymentMethod as PaymentMethod,
+      transactionId: obj.transactionId as string | undefined,
+      status: obj.status as PaymentStatus,
+      order: obj.orderId as string, // Map orderId từ BE thành order cho interface
+      createdAt: obj.createdAt as string,
+      updatedAt: obj.updatedAt as string | undefined,
+    }
+  } catch (error) {
+    console.error('❌ Error normalizing order payment:', error)
+    return null
+  }
+}
+
+/**
+ * ✅ THÊM MỚI - API để lấy tất cả payments của một order cụ thể
+ */
+export const getPaymentsByOrderId = async (orderId: string): Promise<Payment[]> => {
+  console.log('=== GET PAYMENTS BY ORDER ID ===')
+  console.log('Order ID:', orderId)
+  console.log('Token exists:', !!cookie.get('jwt_token'))
+  console.log('================================')
+
+  try {
+    const response = await axiosHttpClient.get(`/payments/${orderId}/payments`)
+    console.log('✅ Get payments by order ID success:', response)
+
+    // Xử lý response theo structure từ BE: { result: [...], success: true, timestamp: "..." }
+    if (
+      response &&
+      isRecord(response) &&
+      hasProperty(response, 'result') &&
+      Array.isArray(response.result)
+    ) {
+      const paymentsArray = response.result
+
+      // Normalize từng payment object
+      const normalizedPayments: Payment[] = paymentsArray
+        .filter(
+          (item): item is Record<string, unknown> =>
+            typeof item === 'object' && item !== null && !Array.isArray(item),
+        )
+        .map((paymentData) => normalizeOrderPayment(paymentData))
+        .filter((payment): payment is Payment => payment !== null)
+
+      console.log(`✅ Processed ${normalizedPayments.length} payments for order ${orderId}`)
+      return normalizedPayments
+    }
+
+    // Fallback - trả về empty array
+    console.warn('⚠️ No payments found or invalid response structure')
+    return []
+  } catch (error) {
+    console.error('❌ Get payments by order ID error:', error)
+
+    // Handle 404 - không có payment nào
+    if (error && isRecord(error) && hasProperty(error, 'response')) {
+      const httpError = error as any
+      if (httpError.response?.status === 404) {
+        console.warn(`⚠️ No payments found for order ${orderId}`)
+        return []
+      }
+    }
+
+    throw error
+  }
+}
+
+/**
+ * ✅ THÊM MỚI - Helper để lấy payment info của order
+ */
+export const getOrderPaymentInfo = async (orderId: string) => {
+  try {
+    const payments = await getPaymentsByOrderId(orderId)
+    console.log(`✅ Retrieved ${payments.length} payments for order ${orderId}`)
+    console.log('💳 Payment Method Info:', payments.map((p) => p.paymentMethod).join(', '))
+
+    if (payments.length === 0) {
+      return {
+        paymentMethod: null,
+        paymentStatus: null,
+        latestPayment: null,
+        hasMultiplePayments: false,
+      }
+    }
+
+    // Lấy payment mới nhất
+    const latestPayment = payments.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )[0]
+
+    return {
+      paymentMethod: latestPayment.paymentMethod,
+      paymentStatus: latestPayment.status,
+      latestPayment: latestPayment,
+      hasMultiplePayments: payments.length > 1,
+    }
+  } catch (error) {
+    console.error('❌ Error getting order payment info:', error)
+    return {
+      paymentMethod: null,
+      paymentStatus: null,
+      latestPayment: null,
+      hasMultiplePayments: false,
+    }
+  }
+}
