@@ -22,8 +22,18 @@ export const productRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/products/:slug',
-    name: 'ProductDetail',
+    path: '/products/slug/:slug',
+    name: 'ProductDetailBySlug',
+    component: () => import('./ProductDetail.vue'),
+    meta: {
+      title: 'Product Detail',
+      requiresAuth: false,
+      layout: 'topbar',
+    },
+  },
+  {
+    path: '/products/id/:id',
+    name: 'ProductDetailById',
     component: () => import('./ProductDetail.vue'),
     meta: {
       title: 'Product Detail',
@@ -32,4 +42,3 @@ export const productRoutes: RouteRecordRaw[] = [
     },
   },
 ]
-

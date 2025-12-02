@@ -740,55 +740,89 @@ const getProductName = (detail: OrderDetail) => {
   return fallbackName
 }
 
+// ✅ CẬP NHẬT - getMainImage với logic mới
+const getMainImage = (product: Product) => {
+  const variants = product.variants || []
+
+  if (variants.length === 0) {
+    return 'https://via.placeholder.com/200x200?text=No+Image'
+  }
+
+  // 1. Tìm variant có ID nhỏ nhất
+  const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+
+  // 2. Tìm ảnh isMain trong variant nhỏ nhất
+  let selectedImage =
+    smallestVariant.images?.find((img: any) => img.isMain) || smallestVariant.images?.[0] || null
+
+  // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
+  if (!selectedImage) {
+    const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
+    if (variantWithImage) {
+      selectedImage =
+        variantWithImage.images.find((img: any) => img.isMain) || variantWithImage.images[0]
+    }
+  }
+
+  // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
+  if (!selectedImage?.url) {
+    return 'https://via.placeholder.com/200x200?text=No+Image'
+  }
+
+  return selectedImage.url
+}
+
+// ✅ THÊM MỚI - getDirectImageUrl
+function getDirectImageUrl(driveUrl: string) {
+  const match = driveUrl?.match(/\/d\/([^/]+)/)
+  if (!match) return driveUrl
+
+  const driveId = match[1]
+  return `http://localhost:8080/api/v1/images/${driveId}`
+}
 const getProductImage = (detail: OrderDetail) => {
   console.log('🖼️ Getting product image for order detail:', detail.id)
-
-  // ✅ Lấy từ cache variant đã fetch
+  // Từ cache variant đã fetch (có product đầy đủ)
   const variantInfo = variantCache.value.get(detail.productVariantId)
-  if (variantInfo?.images?.length > 0) {
-    // Tìm main image trước
-    const mainImage = variantInfo.images.find((img) => img.isMain)
-    if (mainImage?.url) {
-      console.log('✅ Found main image from API cache:', mainImage.url)
-      return mainImage.url
-    }
 
-    // Nếu không có main, lấy ảnh đầu tiên
-    const firstImage = variantInfo.images[0]?.url
-    if (firstImage) {
-      console.log('✅ Found first image from API cache:', firstImage)
-      return firstImage
+  if (variantInfo?.product) {
+    // Kiểm tra xem product có variants không (tức là đã fetch đầy đủ)
+    if (variantInfo.product.variants && variantInfo.product.variants.length > 0) {
+      // Sử dụng getMainImage để lấy ảnh từ product (tìm variant có ảnh đầu tiên)
+      const productImageUrl = getMainImage(variantInfo.product as Product)
+
+      // Convert Google Drive URL thành localhost URL
+      if (
+        productImageUrl &&
+        productImageUrl !== 'https://via.placeholder.com/200x200?text=No+Image'
+      ) {
+        return getDirectImageUrl(productImageUrl)
+      }
+
+      return productImageUrl
+    } else {
+      // Nếu chưa có variants, thử lấy từ variant hiện tại
+      if (variantInfo.images?.length > 0) {
+        const mainImage = variantInfo.images.find((img) => img.isMain)
+        if (mainImage?.url) {
+          return getDirectImageUrl(mainImage.url)
+        }
+        return getDirectImageUrl(variantInfo.images[0].url)
+      }
     }
   }
 
-  // Fallback - từ data có sẵn trong order
+  // Fallback từ data có sẵn trong cart (nếu BE populate product)
   if (detail.productVariant?.images?.length > 0) {
-    const mainImage = detail.productVariant.images.find((img: any) => img.isMain)
+    const mainImage = detail.productVariant.images.find((img) => img.isMain)
     if (mainImage?.url) {
-      console.log('✅ Found image from populated data (main):', mainImage.url)
-      return mainImage.url
+      return getDirectImageUrl(mainImage.url)
     }
-
-    const firstImage = detail.productVariant.images[0]?.url
-    if (firstImage) {
-      console.log('✅ Found image from populated data (first):', firstImage)
-      return firstImage
-    }
+    return getDirectImageUrl(detail.productVariant.images[0].url)
   }
 
-  if (detail.productVariant?.image) {
-    const image =
-      typeof detail.productVariant.image === 'string'
-        ? detail.productVariant.image
-        : detail.productVariant.image.url
-    console.log('✅ Found productVariant.image:', image)
-    return image
-  }
-
-  // Default placeholder
-  const placeholder = 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
-  console.log('⚠️ Using placeholder image:', placeholder)
-  return placeholder
+  // Default placeholder nếu không có thông tin gì
+  return 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
 }
 
 const getVariantSize = (detail: OrderDetail) => {

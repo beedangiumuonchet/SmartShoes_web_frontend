@@ -54,7 +54,7 @@ export interface ProductImage {
   id: string
   url: string
   isMain: boolean
-  file?: File 
+  file?: File
 }
 
 export interface ProductAttribute {
@@ -125,9 +125,9 @@ export interface ProductFilter {
 }
 
 export interface TopProductDTO {
-  product: Product;
-  soldQuantity: number;
-  soldRevenue: number;
+  product: Product
+  soldQuantity: number
+  soldRevenue: number
 }
 
 export interface PaginationResponse<T> {

@@ -366,8 +366,8 @@ import {
   isCartEmpty,
 } from './carts.api'
 import { CartDetailRequest, type Cart, type CartDetail } from './carts.type'
-import { getVariantWithProductByIdApi } from '@/modules/products/product.api'
-import type { ProductVariantWithProduct } from '@/modules/products/product.type'
+import { getVariantWithProductByIdApi, getProductByIdApi } from '@/modules/products/product.api'
+import type { ProductVariantWithProduct, Product } from '@/modules/products/product.type'
 import { updateCartCount } from '@/common/composable/carts.store'
 const router = useRouter()
 
@@ -510,23 +510,44 @@ const loadCart = async () => {
  * ✅ Load thông tin variant từ API để lấy product name, image, etc.
  * Giá đã có sẵn trong DTO rồi
  */
+// ✅ SỬA - Load variant info + product đầy đủ để có thể dùng getMainImage
 const loadVariantInfoForAllItems = async () => {
   if (!cart.value?.details) return
 
-  console.log('🔄 Loading variant info for product details...')
+  console.log('🔄 Loading variant info + product info để hiển thị ảnh...')
 
   const promises = cart.value.details.map(async (detail) => {
     if (!variantCache.value.has(detail.productVariantId)) {
       try {
-        console.log(`🔍 Fetching variant info for: ${detail.productVariantId}`)
+        console.log(`🔍 Fetching variant với product info for: ${detail.productVariantId}`)
+
+        // 1. Lấy variant với product info
         const variantWithProduct = await getVariantWithProductByIdApi(detail.productVariantId)
+
+        // 2. Nếu có product info, fetch thêm chi tiết product để có variants (cho ảnh)
+        if (variantWithProduct.product?.id) {
+          try {
+            const fullProduct = await getProductByIdApi(variantWithProduct.product.id)
+
+            // 3. Gắn full product vào variant info để có thể dùng getMainImage
+            variantWithProduct.product = fullProduct
+
+            console.log(`✅ Loaded full product for image display:`, {
+              variantId: variantWithProduct.id,
+              productId: fullProduct.id,
+              productName: fullProduct.name,
+              variantsCount: fullProduct.variants?.length || 0,
+              hasImages: fullProduct.variants?.some((v) => v.images?.length > 0),
+            })
+          } catch (error) {
+            console.warn(
+              `⚠️ Could not fetch full product for ${variantWithProduct.product.id}`,
+              error,
+            )
+          }
+        }
+
         variantCache.value.set(detail.productVariantId, variantWithProduct)
-        console.log(`✅ Loaded variant for product info:`, {
-          id: variantWithProduct.id,
-          productName: variantWithProduct.product?.name,
-          size: variantWithProduct.size,
-          color: variantWithProduct.color?.name || variantWithProduct.colorName,
-        })
       } catch (error) {
         console.error(`❌ Error loading variant ${detail.productVariantId}:`, error)
       }
@@ -534,7 +555,7 @@ const loadVariantInfoForAllItems = async () => {
   })
 
   await Promise.all(promises)
-  console.log('✅ All variant info loaded for UI display')
+  console.log('✅ All variant info + product info loaded để hiển thị ảnh')
 }
 
 const selectAllItems = (event: Event) => {
@@ -670,7 +691,7 @@ const continueShopping = () => {
 const goToProductDetail = (detail: CartDetail) => {
   const variantInfo = variantCache.value.get(detail.productVariantId)
   if (variantInfo?.product?.id) {
-    router.push(`/products/${variantInfo.product.id}`)
+    router.push(`/products/id/${variantInfo.product.id}`)
   } else {
     console.warn('❌ Cannot navigate to product detail: product ID not found')
     showToast('Không thể xem chi tiết sản phẩm', 'error')
@@ -708,29 +729,88 @@ const getProductName = (detail: CartDetail) => {
   return `Sản phẩm #${detail.productVariantId?.slice(-8) || 'Unknown'}`
 }
 
-const getProductImage = (detail: CartDetail) => {
-  // Từ cache variant đã fetch
-  const variantInfo = variantCache.value.get(detail.productVariantId)
-  if (variantInfo?.images?.length > 0) {
-    // Tìm main image trước
-    const mainImage = variantInfo.images.find((img) => img.isMain)
-    if (mainImage?.url) {
-      return mainImage.url
-    }
-    // Nếu không có main, lấy ảnh đầu tiên
-    return variantInfo.images[0]?.url
+// ✅ CẬP NHẬT - getMainImage với logic mới
+const getMainImage = (product: Product) => {
+  const variants = product.variants || []
+
+  if (variants.length === 0) {
+    return 'https://via.placeholder.com/200x200?text=No+Image'
   }
 
-  // Fallback từ data có sẵn trong cart
+  // 1. Tìm variant có ID nhỏ nhất
+  const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+
+  // 2. Tìm ảnh isMain trong variant nhỏ nhất
+  let selectedImage =
+    smallestVariant.images?.find((img: any) => img.isMain) || smallestVariant.images?.[0] || null
+
+  // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
+  if (!selectedImage) {
+    const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
+    if (variantWithImage) {
+      selectedImage =
+        variantWithImage.images.find((img: any) => img.isMain) || variantWithImage.images[0]
+    }
+  }
+
+  // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
+  if (!selectedImage?.url) {
+    return 'https://via.placeholder.com/200x200?text=No+Image'
+  }
+
+  return selectedImage.url
+}
+
+// ✅ THÊM MỚI - getDirectImageUrl
+function getDirectImageUrl(driveUrl: string) {
+  const match = driveUrl?.match(/\/d\/([^/]+)/)
+  if (!match) return driveUrl
+
+  const driveId = match[1]
+  return `http://localhost:8080/api/v1/images/${driveId}`
+}
+// ✅ SỬA - getProductImage dùng getMainImage từ product đầy đủ
+const getProductImage = (detail: CartDetail) => {
+  // Từ cache variant đã fetch (có product đầy đủ)
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+
+  if (variantInfo?.product) {
+    // Kiểm tra xem product có variants không (tức là đã fetch đầy đủ)
+    if (variantInfo.product.variants && variantInfo.product.variants.length > 0) {
+      // Sử dụng getMainImage để lấy ảnh từ product (tìm variant có ảnh đầu tiên)
+      const productImageUrl = getMainImage(variantInfo.product as Product)
+
+      // Convert Google Drive URL thành localhost URL
+      if (
+        productImageUrl &&
+        productImageUrl !== 'https://via.placeholder.com/200x200?text=No+Image'
+      ) {
+        return getDirectImageUrl(productImageUrl)
+      }
+
+      return productImageUrl
+    } else {
+      // Nếu chưa có variants, thử lấy từ variant hiện tại
+      if (variantInfo.images?.length > 0) {
+        const mainImage = variantInfo.images.find((img) => img.isMain)
+        if (mainImage?.url) {
+          return getDirectImageUrl(mainImage.url)
+        }
+        return getDirectImageUrl(variantInfo.images[0].url)
+      }
+    }
+  }
+
+  // Fallback từ data có sẵn trong cart (nếu BE populate product)
   if (detail.productVariant?.images?.length > 0) {
     const mainImage = detail.productVariant.images.find((img) => img.isMain)
     if (mainImage?.url) {
-      return mainImage.url
+      return getDirectImageUrl(mainImage.url)
     }
-    return detail.productVariant.images[0]?.url
+    return getDirectImageUrl(detail.productVariant.images[0].url)
   }
 
-  // Default placeholder
+  // Default placeholder nếu không có thông tin gì
   return 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
 }
 
