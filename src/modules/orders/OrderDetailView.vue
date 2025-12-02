@@ -335,30 +335,49 @@
             </div>
           </div>
 
-          <!-- Shipping Information -->
+          <!-- Shipping Information - With Edit Button -->
           <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <svg
-                class="w-6 h-6 text-blue-500 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                <svg
+                  class="w-6 h-6 text-blue-500 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                Thông tin giao hàng
+              </h2>
+
+              <!-- Edit Button - Chỉ hiển thị khi có thể edit -->
+              <button
+                v-if="canEditShipping"
+                @click="openEditShippingDialog"
+                class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                ></path>
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                ></path>
-              </svg>
-              Thông tin giao hàng
-            </h2>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Chỉnh sửa
+              </button>
+            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -372,6 +391,279 @@
               <div class="md:col-span-2">
                 <h3 class="text-sm font-medium text-gray-700 mb-2">Địa chỉ giao hàng</h3>
                 <p class="text-base text-gray-900 font-medium">{{ order.shippingAddress }}</p>
+              </div>
+            </div>
+
+            <!-- Status Notice cho PENDING/PAID -->
+            <div
+              v-if="canEditShipping"
+              class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
+            >
+              <div class="flex items-start space-x-2">
+                <svg
+                  class="w-5 h-5 text-blue-500 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div>
+                  <h4 class="text-sm font-medium text-blue-900">Có thể chỉnh sửa địa chỉ</h4>
+                  <p class="text-sm text-blue-800 mt-1">
+                    Đơn hàng đang ở trạng thái "{{ getStatusLabel(order.status) }}", bạn có thể
+                    chỉnh sửa thông tin giao hàng.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- ✅ THÊM MỚI - Payment Information Section -->
+          <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+              <svg
+                class="w-6 h-6 text-green-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-3a2 2 0 00-2-2H9a2 2 0 00-2 2v3a2 2 0 002 2z"
+                />
+              </svg>
+              Thông tin thanh toán
+            </h2>
+
+            <!-- Loading Payment Info -->
+            <div v-if="loadingPayments" class="flex items-center justify-center py-4">
+              <svg
+                class="animate-spin w-6 h-6 text-indigo-500 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              <span class="text-gray-600">Đang tải thông tin thanh toán...</span>
+            </div>
+
+            <!-- Payment Info -->
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Payment Method -->
+              <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Phương thức thanh toán</h3>
+                <div class="flex items-center space-x-2">
+                  <!-- MoMo Icon -->
+                  <div
+                    v-if="paymentMethodInfo === PaymentMethod.MOMO"
+                    class="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center"
+                  >
+                    <div class="w-5 h-5 bg-white rounded flex items-center justify-center">
+                      <span class="text-pink-500 text-xs font-bold">M</span>
+                    </div>
+                  </div>
+                  <!-- Cash Icon -->
+                  <div
+                    v-else-if="paymentMethodInfo === PaymentMethod.CASH"
+                    class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <!-- Unknown Icon -->
+                  <div
+                    v-else
+                    class="w-8 h-8 bg-gray-400 rounded-lg flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <span class="text-base text-gray-900 font-medium">{{ paymentMethodLabel }}</span>
+                </div>
+              </div>
+
+              <!-- Payment Status -->
+              <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Trạng thái thanh toán</h3>
+                <span
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                  :class="paymentStatusColor"
+                >
+                  {{ paymentStatusLabel }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Payment History -->
+            <div
+              v-if="orderPayments.length > 1"
+              class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
+            >
+              <div class="text-sm text-blue-800">
+                <strong>Lịch sử thanh toán:</strong> {{ orderPayments.length }} giao dịch
+              </div>
+            </div>
+
+            <!-- Retry Payment Section - Chỉ hiển thị khi MOMO PENDING -->
+            <div
+              v-if="canRetryPayment"
+              class="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200"
+            >
+              <div class="flex items-start space-x-3">
+                <svg
+                  class="w-6 h-6 text-yellow-500 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+                <div class="flex-1">
+                  <h4 class="text-sm font-semibold text-yellow-900 mb-1">
+                    Thanh toán MoMo chưa hoàn tất
+                  </h4>
+                  <p class="text-sm text-yellow-800 mb-3">
+                    Đơn hàng của bạn chưa được thanh toán qua MoMo. Có thể do kết nối mạng hoặc bạn
+                    đã đóng trang thanh toán.
+                  </p>
+
+                  <!-- Error Message -->
+                  <div
+                    v-if="paymentError"
+                    class="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700"
+                  >
+                    {{ paymentError }}
+                  </div>
+
+                  <!-- Retry Button -->
+                  <button
+                    @click="retryMomoPayment"
+                    :disabled="isCreatingPayment"
+                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    <svg
+                      v-if="isCreatingPayment"
+                      class="animate-spin w-4 h-4 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <div
+                      v-else
+                      class="w-5 h-5 bg-pink-500 rounded mr-2 flex items-center justify-center"
+                    >
+                      <span class="text-white text-xs font-bold">M</span>
+                    </div>
+                    {{ isCreatingPayment ? 'Đang tạo thanh toán...' : 'Thanh toán lại qua MoMo' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Success Info -->
+            <div
+              v-else-if="paymentStatusInfo === PaymentStatus.SUCCESS"
+              class="mt-4 p-3 bg-green-50 rounded-lg border border-green-200"
+            >
+              <div class="flex items-center text-green-700">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                <span class="text-sm font-medium">Đơn hàng đã được thanh toán thành công</span>
+              </div>
+            </div>
+
+            <!-- Payment Failed Info -->
+            <div
+              v-else-if="paymentStatusInfo === PaymentStatus.FAILED"
+              class="mt-4 p-3 bg-red-50 rounded-lg border border-red-200"
+            >
+              <div class="flex items-center text-red-700">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+                <span class="text-sm font-medium">Thanh toán đã thất bại</span>
+              </div>
+            </div>
+
+            <!-- No Payment Info Notice -->
+            <div
+              v-else-if="!paymentMethodInfo && !loadingPayments"
+              class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200"
+            >
+              <div class="flex items-center text-gray-600">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span class="text-sm">Chưa có thông tin thanh toán</span>
               </div>
             </div>
           </div>
@@ -526,6 +818,119 @@
         </div>
       </div>
     </div>
+    <!-- Edit Shipping Dialog -->
+    <div
+      v-if="showEditShippingDialog"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-semibold text-gray-900">Chỉnh sửa thông tin giao hàng</h3>
+          <button
+            @click="closeEditShippingDialog"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <form @submit.prevent="updateShippingInfo" class="space-y-4">
+          <!-- Tên người nhận -->
+          <div>
+            <label for="shipping-name" class="block text-sm font-medium text-gray-700 mb-2">
+              Tên người nhận <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="shipping-name"
+              v-model="shippingForm.shippingName"
+              type="text"
+              required
+              maxlength="100"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Nhập tên người nhận"
+            />
+          </div>
+
+          <!-- Số điện thoại -->
+          <div>
+            <label for="shipping-phone" class="block text-sm font-medium text-gray-700 mb-2">
+              Số điện thoại <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="shipping-phone"
+              v-model="shippingForm.shippingPhone"
+              type="tel"
+              required
+              maxlength="15"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Nhập số điện thoại"
+            />
+          </div>
+
+          <!-- Địa chỉ -->
+          <div>
+            <label for="shipping-address" class="block text-sm font-medium text-gray-700 mb-2">
+              Địa chỉ giao hàng <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              id="shipping-address"
+              v-model="shippingForm.shippingAddress"
+              required
+              maxlength="500"
+              rows="3"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+              placeholder="Nhập địa chỉ giao hàng chi tiết"
+            ></textarea>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3 pt-4">
+            <button
+              type="submit"
+              :disabled="isUpdatingShipping"
+              class="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white font-medium rounded-lg transition-colors"
+            >
+              <span v-if="isUpdatingShipping" class="flex items-center justify-center">
+                <svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Đang cập nhật...
+              </span>
+              <span v-else>Cập nhật thông tin</span>
+            </button>
+
+            <button
+              type="button"
+              @click="closeEditShippingDialog"
+              class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors"
+            >
+              Hủy
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- Success Toast -->
     <div
@@ -568,9 +973,22 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getOrder, cancelOrder } from './orders.api'
+import { getOrder, cancelOrder, updateOrderShipping } from './orders.api'
 import { getCurrentUser } from '@/common/guards/roleGuard.guard'
-import { ORDER_STATUS_LABELS, OrderStatus, type Order, type OrderDetail } from './orders.type'
+import {
+  ORDER_STATUS_LABELS,
+  OrderStatus,
+  type Order,
+  type OrderDetail,
+  UpdateShippingRequest,
+} from './orders.type'
+import {
+  getPaymentsByOrderId,
+  getOrderPaymentInfo,
+  createMomoPayment,
+  redirectToMomoPayment,
+} from '../payments/payments.api'
+import { PaymentMethod, PaymentStatus, type Payment } from '../payments/payments.type'
 import { CartDetailRequest } from '../carts/carts.type'
 import { getOrCreateUserCart, addCartDetail } from '../carts/carts.api'
 // ✅ Import API để lấy variant với product - SAME AS CARTVIEW
@@ -586,6 +1004,14 @@ const productReviews = ref<Map<string, Review[]>>(new Map())
 const route = useRoute()
 const router = useRouter()
 
+const showEditShippingDialog = ref(false)
+const isUpdatingShipping = ref(false)
+const shippingForm = ref({
+  shippingName: '',
+  shippingPhone: '',
+  shippingAddress: '',
+})
+
 // ================================
 // STATE MANAGEMENT
 // ================================
@@ -597,7 +1023,15 @@ const showErrorToast = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const error = ref('')
+// ✅ THÊM MỚI - Payment states
+const orderPayments = ref<Payment[]>([])
+const loadingPayments = ref(false)
+const isCreatingPayment = ref(false)
+const paymentError = ref('')
 
+// Payment info derived từ API
+const paymentMethodInfo = ref<PaymentMethod | null>(null)
+const paymentStatusInfo = ref<PaymentStatus | null>(null)
 // Data
 const order = ref<Order | null>(null)
 
@@ -671,7 +1105,242 @@ const orderSummary = computed(() => {
     itemCount,
   }
 })
+const canEditShipping = computed(() => {
+  if (!order.value || !currentUser.value?.userId) return false
 
+  // Kiểm tra order có phải của user hiện tại không
+  const isOwner = order.value.userId === currentUser.value.userId
+
+  // Kiểm tra status có phải PENDING hoặc PAID không
+  const canEditStatus = [OrderStatus.PENDING, OrderStatus.PAID].includes(order.value.status)
+
+  return isOwner && canEditStatus
+})
+
+const openEditShippingDialog = () => {
+  if (!order.value || !canEditShipping.value) return
+
+  // Load thông tin hiện tại vào form
+  shippingForm.value = {
+    shippingName: order.value.shippingName,
+    shippingPhone: order.value.shippingPhone,
+    shippingAddress: order.value.shippingAddress,
+  }
+
+  showEditShippingDialog.value = true
+}
+
+const closeEditShippingDialog = () => {
+  showEditShippingDialog.value = false
+  // Reset form
+  shippingForm.value = {
+    shippingName: '',
+    shippingPhone: '',
+    shippingAddress: '',
+  }
+}
+
+const updateShippingInfo = async () => {
+  if (!order.value || !canEditShipping.value) return
+
+  // Validation
+  if (!shippingForm.value.shippingName.trim()) {
+    showError('Tên người nhận không được để trống')
+    return
+  }
+
+  if (!shippingForm.value.shippingPhone.trim()) {
+    showError('Số điện thoại không được để trống')
+    return
+  }
+
+  if (!shippingForm.value.shippingAddress.trim()) {
+    showError('Địa chỉ giao hàng không được để trống')
+    return
+  }
+
+  try {
+    isUpdatingShipping.value = true
+
+    const request = new UpdateShippingRequest(
+      shippingForm.value.shippingName.trim(),
+      shippingForm.value.shippingPhone.trim(),
+      shippingForm.value.shippingAddress.trim(),
+    )
+
+    console.log('🔄 Updating shipping info for order:', order.value.id)
+
+    const updatedOrder = await updateOrderShipping(order.value.id, request)
+
+    // Cập nhật order trong component
+    order.value = updatedOrder
+
+    showEditShippingDialog.value = false
+    showSuccess('Cập nhật thông tin giao hàng thành công!')
+  } catch (error: any) {
+    console.error('❌ Update shipping error:', error)
+
+    let errorMsg = 'Có lỗi xảy ra khi cập nhật thông tin giao hàng'
+    if (error?.response?.data?.message) {
+      errorMsg = error.response.data.message
+    } else if (error?.message) {
+      errorMsg = error.message
+    }
+
+    showError(errorMsg)
+  } finally {
+    isUpdatingShipping.value = false
+  }
+}
+
+// ✅ THÊM MỚI - Payment computed properties
+const canRetryPayment = computed(() => {
+  // Check từ orderPayments thực tế từ API
+  const hasPendingMoMo = orderPayments.value.some(
+    (payment) =>
+      payment.paymentMethod === PaymentMethod.MOMO && payment.status === PaymentStatus.PENDING,
+  )
+
+  // Và order status phải là PENDING
+  const orderIsPending = order.value?.status === OrderStatus.PENDING
+
+  return hasPendingMoMo && orderIsPending
+})
+
+const paymentMethodLabel = computed(() => {
+  console.log('💳 Payment Method Info:', paymentMethodInfo.value)
+  if (paymentMethodInfo.value === PaymentMethod.MOMO) {
+    return 'Ví điện tử MoMo'
+  } else if (paymentMethodInfo.value === PaymentMethod.CASH) {
+    return 'Tiền mặt khi nhận hàng'
+  }
+  return 'Chưa xác định'
+})
+
+const paymentStatusLabel = computed(() => {
+  switch (paymentStatusInfo.value) {
+    case PaymentStatus.PENDING:
+      return 'Chờ thanh toán'
+    case PaymentStatus.SUCCESS:
+      return 'Đã thanh toán'
+    case PaymentStatus.FAILED:
+      return 'Thanh toán thất bại'
+    default:
+      // Fallback dựa trên order status
+      switch (order.value?.status) {
+        case OrderStatus.PENDING:
+          return 'Chờ thanh toán'
+        case OrderStatus.PAID:
+        case OrderStatus.CONFIRMED:
+        case OrderStatus.SHIPPING:
+        case OrderStatus.DELIVERED:
+          return 'Đã thanh toán'
+        case OrderStatus.CANCELLED:
+          return 'Đã hủy'
+        default:
+          return 'Chưa xác định'
+      }
+  }
+})
+
+const paymentStatusColor = computed(() => {
+  switch (paymentStatusInfo.value) {
+    case PaymentStatus.PENDING:
+      return 'bg-yellow-100 text-yellow-800'
+    case PaymentStatus.SUCCESS:
+      return 'bg-green-100 text-green-800'
+    case PaymentStatus.FAILED:
+      return 'bg-red-100 text-red-800'
+    default:
+      // Fallback colors dựa trên order status
+      switch (order.value?.status) {
+        case OrderStatus.PENDING:
+          return 'bg-yellow-100 text-yellow-800'
+        case OrderStatus.PAID:
+        case OrderStatus.CONFIRMED:
+        case OrderStatus.SHIPPING:
+        case OrderStatus.DELIVERED:
+          return 'bg-green-100 text-green-800'
+        case OrderStatus.CANCELLED:
+          return 'bg-red-100 text-red-800'
+        default:
+          return 'bg-gray-100 text-gray-600'
+      }
+  }
+})
+// ✅ THÊM MỚI - Retry MoMo payment function
+const retryMomoPayment = async () => {
+  if (!order.value || !canRetryPayment.value) return
+
+  try {
+    isCreatingPayment.value = true
+    paymentError.value = ''
+
+    console.log('🔄 Retrying MoMo payment for order:', order.value.id)
+
+    // Tạo payment MoMo mới
+    const momoResponse = await createMomoPayment(order.value.id, order.value.totalAmount)
+
+    console.log('✅ MoMo payment created:', momoResponse)
+
+    // Redirect đến trang thanh toán MoMo
+    if (momoResponse.payUrl) {
+      showSuccess('Đang chuyển hướng đến trang thanh toán MoMo...')
+
+      setTimeout(() => {
+        redirectToMomoPayment(momoResponse.payUrl)
+      }, 1000)
+    } else {
+      throw new Error('Không nhận được link thanh toán từ MoMo')
+    }
+  } catch (error: any) {
+    console.error('❌ Retry MoMo payment error:', error)
+
+    let errorMsg = 'Có lỗi xảy ra khi tạo thanh toán MoMo'
+    if (error?.response?.data?.message) {
+      errorMsg = error.response.data.message
+    } else if (error?.message) {
+      errorMsg = error.message
+    }
+
+    paymentError.value = errorMsg
+    showError(errorMsg)
+  } finally {
+    isCreatingPayment.value = false
+  }
+}
+// ✅ THÊM MỚI - Load order payment info
+const loadOrderPaymentInfo = async (orderId: string) => {
+  try {
+    loadingPayments.value = true
+
+    // Lấy payment info thực từ API
+    const payments = await getPaymentsByOrderId(orderId)
+    const paymentInfo = await getOrderPaymentInfo(orderId)
+
+    orderPayments.value = payments
+
+    // Cập nhật payment info từ API (không thêm vào Order type)
+    paymentMethodInfo.value = paymentInfo.paymentMethod
+    paymentStatusInfo.value = paymentInfo.paymentStatus
+
+    console.log('✅ Order payment info loaded:', {
+      orderId,
+      paymentMethod: paymentInfo.paymentMethod,
+      paymentStatus: paymentInfo.paymentStatus,
+      paymentsCount: payments.length,
+      canRetryPayment: canRetryPayment.value,
+    })
+  } catch (error) {
+    console.error('❌ Error loading payment info:', error)
+
+    // Fallback logic nếu API lỗi - giữ null để hiển thị "Chưa xác định"
+    paymentMethodInfo.value = null
+    paymentStatusInfo.value = null
+  } finally {
+    loadingPayments.value = false
+  }
+}
 // ================================
 // ✅ THÊM: REVIEW COMPUTED PROPERTIES
 // ================================
@@ -1021,6 +1690,10 @@ const loadOrderDetail = async () => {
     // ✅ Load variant info cho tất cả order details
     if (order.value?.orderDetails) {
       await loadVariantInfoForOrder()
+    }
+    // ✅ THÊM MỚI - Load payment info từ API
+    if (order.value) {
+      await loadOrderPaymentInfo(order.value.id)
     }
   } catch (err) {
     console.error('❌ Error loading order detail:', err)

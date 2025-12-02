@@ -43,7 +43,6 @@
           <div class="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-700">
             <div class="col-span-1 flex items-center">
               <input
-                type="checkbox"
                 class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
                 :checked="isAllSelected"
                 :indeterminate="isIndeterminate"
@@ -66,10 +65,8 @@
             class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200"
           >
             <div class="grid grid-cols-12 gap-4 items-center">
-              <!-- ✅ Checkbox (1 column) -->
               <div class="col-span-1 flex items-center">
                 <input
-                  type="checkbox"
                   class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
                   :checked="selectedItems.includes(detail.id)"
                   @change="toggleSelectItem(detail.id)"
@@ -236,26 +233,7 @@
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <!-- Left: Bulk Actions -->
             <div class="flex items-center gap-6">
-              <div class="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
-                  :checked="isAllSelected"
-                  :indeterminate="isIndeterminate"
-                  @change="selectAllItems"
-                />
-                <span class="text-sm text-gray-700">
-                  Chọn tất cả ({{ cart ? getCartItemCount(cart) : 0 }})
-                </span>
-              </div>
-
-              <button
-                @click="clearSelectedItems"
-                :disabled="isUpdating || selectedItems.length === 0"
-                class="text-sm text-gray-500 hover:text-rose-500 disabled:opacity-50 transition-colors"
-              >
-                Xóa ({{ selectedItems.length }})
-              </button>
+              <div class="flex items-center gap-2"></div>
 
               <button
                 @click="continueShopping"
@@ -390,7 +368,7 @@ import {
 import { CartDetailRequest, type Cart, type CartDetail } from './carts.type'
 import { getVariantWithProductByIdApi } from '@/modules/products/product.api'
 import type { ProductVariantWithProduct } from '@/modules/products/product.type'
-
+import { updateCartCount } from '@/common/composable/carts.store'
 const router = useRouter()
 
 // ================================
@@ -812,6 +790,8 @@ const showToast = (message: string, type: 'success' | 'error' = 'success') => {
 // ================================
 onMounted(() => {
   loadCart()
+  updateCartCount()
+
   window.addEventListener('cart-updated', loadCart)
 })
 </script>

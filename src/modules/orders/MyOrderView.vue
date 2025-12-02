@@ -555,6 +555,7 @@ import { getCurrentUser } from '@/common/guards/roleGuard.guard'
 import { ORDER_STATUS_LABELS, OrderStatus, type Order, type OrderDetail } from './orders.type'
 import { CartDetailRequest } from '../carts/carts.type'
 import { getOrCreateUserCart, addCartDetail } from '../carts/carts.api'
+import { updateCartCount } from '@/common/composable/carts.store'
 // ✅ Import API để lấy variant với product - SAME AS CARTVIEW
 import { getVariantWithProductByIdApi } from '@/modules/products/product.api'
 import type { ProductVariantWithProduct } from '@/modules/products/product.type'
@@ -1049,6 +1050,7 @@ watch([searchQuery, selectedStatus, dateFrom, dateTo], () => {
 
 onMounted(() => {
   loadOrders()
+  updateCartCount()
 })
 </script>
 
