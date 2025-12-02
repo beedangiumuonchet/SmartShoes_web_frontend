@@ -15,6 +15,8 @@ import { categoryManagerRoutes } from '@/modules/category/category.manager.route
 import { colorManagerRoutes } from '@/modules/color/color.manager.routes'
 import { attributeManagerRoutes } from '@/modules/attribute/attribute.manager.routes'
 import { paymentsRoutes } from '@/modules/payments/payments.routes'
+import {promotionManagerRoutes} from '@/modules/promotion/promotion.manager.routes'
+import {reportRoutes} from '@/modules/report/report.routes'
 //import { paymentsRoutes } from '@/modules/payments/payments.routes'
 
 const router = createRouter({
@@ -34,6 +36,9 @@ const router = createRouter({
     ...colorManagerRoutes,
     ...attributeManagerRoutes,
     ...paymentsRoutes,
+    ...promotionManagerRoutes,
+    ...reportRoutes,
+    //...paymentsRoutes,
 
     ...routes,
     {

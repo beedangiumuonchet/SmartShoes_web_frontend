@@ -208,6 +208,12 @@ const navigationItems = ref<NavigationMenuItem[][]>([
       icon: 'i-heroicons-cube',
     },
     {
+      label: 'Khuyến mãi',
+      to: '/manager/promotions',
+      icon: 'i-heroicons-percent-badge'
+
+    },
+    {
       label: 'Đơn Hàng',
       to: '/manager/orders',
       icon: 'i-heroicons-shopping-cart',
@@ -219,9 +225,16 @@ const navigationItems = ref<NavigationMenuItem[][]>([
     },
     {
       label: 'Báo Cáo',
-      to: '/manager/reports',
       icon: 'i-heroicons-chart-bar',
+      children: [
+        {
+          label: 'Báo cáo theo sản phẩm',
+          to: '/manager/report/top-products',
+          icon: 'i-heroicons-chart-bar',
+        }
+      ],
     },
+
     {
       label: 'Cài Đặt',
       to: '/manager/settings',

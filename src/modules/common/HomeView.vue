@@ -446,6 +446,7 @@ const fetchFeaturedProducts = async () => {
       page: 0,
       size: 8,
       status: 'ACTIVE',
+      inStock: true,
     })
     const data = response.content || []
 

@@ -136,7 +136,7 @@
         <option value="">Tất cả</option>
         <option value="ACTIVE">Đang bán</option>
         <option value="INACTIVE">Ngưng bán</option>
-        <option value="OUT_OF_STOCK">Hết hàng</option>
+        <!-- <option value="OUT_OF_STOCK">Hết hàng</option> -->
       </select>
     </div>
 
