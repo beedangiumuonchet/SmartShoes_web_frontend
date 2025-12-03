@@ -87,6 +87,19 @@
             </svg>
             <span class="text-lg">{{ isAiSearching ? 'Đang tìm...' : 'Tìm kiếm AI' }}</span>
           </button>
+
+          <!-- Image Search -->
+          <label
+            class="cursor-pointer inline-flex items-center px-6 py-4 bg-blue-50 border border-blue-300 text-blue-600 font-semibold rounded-full hover:bg-blue-100 transition text-sm md:text-base"
+          >
+            <input type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 7h2l2-3h10l2 3h2a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V8a1 1 0 011-1zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
+            Tìm kiếm bằng hình ảnh
+          </label>
+
         </div>
 
         <!-- Quick AI Search Examples -->
@@ -372,17 +385,14 @@
 
               <div class="flex items-center justify-between">
                 <span class="text-blue-600 font-semibold">{{
-                  formatPrice(getProductMinPrice(product))
-                }}</span>
+                  formatPrice(getProductMinPrice(product))}}
+                </span>
                 <span
-                  class="px-2 py-1 rounded-lg text-xs font-medium"
-                  :class="
-                    product.status === 'ACTIVE'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-200 text-gray-500'
-                  "
-                  >{{ statusLabel(product.status) }}</span
+                  v-if="hasDiscount(product)"
+                  class="px-2 py-1 rounded-lg text-xs font-medium bg-red-100 text-red-500"
                 >
+                  {{ getProductTag(product) }}
+                </span>
               </div>
             </div>
           </RouterLink>
@@ -481,6 +491,7 @@ import {
   getAllProductsApi,
   getProductByIdApi,
   searchProductsWithAiApi,
+  searchProductsByImageApi  
 } from '../products/product.api'
 import { getAllBrandsApi } from '../brand/brand.api'
 import { getAllCategoriesApi } from '../category/category.api'
@@ -502,6 +513,8 @@ const products = ref<Product[]>([])
 const brands = ref<Brand[]>([])
 const categories = ref<Category[]>([])
 const colors = ref<Color[]>([]) // ✅ THÊM MỚI
+const isImageSearching = ref(false)
+
 
 // ✅ THÊM MỚI - UI Toggle states
 const showBrand = ref(false)
@@ -673,6 +686,33 @@ const getStatusLabel = (status: string) => {
       return 'Không rõ'
   }
 }
+// import API bạn đã có
+
+const handleImageUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (!target.files || !target.files[0]) return
+
+  const file = target.files[0]
+  try {
+    isImageSearching.value = true
+    console.log('📸 Searching products by image:', file.name)
+
+    const response = await searchProductsByImageApi(file)
+    
+    // Giả sử API trả về mảng Product[]
+    products.value = response?.data || response
+
+    // Lưu vào sessionStorage nếu cần redirect từ trang khác
+    // sessionStorage.setItem('imageSearchResults', JSON.stringify(products.value))
+
+    console.log('✅ Products found by image:', products.value)
+  } catch (err) {
+    console.error('❌ Image search error:', err)
+    alert('Tìm kiếm bằng hình ảnh thất bại. Vui lòng thử lại!')
+  } finally {
+    isImageSearching.value = false
+  }
+}
 
 // ========== AI SEARCH METHODS - GIỮ NGUYÊN ==========
 const handleAiSearch = async (): Promise<void> => {
@@ -831,6 +871,20 @@ const statusLabel = (status: string) => {
   }
 }
 
+// Kiểm tra sản phẩm có đang khuyến mãi hay không
+const hasDiscount = (product: Product): boolean => {
+  const variants = product.variants || []
+  return variants.some(v => (v.price || 0) > (v.priceSale || 0))
+}
+
+// Lấy nhãn status hiển thị
+const getProductTag = (product: Product): string => {
+  if (hasDiscount(product)) return 'Giảm giá sốc'
+  
+  return ""
+}
+
+
 // ✅ CẬP NHẬT - onMounted với logic mới
 onMounted(async () => {
   await fetchFilters()
@@ -848,14 +902,14 @@ onMounted(async () => {
   }
 
   // ⭐ Nếu đến từ image search → lấy data từ sessionStorage
-  if (route.query.fromImageSearch === '1') {
-    const raw = sessionStorage.getItem('imageSearchResults')
-    if (raw) {
-      products.value = JSON.parse(raw)
-      console.log('🎯 Load products from image search:', products.value)
-      return
-    }
-  }
+  // if (route.query.fromImageSearch === '1') {
+  //   const raw = sessionStorage.getItem('imageSearchResults')
+  //   if (raw) {
+  //     products.value = JSON.parse(raw)
+  //     console.log('🎯 Load products from image search:', products.value)
+  //     return
+  //   }
+  // }
 
   // ⭐ Còn lại → fetch bình thường
   await fetchProducts()

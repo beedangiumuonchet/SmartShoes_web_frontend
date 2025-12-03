@@ -52,145 +52,163 @@
       </div>
 
       <!-- Bộ lọc -->
-      <!-- Bộ lọc -->
-<div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-  <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
 
-    <!-- TỪ KHÓA -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Từ khóa</label>
-      <input
-        v-model="filters.q"
-        type="text"
-        placeholder="Nhập tên sản phẩm..."
-        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        @keyup.enter="fetchProducts"
-      />
-    </div>
+          <!-- TỪ KHÓA -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Từ khóa</label>
+            <input
+              v-model="filters.q"
+              type="text"
+              placeholder="Nhập tên sản phẩm..."
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              @keyup.enter="fetchProducts"
+            />
+          </div>
 
-    <!-- THƯƠNG HIỆU -->
-    <div class="filter-group border rounded-lg p-3 shadow-sm">
-      <div
-        class="flex items-center justify-between cursor-pointer py-2 px-1 hover:bg-gray-50 rounded"
-        @click="showBrand = !showBrand"
-      >
-        <h3 class="font-semibold text-gray-800">Thương hiệu</h3>
-        <span class="text-sm text-gray-600">{{ showBrand ? "▲" : "▼" }}</span>
-      </div>
+          <!-- THƯƠNG HIỆU -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Thương hiệu</label>
 
-      <div v-show="showBrand" class="mt-2 pl-2 space-y-1">
-        <div v-for="b in brands" :key="b.id" class="flex items-center gap-2">
-          <input type="checkbox" :value="b.id" v-model="filters.brandIds" class="w-4 h-4" />
-          <label class="text-sm text-gray-700">{{ b.name }}</label>
+            <div class="border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500">
+              <div
+                class="flex items-center justify-between cursor-pointer"
+                @click="showBrand = !showBrand"
+              >
+                <span class="text-sm text-gray-700">
+                  {{ selectedBrandLabel || "Chọn thương hiệu" }}
+                </span>
+                <span class="text-gray-500">{{ showBrand ? "▲" : "▼" }}</span>
+              </div>
+
+              <!-- Dropdown list -->
+              <div v-show="showBrand" class="mt-2 max-h-40 overflow-y-auto">
+                <div v-for="b in brands" :key="b.id" class="flex items-center gap-2 py-1">
+                  <input type="checkbox" :value="b.id" v-model="filters.brandIds" class="w-4 h-4" />
+                  <label class="text-sm text-gray-700">{{ b.name }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- DANH MỤC -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Thể loại</label>
+
+            <div class="border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500">
+              <div
+                class="flex items-center justify-between cursor-pointer"
+                @click="showCategory = !showCategory"
+              >
+                <span class="text-sm text-gray-700">
+                  {{ selectedCategoryLabel || "Chọn thể loại" }}
+                </span>
+                <span class="text-gray-500">{{ showCategory ? "▲" : "▼" }}</span>
+              </div>
+
+              <!-- Dropdown list -->
+              <div v-show="showCategory" class="mt-2 max-h-40 overflow-y-auto space-y-1">
+                <div v-for="c in categories" :key="c.id" class="flex items-center gap-2 py-1">
+                  <input type="checkbox" :value="c.id" v-model="filters.categoryIds" class="w-4 h-4" />
+                  <label class="text-sm text-gray-700">{{ c.name }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- MÀU SẮC -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Màu sắc</label>
+
+            <div class="border rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500">
+              <div
+                class="flex items-center justify-between cursor-pointer"
+                @click="showColor = !showColor"
+              >
+                <span class="text-sm text-gray-700">
+                  {{ selectedColorLabel || "Chọn màu sắc" }}
+                </span>
+                <span class="text-gray-500">{{ showColor ? "▲" : "▼" }}</span>
+              </div>
+
+              <div v-show="showColor" class="mt-2 max-h-40 overflow-y-auto grid grid-cols-2 gap-2">
+                <div v-for="color in colors" :key="color.id" class="flex items-center gap-2 py-1">
+                  <input type="checkbox" :value="color.id" v-model="filters.colorIds" class="w-4 h-4" />
+                  <label class="text-sm text-gray-700">{{ color.name }}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- TRẠNG THÁI -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+            <select
+              v-model="filters.status"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Tất cả</option>
+              <option value="ACTIVE">Đang bán</option>
+              <option value="INACTIVE">Ngưng bán</option>
+              <!-- <option value="OUT_OF_STOCK">Hết hàng</option> -->
+            </select>
+          </div>
+
+          <!-- GIÁ -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Giá</label>
+            <div class="flex gap-2">
+              <input
+                type="number"
+                v-model.number="filters.minPrice"
+                placeholder="Từ"
+                class="w-1/2 border rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <input
+                type="number"
+                v-model.number="filters.maxPrice"
+                placeholder="Đến"
+                class="w-1/2 border rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </div>
+
+          <!-- TỒN KHO -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tồn kho</label>
+            <select
+              v-model="filters.inStock"
+              class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Tất cả</option>
+              <option :value="true">Còn hàng</option>
+              <option :value="false">Hết hàng</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="px-6 pb-6 flex justify-end">
+          <button
+            @click="resetFilters"
+            class="px-4 py-2 border rounded-md text-sm font-medium mr-3 hover:bg-gray-50"
+          >
+            Đặt lại
+          </button>
+
+          <button
+            @click="fetchProducts"
+            class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+          >
+            Áp dụng
+          </button>
         </div>
       </div>
-    </div>
-
-    <!-- DANH MỤC -->
-    <div class="filter-group border rounded-lg p-3 shadow-sm">
-      <div
-        class="flex items-center justify-between cursor-pointer py-2 px-1 hover:bg-gray-50 rounded"
-        @click="showCategory = !showCategory"
-      >
-        <h3 class="font-semibold text-gray-800">Thể loại</h3>
-        <span class="text-sm text-gray-600">{{ showCategory ? "▲" : "▼" }}</span>
-      </div>
-
-      <div v-show="showCategory" class="mt-2 pl-2 space-y-1">
-        <div v-for="c in categories" :key="c.id" class="flex items-center gap-2">
-          <input type="checkbox" :value="c.id" v-model="filters.categoryIds" class="w-4 h-4" />
-          <label class="text-sm text-gray-700">{{ c.name }}</label>
-        </div>
-      </div>
-    </div>
-
-    <!-- MÀU SẮC -->
-    <div class="filter-group border rounded-lg p-3 shadow-sm">
-      <div
-        class="flex items-center justify-between cursor-pointer py-2 px-1 hover:bg-gray-50 rounded"
-        @click="showColor = !showColor"
-      >
-        <h3 class="font-semibold text-gray-800">Màu sắc</h3>
-        <span class="text-sm text-gray-600">{{ showColor ? "▲" : "▼" }}</span>
-      </div>
-
-      <div v-show="showColor" class="mt-2 pl-2 grid grid-cols-2 gap-2">
-        <div
-          v-for="color in colors"
-          :key="color.id"
-          class="flex items-center gap-2"
-        >
-          <input type="checkbox" :value="color.id" v-model="filters.colorIds" class="w-4 h-4" />
-          <label class="text-sm text-gray-700">{{ color.name }}</label>
-        </div>
-      </div>
-    </div>
-
-    <!-- TRẠNG THÁI -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-      <select
-        v-model="filters.status"
-        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      >
-        <option value="">Tất cả</option>
-        <option value="ACTIVE">Đang bán</option>
-        <option value="INACTIVE">Ngưng bán</option>
-        <!-- <option value="OUT_OF_STOCK">Hết hàng</option> -->
-      </select>
-    </div>
-
-    <!-- GIÁ -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Giá</label>
-      <div class="flex gap-2">
-        <input
-          type="number"
-          v-model.number="filters.minPrice"
-          placeholder="Từ"
-          class="w-1/2 border rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-        <input
-          type="number"
-          v-model.number="filters.maxPrice"
-          placeholder="Đến"
-          class="w-1/2 border rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-    </div>
-
-    <!-- TỒN KHO -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Tồn kho</label>
-      <select
-        v-model="filters.inStock"
-        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      >
-        <option value="">Tất cả</option>
-        <option :value="true">Còn hàng</option>
-        <option :value="false">Hết hàng</option>
-      </select>
-    </div>
-
-  </div>
-
-  <!-- BUTTONS -->
-  <div class="px-6 pb-6 flex justify-end">
-    <button
-      @click="resetFilters"
-      class="px-4 py-2 border rounded-md text-sm font-medium mr-3 hover:bg-gray-50"
-    >
-      Đặt lại
-    </button>
-
-    <button
-      @click="fetchProducts"
-      class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
-    >
-      Áp dụng
-    </button>
-  </div>
-</div>
 
 
 
@@ -425,14 +443,37 @@
                 </span>
               </td>
               <td class="px-4 py-3">{{ formatDate(p.createdAt) }}</td>
-              <td class="px-4 py-3 text-right">
-                <button class="text-indigo-600 hover:underline mr-3" @click="openEditModal(p)">
-                  Sửa
-                </button>
-                <!-- <button class="text-red-600 hover:underline" @click="confirmDelete(p.id)">
-                  Xoá
-                </button> -->
-              </td>
+              <td class="px-4 py-3 text-right relative">
+                  <div class="relative inline-block text-left">
+                    <!-- Nút 3 chấm -->
+                    <button
+                      @click="toggleActionMenu(p.id)"
+                      class="p-2 rounded hover:bg-gray-100"
+                    >
+                      ⋮
+                    </button>
+
+                    <!-- Menu dropdown -->
+                    <div
+                      v-if="openMenuId === p.id"
+                      class="absolute right-0 mt-2 w-28 bg-white border border-gray-200 shadow-lg rounded-md z-50"
+                    >
+                      <button
+                        class="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        @click="openEditModal(p)"
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                        @click="askDeleteProduct(p.id)"
+                      >
+                        Xoá
+                      </button>
+                    </div>
+                  </div>
+                </td>
+
             </tr>
           </tbody>
 
@@ -674,11 +715,13 @@
                   <button @click="addImage(vIdx)" class="text-blue-600 text-xs">+ Thêm ảnh</button>
                 </div>
 
-                <div
+                <!-- <div
                   v-for="(img, iIdx) in variant.images"
-                  :key="iIdx"
+                  :key="img.id ||iIdx"
                   class="flex gap-3 items-center mb-2"
-                >
+                > -->
+                <div v-for="(img,iIdx) in variant.images.filter(i => !i._deleted)">
+
                   <!-- Preview -->
                   <div class="relative w-12 h-12">
                     <!-- Nếu đang upload -->
@@ -737,8 +780,37 @@
 
         <!-- Nút hành động -->
         <div class="flex justify-end gap-3 mt-6">
-            <button class="px-4 py-2 rounded bg-gray-200" @click="closeModal">Huỷ</button>
-            <button class="px-4 py-2 rounded bg-indigo-600 text-white" @click="save">Lưu</button>
+            <button class="px-4 py-2 rounded bg-gray-200" @click="closeModal" :disabled="loading">Huỷ</button>
+            <button
+              class="px-4 py-2 rounded bg-indigo-600 text-white flex items-center justify-center"
+              :disabled="loading"
+              @click="save"
+            >
+              <!-- Spinner + Text khi loading -->
+              <svg
+                v-if="loading"
+                class="animate-spin h-5 w-5 mr-2 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+
+              <span>{{ loading ? "Đang lưu..." : "Lưu" }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -747,21 +819,146 @@
       <div v-if="showDeleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
         <div class="bg-white rounded-lg p-6 w-[420px]">
           <h3 class="text-lg font-semibold mb-3">Xác nhận xoá</h3>
-          <p class="text-gray-700 mb-6">Bạn có chắc muốn xoá sản phẩm này không?</p>
+          <p class="text-gray-700 mb-6">{{ deleteConfirmMessage }}</p>
+
           <div class="flex justify-end gap-3">
-            <button class="px-4 py-2 rounded bg-gray-200" @click="showDeleteConfirm = false">Huỷ</button>
-            <button class="px-4 py-2 rounded bg-red-600 text-white" @click="deleteProduct">Xoá</button>
+            <button class="px-4 py-2 rounded bg-gray-200"
+                    @click="showDeleteConfirm = false">
+              Huỷ
+            </button>
+            <button class="px-4 py-2 rounded bg-red-600 text-white"
+                    @click="deleteConfirmAction">
+              Xoá
+            </button>
           </div>
         </div>
       </div>
+
     </div>
   </SidebarPart>
+  <!-- Success Toast -->
+    <Transition
+      enter-active-class="transform ease-out duration-300 transition"
+      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="showSuccessToast"
+        class="fixed top-4 right-4 max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden z-50"
+      >
+        <div class="p-4">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg
+                class="h-6 w-6 text-green-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div class="ml-3 w-0 flex-1 pt-0.5">
+              <p class="text-sm font-medium text-gray-900">Thành công!</p>
+              <p class="mt-1 text-sm text-gray-500">{{ successMessage }}</p>
+            </div>
+            <div class="ml-4 flex-shrink-0 flex">
+              <button
+                @click="showSuccessToast = false"
+                class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500"
+              >
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Error Toast -->
+    <Transition
+      enter-active-class="transform ease-out duration-300 transition"
+      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="showErrorToast"
+        class="fixed top-4 right-4 max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden z-50"
+      >
+        <div class="p-4">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg
+                class="h-6 w-6 text-red-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div class="ml-3 w-0 flex-1 pt-0.5">
+              <p class="text-sm font-medium text-gray-900">Lỗi</p>
+              <p class="mt-1 text-sm text-gray-500">{{ errorMessage }}</p>
+            </div>
+            <div class="ml-4 flex-shrink-0 flex">
+              <button
+                @click="showErrorToast = false"
+                class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500"
+              >
+                <svg
+                  class="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
 </template>
 
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed  } from 'vue'
-import { getAllProductsApi, createProductApi, getProductByIdApi, updateProductApi, getProductsByBrandApi, getProductsByCategoryApi } from '../product.api'
+import { ref, reactive, onMounted, watch, computed  } from 'vue'
+import { getAllProductsApi, createProductApi, getProductByIdApi, updateProductApi, deleteVariantApi, deleteProductApi } from '../product.api'
 import type { Product, Brand, Category, ProductFilter, Attribute } from '../product.type'
 import type { Color } from '@/modules/color/color.type'
 import { getAllBrandsApi } from '@/modules/brand/brand.api'
@@ -780,6 +977,13 @@ const colors = ref<Color[]>([])
 const attributes = ref<Attribute[]>([])
 const sortColumn = ref<string>('')       // tên cột đang sort
 const sortDirection = ref<'asc'|'desc'>('asc') // hướng sort
+
+// Toast state management
+const showSuccessToast = ref(false)
+const successMessage = ref('')
+const showErrorToast = ref(false)
+const errorMessage = ref('')
+const loading = ref(false)
 
 const filters = ref({
   q: '',
@@ -933,7 +1137,8 @@ const onColorSelectChange = (event) => {
 
 const addNewColor = async () => {
   if (!newColorName.value.trim()) {
-    alert('Vui lòng nhập tên màu')
+    // alert('Vui lòng nhập tên màu')
+    showError('Vui lòng nhập tên màu')
     return
   }
 
@@ -946,52 +1151,11 @@ const addNewColor = async () => {
     newColorName.value = ''
   } catch (err) {
     console.error('❌ Lỗi khi thêm màu mới:', err)
-    alert('Không thể thêm màu mới')
+    // alert('Không thể thêm màu mới')
+    showError('Không thể thêm màu mới')
   }
 }
 
-// const onFileSelect = async (event, vIdx, iIdx) => {
-//   const file = event.target.files?.[0]
-//   if (!file) return
-
-//   try {
-//     // Gọi API upload
-//     const res = await uploadImageApi(file)
-//     const url = res.result // tùy backend bạn trả BaseResponse hay string
-
-//     // Gán URL nhận được vào variant.images
-//     form.value.variants[vIdx].images[iIdx].url = url
-
-//     alert('✅ Upload ảnh thành công!')
-//   } catch (err) {
-//     console.error('❌ Upload ảnh thất bại:', err)
-//     alert('Upload ảnh thất bại, vui lòng thử lại.')
-//   }
-// }
-// const onFileSelect = async (event, vIdx, iIdx) => {
-//   const file = event.target.files?.[0];
-//   if (!file) return;
-
-//   const imgItem = form.value.variants[vIdx].images[iIdx];
-
-//   // Bật trạng thái loading
-//   imgItem.loading = true;
-
-//   try {
-//     const res = await uploadImageApi(file);
-//     const url = res.result; // tùy backend bạn
-
-//     imgItem.url = url;
-
-//     alert("✅ Upload ảnh thành công!");
-//   } catch (err) {
-//     console.error("❌ Upload ảnh thất bại:", err);
-//     alert("Upload ảnh thất bại, vui lòng thử lại.");
-//   } finally {
-//     // Tắt loading dù có lỗi hay không
-//     imgItem.loading = false;
-//   }
-// };
 const onFileSelect = async (event, vIdx, iIdx) => {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -1007,7 +1171,36 @@ const onFileSelect = async (event, vIdx, iIdx) => {
 const addVariant = () =>
   form.value.variants.push({ size: "", price: 0, stock: 0, colorId: "", images: [] })
 
-const removeVariant = (i) => form.value.variants.splice(i, 1)
+// const removeVariant = (i) => form.value.variants.splice(i, 1)
+const removeVariant = (vIdx) => {
+  const variant = form.value.variants[vIdx]
+
+  openDeleteConfirm(
+    "Bạn có chắc muốn xoá biến thể này?",
+    async () => {
+      try {
+        if (variant.id) {
+          console.log("🗑️ Deleting variant ID:", variant.id)
+          await deleteVariantApi(variant.id)
+        } else {
+          console.log("🗑️ Removing unsaved variant:", variant)
+        }
+
+        // Xoá khỏi FE
+        form.value.variants.splice(vIdx, 1)
+        showSuccess("Đã xoá biến thể thành công!")
+      } catch (err) {
+        console.error("❌ Failed to delete variant:", err)
+        showError("Xoá biến thể thất bại!")
+      }
+
+      // Đóng popup
+      showDeleteConfirm.value = false
+      deleteConfirmAction.value = null
+    }
+  )
+}
+
 // const addImage = (vIdx) => form.value.variants[vIdx].images.push({ url: "", isMain: false })
 const addImage = (vIdx) => {
   form.value.variants[vIdx].images.push({
@@ -1017,12 +1210,49 @@ const addImage = (vIdx) => {
   })
 }
 
-const removeImage = (vIdx, iIdx) => form.value.variants[vIdx].images.splice(iIdx, 1)
+// const removeImage = (vIdx, iIdx) => form.value.variants[vIdx].images.splice(iIdx, 1)
+const removeImage = (vIdx, iIdx) => {
+  const img = form.value.variants[vIdx].images[iIdx];
 
+  if (img.id) {
+    // ảnh cũ → đánh dấu xoá
+    img._deleted = true;
+  } else {
+    // ảnh mới → có thể xoá hẳn
+    form.value.variants[vIdx].images.splice(iIdx, 1);
+  }
+}
+
+// ================================
+// TOAST HELPER FUNCTIONS
+// ================================
+const showSuccess = (message: string) => {
+  successMessage.value = message
+  showSuccessToast.value = true
+  setTimeout(() => {
+    showSuccessToast.value = false
+  }, 3000)
+}
+
+const showError = (message: string) => {
+  errorMessage.value = message
+  showErrorToast.value = true
+  setTimeout(() => {
+    showErrorToast.value = false
+  }, 4000)
+}
 
 const variantsJson = ref<string>('') // quick edit JSON for variants
 
 const showDeleteConfirm = ref(false)
+const deleteConfirmMessage = ref("")
+const deleteConfirmAction = ref(null)
+const openDeleteConfirm = (message, actionCallback) => {
+  deleteConfirmMessage.value = message
+  deleteConfirmAction.value = actionCallback
+  showDeleteConfirm.value = true
+}
+
 const deletingId = ref<string | null>(null)
 
 /* Axios client for update/delete */
@@ -1069,46 +1299,6 @@ function buildQueryParams() {
   return params
 }
 
-
-// const fetchProducts = async () => {
-//   try {
-//     const params: Record<string, any> = {}
-    
-//     if (filters.value.q) params.q = filters.value.q
-//     if (filters.value.brandId) params.brandId = filters.value.brandId
-//     if (filters.value.categoryId) params.categoryId = filters.value.categoryId
-//     if (filters.value.sortBy) params.sortBy = filters.value.sortBy
-//     if (filters.value.page !== undefined) params.page = filters.value.page
-//     if (filters.value.size !== undefined) params.size = filters.value.size
-
-//     // optional: thêm filter trạng thái, stock, price
-//     if (filters.value.status) params.status = filters.value.status
-//     if (filters.value.minPrice) params.minPrice = filters.value.minPrice
-//     if (filters.value.maxPrice) params.maxPrice = filters.value.maxPrice
-//     if (filters.value.inStock !== undefined) params.inStock = filters.value.inStock
-
-//       if (filters.value.brandId) {
-//         await fetchProductsByBrand()
-//         return
-//       }
-
-//     const res = await getAllProductsApi(params)
-//     const { content, pageObj } = normalizeGetProductsResponse(res)
-    
-//     products.value = content
-//     pagination.value = {
-//       page: pageObj.page ?? 0,
-//       size: pageObj.size ?? filters.value.size ?? 10,
-//       totalElements: pageObj.totalElements ?? content.length,
-//       totalPages: pageObj.totalPages ?? 1,
-//       hasNext: pageObj.hasNext ?? false,
-//       hasPrevious: pageObj.hasPrevious ?? false,
-//     }
-//   } catch (err) {
-//     console.error('Lỗi tải sản phẩm:', err)
-//     products.value = []
-//   }
-// }
 const fetchProducts = async () => {
   try {
     const params = buildQueryParams()
@@ -1316,93 +1506,23 @@ const closeModal = () => {
   showModal.value = false
 }
 
-const deleteProductApi = async (id: string) => {
-  try {
-    const res = await axiosClient.delete(`/products/${id}`)
-    return res
-  } catch (err) {
-    throw err
-  }
-}
-
-// const save = async () => {
-//   try {
-
-//     console.log('💾 Dữ liệu gửi lên backend:', JSON.stringify(form.value, null, 2));
-//     // 🔹 Kiểm tra dữ liệu bắt buộc
-//     if (!form.value.name.trim()) {
-//       alert('Vui lòng nhập tên sản phẩm!')
-//       return
-//     }
-//     if (!form.value.brandId || !form.value.categoryId) {
-//       alert('Vui lòng chọn thương hiệu và danh mục!')
-//       return
-//     }
-
-//     // 🔹 Xử lý attribute: chỉ giữ các id hoặc key-value
-//     const attributesPayload = form.value.attributes
-//       .filter(a => a.attribute?.key && a.attribute?.value)
-//       .map(a => ({
-//         attributeId: a.attribute.id || null,
-//         key: a.attribute.key,
-//         value: a.attribute.value
-//       }))
-
-//     // 🔹 Xử lý variants (bao gồm ảnh)
-//     const variantsPayload = form.value.variants.map(v => {
-//       // đảm bảo có ít nhất 1 ảnh chính
-//       setMainImage(v)
-//       return {
-//         id: v.id || null,
-//         size: v.size,
-//         price: Number(v.price) || 0,
-//         stock: Number(v.stock) || 0,
-//         colorId: v.colorId,
-//         images: v.images.map(img => ({
-//           url: img.url,
-//           isMain: img.isMain
-//         }))
-//       }
-//     })
-
-//     // 🔹 Gom payload để gửi API
-//     const payload = {
-//       name: form.value.name.trim(),
-//       brandId: form.value.brandId,
-//       categoryId: form.value.categoryId,
-//       description: form.value.description,
-//       status: form.value.status,
-//       attributes: attributesPayload,
-//       variants: variantsPayload
-//     }
-
-//     if (isEdit.value && form.value.id) {
-//       // 🟡 Nếu là chỉnh sửa
-//       await updateProductApi(form.value.id, payload)
-//       alert('✅ Cập nhật sản phẩm thành công!')
-//     } else {
-//       // 🟢 Nếu là thêm mới
-//       await createProductApi(payload)
-//       alert('✅ Thêm sản phẩm thành công!')
-//     }
-
-//     // 🔹 Làm mới danh sách
-//     await fetchProducts()
-
-//     // 🔹 Đóng modal và reset form
-//     closeModal()
-//   } catch (err) {
-//     console.error('❌ Lưu sản phẩm thất bại:', err)
-//     alert('Lưu sản phẩm thất bại, vui lòng thử lại!')
-//   }
-// }
 const save = async () => {
   try {
     if (!form.value.name.trim())
-      return alert("Vui lòng nhập tên sản phẩm!");
+      return showError("Vui lòng nhập tên sản phẩm!");
 
     if (!form.value.brandId || !form.value.categoryId)
-      return alert("Vui lòng chọn thương hiệu và danh mục!");
+      return showError("Vui lòng chọn thương hiệu và danh mục!");
+      console.log("===== DEBUG VARIANTS BEFORE BUILD =====");
+      form.value.variants.forEach((v, vIdx) => {
+        console.log(`--- Variant ${vIdx} ---`);
+        v.images.forEach((img, iIdx) => {
+          console.log(
+            `Image ${iIdx}: id=${img.id}, file=${!!img.file}, deleted=${img._deleted}, isMain=${img.isMain}`
+          );
+        });
+      });
+      console.log("=========================================");
 
     const formData = new FormData();
 
@@ -1430,52 +1550,73 @@ const save = async () => {
     // Variants + Images
     // ===========================
     form.value.variants.forEach((v, vIdx) => {
+      // ===== Base fields =====
       formData.append(`variants[${vIdx}].id`, v.id || "");
-      formData.append(`variants[${vIdx}].size`, v.size || "");
-      formData.append(`variants[${vIdx}].price`, String(v.price || 0));
-      formData.append(`variants[${vIdx}].stock`, String(v.stock || 0));
-      formData.append(`variants[${vIdx}].colorId`, v.colorId || "");
+      formData.append(`variants[${vIdx}].colorId`, v.colorId);
+      formData.append(`variants[${vIdx}].size`, v.size);
+      formData.append(`variants[${vIdx}].price`, String(v.price));
+      formData.append(`variants[${vIdx}].stock`, String(v.stock));
 
-      // đảm bảo có 1 ảnh chính
+      // đảm bảo có isMain đúng
       setMainImage(v);
 
-      v.images.forEach((img, iIdx) => {
-        formData.append(`variants[${vIdx}].images[${iIdx}].isMain`, String(img.isMain));
+      // ======================================
+      // SEND REMAINING IMAGES (có thứ tự sạch)
+      // ======================================
+      let cleanIndex = 0;
+      v.images.forEach((img) => {
+        if (img._deleted) return; // bỏ qua ảnh đã xoá
+
+        formData.append(
+          `variants[${vIdx}].images[${cleanIndex}].isMain`,
+          String(img.isMain)
+        );
 
         if (img.id) {
-          // Ảnh cũ
-          formData.append(`variants[${vIdx}].images[${iIdx}].id`, img.id);
+          formData.append(`variants[${vIdx}].images[${cleanIndex}].id`, img.id);
         }
 
         if (img.file) {
-          // Ảnh mới
-          formData.append(
-            `variants[${vIdx}].images[${iIdx}].file`,
-            img.file
-          );
+          formData.append(`variants[${vIdx}].images[${cleanIndex}].file`, img.file);
         }
+
+        cleanIndex++;
       });
     });
 
-    // ===========================
-    // Gửi về backend
-    // ===========================
+    // ===== START LOADING =====
+    loading.value = true
     if (isEdit.value && form.value.id) {
       await updateProductApi(form.value.id, formData);
-      alert("✅ Cập nhật sản phẩm thành công!");
+      showSuccess("Cập nhật sản phẩm thành công!");
     } else {
       await createProductApi(formData);
-      alert("✅ Thêm sản phẩm thành công!");
+      showSuccess("Thêm sản phẩm thành công!");
     }
 
     await fetchProducts();
     closeModal();
   } catch (err) {
     console.error("❌ Lưu sản phẩm thất bại:", err);
-    alert("Lưu sản phẩm thất bại, vui lòng thử lại!");
+    showError("Lưu sản phẩm thất bại, vui lòng thử lại!");
+  } finally {
+    // ===== STOP LOADING =====
+    loading.value = false
   }
 };
 
+const openMenuId = ref(null)
+
+const toggleActionMenu = (id) => {
+  openMenuId.value = openMenuId.value === id ? null : id
+}
+
+window.addEventListener("click", (e) => {
+  // đóng menu khi click ra ngoài
+  if (!e.target.closest(".relative.inline-block")) {
+    openMenuId.value = null
+  }
+})
 
 /* delete flow */
 const confirmDelete = (id: string) => {
@@ -1483,19 +1624,44 @@ const confirmDelete = (id: string) => {
   showDeleteConfirm.value = true
 }
 
-const deleteProduct = async () => {
+// const deleteProduct = async () => {
+//   if (!deletingId.value) return
+//   try {
+//     await deleteProductApi(deletingId.value)
+//     showSuccess('Xoá sản phẩm thành công')
+//     showDeleteConfirm.value = false
+//     deletingId.value = null
+//     await fetchProducts()
+//   } catch (err) {
+//     console.error('Lỗi xoá:', err)
+//     showError('Lỗi khi xoá sản phẩm')
+//   }
+// }
+const askDeleteProduct = (id) => {
+  deletingId.value = id
+  openDeleteConfirm(
+    "Bạn có chắc muốn xoá sản phẩm này không?",
+    deleteProductConfirm
+  )
+}
+
+const deleteProductConfirm = async () => {
   if (!deletingId.value) return
+
   try {
     await deleteProductApi(deletingId.value)
-    alert('Xoá sản phẩm thành công')
-    showDeleteConfirm.value = false
-    deletingId.value = null
+    showSuccess('Xoá sản phẩm thành công')
     await fetchProducts()
   } catch (err) {
     console.error('Lỗi xoá:', err)
-    alert('Lỗi khi xoá sản phẩm')
+    showError('Lỗi khi xoá sản phẩm')
   }
+
+  // Đóng popup
+  showDeleteConfirm.value = false
+  deletingId.value = null
 }
+
 
 /* pagination */
 const nextPage = async () => {
@@ -1513,21 +1679,23 @@ const prevPage = async () => {
 const resetFilters = () => {
   filters.value = {
     q: '',
-    brandId: '',
-    categoryId: '',
+    brandIds: [],
+    categoryIds: [],
+    colorIds: [],
+    sizes: [],
+    status: [],
+    minPrice: null,
+    maxPrice: null,
+    inStock: null,
     sortBy: 'createdAt',
     sortDirection: 'desc',
     page: 0,
-    size: 10,
-    status: '',
-    minPrice: 0,
-    maxPrice: 0,
-    inStock: true,
-    createdAtFrom: null,
-    createdAtTo: null,
+    size: 12,
   }
+
   fetchProducts()
 }
+
 
 
 
