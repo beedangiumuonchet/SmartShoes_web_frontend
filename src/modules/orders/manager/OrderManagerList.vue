@@ -894,6 +894,300 @@
         </div>
       </Transition>
     </div>
+    <!-- Order Detail Modal -->
+    <div
+      v-if="showOrderDetailModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 text-white">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold">Chi tiết đơn hàng</h2>
+              <p v-if="selectedOrderForDetail" class="text-indigo-100 text-sm mt-1">
+                Mã đơn hàng: #{{ selectedOrderForDetail.id.slice(-8) }}
+              </p>
+            </div>
+            <button
+              @click="closeOrderDetailModal"
+              class="text-white/80 hover:text-white p-2 hover:bg-white/20 rounded-full transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="overflow-y-auto max-h-[calc(90vh-80px)]">
+          <!-- Loading State -->
+          <div v-if="loadingOrderDetail" class="p-12 text-center">
+            <div class="inline-flex items-center space-x-2">
+              <svg
+                class="w-6 h-6 animate-spin text-indigo-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              <span class="text-gray-600 text-lg">Đang tải chi tiết đơn hàng...</span>
+            </div>
+          </div>
+
+          <!-- Order Detail Content -->
+          <div v-else-if="selectedOrderForDetail" class="p-6 space-y-6">
+            <!-- Order Status & Info -->
+            <div class="bg-gray-50 rounded-xl p-6">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Status -->
+                <div class="text-center">
+                  <h3 class="text-sm font-medium text-gray-500 mb-2">Trạng thái</h3>
+                  <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    :class="getStatusClasses(selectedOrderForDetail.status)"
+                  >
+                    {{ getStatusLabel(selectedOrderForDetail.status) }}
+                  </span>
+                </div>
+
+                <!-- Order Date -->
+                <div class="text-center">
+                  <h3 class="text-sm font-medium text-gray-500 mb-2">Ngày đặt hàng</h3>
+                  <p class="text-gray-900 font-medium">
+                    {{ formatDate(selectedOrderForDetail.createdAt) }}
+                  </p>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="text-center">
+                  <h3 class="text-sm font-medium text-gray-500 mb-2">Tổng tiền</h3>
+                  <p class="text-xl font-bold text-indigo-600">
+                    {{ formatPrice(selectedOrderForDetail.totalAmount) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer & Shipping Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Customer Info -->
+              <div class="bg-blue-50 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg
+                    class="w-5 h-5 text-blue-500 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                  Thông tin khách hàng
+                </h3>
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm text-gray-500">Tên khách hàng</p>
+                    <p class="text-gray-900 font-medium">
+                      {{ selectedOrderForDetail.shippingName }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Số điện thoại</p>
+                    <p class="text-gray-900 font-medium">
+                      {{ selectedOrderForDetail.shippingPhone }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Shipping Info -->
+              <div class="bg-green-50 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg
+                    class="w-5 h-5 text-green-500 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  Địa chỉ giao hàng
+                </h3>
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm text-gray-500">Người nhận</p>
+                    <p class="text-gray-900 font-medium">
+                      {{ selectedOrderForDetail.shippingName }}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Địa chỉ</p>
+                    <p class="text-gray-900 font-medium">
+                      {{ selectedOrderForDetail.shippingAddress }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                  <svg
+                    class="w-5 h-5 text-orange-500 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"
+                    />
+                  </svg>
+                  Sản phẩm đã đặt ({{ getOrderSummary(selectedOrderForDetail).itemCount }} sản phẩm)
+                </h3>
+              </div>
+
+              <div class="divide-y divide-gray-200">
+                <div
+                  v-for="detail in selectedOrderForDetail.orderDetails"
+                  :key="detail.id"
+                  class="p-6 hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-start space-x-4">
+                    <!-- Product Image -->
+                    <div class="flex-shrink-0">
+                      <img
+                        :src="getProductImage(detail)"
+                        :alt="getProductName(detail)"
+                        class="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                      />
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="flex-1 min-w-0">
+                      <h4 class="text-base font-medium text-gray-900 line-clamp-2 mb-2">
+                        {{ getProductName(detail) }}
+                      </h4>
+
+                      <div class="flex flex-wrap gap-2 text-sm mb-3">
+                        <span
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800"
+                        >
+                          Size: {{ getVariantSize(detail) }}
+                        </span>
+                        <span
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                        >
+                          Màu: {{ getVariantColor(detail) }}
+                        </span>
+                        <span
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                        >
+                          SL: {{ detail.quantity }}
+                        </span>
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                          Đơn giá: <span class="font-medium">{{ formatPrice(detail.price) }}</span>
+                        </div>
+                        <div class="text-lg font-bold text-indigo-600">
+                          {{ formatPrice(detail.subtotal) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div
+              class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200"
+            >
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Tóm tắt đơn hàng</h3>
+
+              <div class="space-y-3">
+                <div class="flex justify-between text-gray-600">
+                  <span
+                    >Tạm tính ({{ getOrderSummary(selectedOrderForDetail).itemCount }} sản
+                    phẩm)</span
+                  >
+                  <span class="font-medium">{{
+                    formatPrice(getOrderSummary(selectedOrderForDetail).subtotal)
+                  }}</span>
+                </div>
+                <div class="flex justify-between text-gray-600">
+                  <span>Phí vận chuyển</span>
+                  <span class="font-medium">{{
+                    formatPrice(getOrderSummary(selectedOrderForDetail).shippingFee)
+                  }}</span>
+                </div>
+                <div class="border-t border-indigo-200 pt-3">
+                  <div class="flex justify-between text-lg font-bold text-gray-900">
+                    <span>Tổng cộng</span>
+                    <span class="text-indigo-600">{{
+                      formatPrice(selectedOrderForDetail.totalAmount)
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+          <div class="flex justify-end space-x-3">
+            <button
+              v-if="selectedOrderForDetail"
+              @click="openStatusModal(selectedOrderForDetail)"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Cập nhật trạng thái
+            </button>
+            <button
+              @click="closeOrderDetailModal"
+              class="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium rounded-lg transition-colors"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </SidebarPart>
 </template>
 
@@ -905,6 +1199,7 @@ import {
   getAllOrders,
   updateOrderStatus,
   cancelOrder,
+  getOrder,
   getOrderItemCount,
   formatOrderTotal,
 } from '../orders.api'
@@ -941,6 +1236,89 @@ const showSuccessToast = ref(false)
 const successMessage = ref('')
 const showNoticeToast = ref(false)
 const noticeMessage = ref('')
+
+// ✅ THÊM MỚI - Order detail modal states
+const showOrderDetailModal = ref(false)
+const selectedOrderForDetail = ref<Order | null>(null)
+const loadingOrderDetail = ref(false)
+
+// ✅ THÊM MỚI - Helper functions cho order detail modal
+const getOrderSummary = (order: Order) => {
+  if (!order?.orderDetails) {
+    return {
+      subtotal: 0,
+      shippingFee: 0,
+      total: 0,
+      itemCount: 0,
+    }
+  }
+
+  const subtotal = order.orderDetails.reduce((sum, detail) => sum + detail.subtotal, 0)
+  const shippingFee = 0 // Fixed shipping fee
+  const total = subtotal + shippingFee
+  const itemCount = order.orderDetails.reduce((sum, detail) => sum + detail.quantity, 0)
+
+  return {
+    subtotal,
+    shippingFee,
+    total,
+    itemCount,
+  }
+}
+
+const getVariantSize = (detail: any) => {
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.size) {
+    return variantInfo.size
+  }
+  if (detail.productVariant?.size) {
+    return detail.productVariant.size
+  }
+  return 'N/A'
+}
+
+const getVariantColor = (detail: any) => {
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+
+  if (variantInfo?.colorName) {
+    return variantInfo.colorName
+  }
+  if (variantInfo?.color?.name) {
+    return variantInfo.color.name
+  }
+  if (detail.productVariant?.color?.name) {
+    return detail.productVariant.color.name
+  }
+  if (detail.productVariant?.colorName) {
+    return detail.productVariant.colorName
+  }
+  return 'N/A'
+}
+
+const getProductImage = (detail: any) => {
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.images?.length > 0) {
+    const mainImage = variantInfo.images.find((img: any) => img.isMain)
+    if (mainImage?.url) return mainImage.url
+    return variantInfo.images[0]?.url
+  }
+
+  if (detail.productVariant?.images?.length > 0) {
+    const mainImage = detail.productVariant.images.find((img: any) => img.isMain)
+    if (mainImage?.url) return mainImage.url
+    return detail.productVariant.images[0]?.url
+  }
+
+  return 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
+}
+
+const formatPrice = (price: number) => {
+  if (!price || isNaN(price)) return '0 ₫'
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(price)
+}
 
 // ✅ Toast helper functions
 const showSuccess = (message: string) => {
@@ -1355,11 +1733,64 @@ const cancelOrderAction = async (orderId: string): Promise<void> => {
   }
 }
 
-const viewOrderDetails = (order: Order): void => {
-  console.log('👁️ Viewing order details:', order.id)
-  // TODO: Navigate to order details page
-  router.push(`/orders/${order.id}`)
-  activeOrderMenu.value = null
+// ✅ CẬP NHẬT - View order details trong modal thay vì navigate
+const viewOrderDetails = async (order: Order): Promise<void> => {
+  console.log('👁️ Viewing order details in modal:', order.id)
+
+  try {
+    loadingOrderDetail.value = true
+    selectedOrderForDetail.value = null
+    showOrderDetailModal.value = true
+    activeOrderMenu.value = null
+
+    // Load full order details từ API để có đầy đủ thông tin
+    const fullOrderData = await getOrder(order.id)
+    selectedOrderForDetail.value = fullOrderData
+
+    // Load variant info cho order details
+    if (fullOrderData?.orderDetails) {
+      await loadVariantInfoForOrderDetail(fullOrderData)
+    }
+  } catch (error: any) {
+    console.error('❌ Error loading order detail:', error)
+    showError('Không thể tải chi tiết đơn hàng')
+    showOrderDetailModal.value = false
+  } finally {
+    loadingOrderDetail.value = false
+  }
+}
+
+const closeOrderDetailModal = (): void => {
+  showOrderDetailModal.value = false
+  selectedOrderForDetail.value = null
+}
+
+// ✅ THÊM MỚI - Load variant info cho order detail modal
+const loadVariantInfoForOrderDetail = async (order: Order) => {
+  if (!order?.orderDetails) return
+
+  console.log('🔄 Loading variant info for order detail modal...')
+
+  const promises = order.orderDetails.map(async (detail) => {
+    if (!variantCache.value.has(detail.productVariantId)) {
+      try {
+        console.log(`🔍 Fetching variant info for: ${detail.productVariantId}`)
+        const variantWithProduct = await getVariantWithProductByIdApi(detail.productVariantId)
+        variantCache.value.set(detail.productVariantId, variantWithProduct)
+        console.log(`✅ Loaded variant info:`, {
+          id: variantWithProduct.id,
+          productName: variantWithProduct.product?.name,
+          size: variantWithProduct.size,
+          colorName: variantWithProduct.colorName || variantWithProduct.color?.name,
+        })
+      } catch (error) {
+        console.error(`❌ Error loading variant ${detail.productVariantId}:`, error)
+      }
+    }
+  })
+
+  await Promise.all(promises)
+  console.log('✅ All variant info loaded for order detail modal')
 }
 
 const exportOrders = (): void => {

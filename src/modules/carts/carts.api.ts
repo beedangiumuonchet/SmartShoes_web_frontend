@@ -205,6 +205,8 @@ export const addCartDetail = async (cartId: string, request: CartDetailRequest) 
     const response = await axiosHttpClient.post(`/carts/${cartId}/details`, request)
     console.log('✅ Add cart detail success:', response)
 
+    window.dispatchEvent(new CustomEvent('cart-updated'))
+
     // Handle BE response structure
     if (response && typeof response === 'object') {
       // Case 1: Direct cart detail response
@@ -265,6 +267,7 @@ export const updateCartDetail = async (detailId: string, request: CartDetailRequ
   try {
     const response = await axiosHttpClient.put(`/carts/details/${detailId}`, request)
     console.log('✅ Update cart detail success:', response)
+    window.dispatchEvent(new CustomEvent('cart-updated'))
 
     // Handle BE response structure tương tự addCartDetail
     if (response && typeof response === 'object') {
