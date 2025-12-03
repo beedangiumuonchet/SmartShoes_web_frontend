@@ -291,7 +291,7 @@ export const updateProductApi = async (id: string, formData: FormData) => {
 export const searchProductsByImageApi = async (file: File) => {
   console.log('=== SEARCH PRODUCTS BY IMAGE ===')
   console.log('File:', file)
-  console.log('Token exists:', !!cookie.get('jwt_token'))
+  // console.log('Token exists:', !!cookie.get('jwt_token'))
   console.log('Full URL:', `${import.meta.env.VITE_API_URL}/products/search-image`)
   console.log('===============================')
 
@@ -371,3 +371,54 @@ export const searchProductsWithAiApi = async (searchRequest: AiSearchRequest) =>
     throw error
   }
 }
+
+/**
+ * 🔴 Delete variant by ID
+ * DELETE /product-variants/{id}
+ */
+export const deleteVariantApi = async (id: string) => {
+  console.log("=== DELETE VARIANT ===");
+  console.log("Variant ID:", id);
+  console.log("Full URL:", `${import.meta.env.VITE_API_URL}/product-variants/${id}`);
+  console.log("=======================");
+
+  try {
+    const response = await axiosHttpClient.delete(`/product-variants/${id}`);
+    console.log("🗑️ Delete variant success:", response);
+    return response;
+  } catch (error: any) {
+    console.error("❌ Delete variant error:", error);
+
+    if (error?.response?.data) {
+      console.error("📍 Server error:", error.response.data);
+    }
+
+    throw error;
+  }
+};
+
+/**
+ * 🔴 Delete product by ID
+ * DELETE /products/{id}
+ */
+export const deleteProductApi = async (id: string) => {
+  console.log("=== DELETE PRODUCT ===");
+  console.log("Product ID:", id);
+  console.log("Full URL:", `${import.meta.env.VITE_API_URL}/products/${id}`);
+  console.log("=======================");
+
+  try {
+    const response = await axiosHttpClient.delete(`/products/${id}`);
+    console.log("🗑️ Delete product success:", response);
+    return response;
+  } catch (error: any) {
+    console.error("❌ Delete product error:", error);
+
+    if (error?.response?.data) {
+      console.error("📍 Server error:", error.response.data);
+    }
+
+    throw error;
+  }
+};
+

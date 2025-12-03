@@ -36,6 +36,13 @@
       <!-- Thương hiệu + phân loại -->
       <p class="text-gray-500 mb-4">
         <RouterLink
+          :to="{ path: '/products'}"
+          class="text-blue-600 hover:underline"
+        >
+          {{ "Tất cả sản phẩm" }}
+        </RouterLink>
+        -
+        <RouterLink
           v-if="product.brand"
           :to="{ path: '/products', query: { brandId: product.brand.id } }"
           class="text-blue-600 hover:underline"
@@ -45,7 +52,7 @@
 
         <span v-else>{{ product.brand?.name || product.brandName || 'Không rõ thương hiệu' }}</span>
 
-        ·
+        -
 
         <RouterLink
           v-if="product.category"

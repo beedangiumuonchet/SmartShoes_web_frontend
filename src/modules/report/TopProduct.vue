@@ -50,6 +50,21 @@
             </svg>
             Lọc
           </button>
+
+          <button
+            @click="exportExcel"
+            class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Xuất Excel
+          </button>
+
+          <button
+            @click="exportPDF"
+            class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Xuất PDF
+          </button>
+
         </div>
       </div>
     </div>
@@ -74,8 +89,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-blue-600">Tổng sản phẩm</p>
-            <p class="text-2xl font-bold text-blue-900">{{ topProducts.length }}</p>
+            <p class="text-sm font-medium text-blue-600">Tổng số lượng sản phẩm đã bán</p>
+            <p class="text-2xl font-bold text-blue-900">{{ totalSoldQuantity  }}</p>
           </div>
         </div>
       </div>
@@ -98,32 +113,8 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-green-600">Sản phẩm đang bán</p>
-            <p class="text-2xl font-bold text-green-900">{{ totalQuantity }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-purple-50 rounded-lg p-4">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <svg
-              class="w-8 h-8 text-purple-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-purple-600">Sản phẩm hết hàng</p>
-            <p class="text-2xl font-bold text-purple-900">{{ outOfStock }}</p>
+            <p class="text-sm font-medium text-green-600">Tổng doanh thu</p>
+            <p class="text-2xl font-bold text-green-900">{{ formatPrice(totalRevenue)  }}</p>
           </div>
         </div>
       </div>
@@ -220,6 +211,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { getTopProductsApi } from './report.api';
+import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import "@fontsource/noto-sans";
 
 interface ProductVariant {
   id: string;
@@ -248,8 +245,24 @@ const loading = ref(false);
 // const selectedPeriod = ref<'week' | 'month' | 'quarter' | 'year'>('week');
 
 // New: Date filters
-const startDate = ref<string>(new Date().toISOString().slice(0, 10));
-const endDate = ref<string>(new Date().toISOString().slice(0, 10));
+const formatDate = (d: Date) => {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0'); // tháng từ 0-11
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth(); // 0-11
+
+// Ngày đầu tháng
+const startDate = ref<string>(formatDate(new Date(year, month, 1)));
+
+// Ngày cuối tháng
+const endDate = ref<string>(formatDate(new Date(year, month + 1, 0)));
+
+
 // Thêm biến
 const selectedLimit = ref<number>(10); // mặc định top 10
 
@@ -271,6 +284,150 @@ const fetchTopProducts = async () => {
   }
 };
 
+const exportExcel = async () => {
+  if (!topProducts.value.length) {
+    alert("Không có dữ liệu để xuất!");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("TopProducts");
+
+  // Tiêu đề
+  const headers = [
+    { header: "TenSanPham", key: "TenSanPham", width: 30 },
+    { header: "Brand", key: "Brand", width: 20 },
+    { header: "Category", key: "Category", width: 20 },
+    { header: "SoLuongBan", key: "SoLuongBan", width: 15 },
+    { header: "DoanhThu", key: "DoanhThu", width: 20 },
+    { header: "TrangThai", key: "TrangThai", width: 15 },
+  ];
+
+  worksheet.columns = headers;
+
+  // Tô màu header + kẻ viền + bold
+  worksheet.getRow(1).eachCell((cell) => {
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF4CAF50" }, // xanh lá
+    };
+    cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+    cell.alignment = { vertical: "middle", horizontal: "center" };
+    cell.border = {
+      top: { style: "thin" },
+      left: { style: "thin" },
+      bottom: { style: "thin" },
+      right: { style: "thin" },
+    };
+  });
+
+  // Thêm dữ liệu
+  topProducts.value.forEach((item) => {
+    worksheet.addRow({
+      TenSanPham: item.product.name,
+      Brand: item.product.brand.name,
+      Category: item.product.category.name,
+      SoLuongBan: item.totalQuantity,
+      DoanhThu: item.totalRevenue,
+      TrangThai: item.product.status,
+    });
+  });
+
+  // Kẻ viền cho tất cả các ô dữ liệu
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+  });
+
+  // Freeze row đầu tiên
+  worksheet.views = [{ state: "frozen", ySplit: 1 }];
+
+  // Định dạng số cho DoanhThu, SoLuongBan
+  worksheet.getColumn("DoanhThu").numFmt = "#,##0";
+  worksheet.getColumn("SoLuongBan").numFmt = "0";
+
+  // Xuất file
+  const buf = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buf]), `TopSanPham_${startDate.value}_to_${endDate.value}.xlsx`);
+};
+
+
+const exportPDF = () => {
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+  // — Header chính —
+  const title = "BÁO CÁO TOP SẢN PHẨM BÁN CHẠY";
+  doc.setFontSize(16);
+  doc.setFont(undefined, "bold");
+  doc.text(title, 105, 15, { align: "center" });
+
+  // — Thông tin báo cáo —
+  doc.setFontSize(10);
+  doc.setFont(undefined, "normal");
+  doc.text(`Từ: ${startDate.value}  -  Đến: ${endDate.value}`, 14, 25);
+  doc.text(`Tổng sản phẩm: ${topProducts.value.length}`, 14, 31);
+  const totalQuantity = topProducts.value.reduce((sum, p) => sum + p.totalQuantity, 0);
+  doc.text(`Tổng số lượng bán: ${totalQuantity}`, 14, 37);
+
+  // — Chuẩn bị dữ liệu bảng —
+  const rows = topProducts.value.map((item, index) => [
+    index + 1,
+    item.product.name,
+    item.product.brand.name,
+    item.product.category.name,
+    item.totalQuantity,
+    formatPrice(item.totalRevenue || 0),
+    item.product.status
+  ]);
+
+  const head = [["#", "Tên sản phẩm", "Brand", "Category", "SL bán", "Doanh thu", "Trạng thái"]];
+
+  // — Xuất bảng autoTable —
+  autoTable(doc, {
+    head,
+    body: rows,
+    startY: 45,
+    styles: {
+      fontSize: 9,
+      cellPadding: 3
+    },
+    headStyles: {
+      fillColor: [76, 175, 80],
+      textColor: 255,
+      fontStyle: "bold",
+      halign: "center"
+    },
+    alternateRowStyles: {
+      fillColor: [240, 240, 240] // xen kẽ màu nhẹ
+    },
+    columnStyles: {
+      0: { halign: "center", cellWidth: 10 }, // cột #
+      4: { halign: "right" }, // SL bán
+      5: { halign: "right" }  // Doanh thu
+    },
+    margin: { left: 14, right: 14 },
+    didDrawPage: (data) => {
+      // — Footer: số trang —
+      const page = doc.internal.getNumberOfPages();
+      doc.setFontSize(9);
+      doc.text(`Trang ${page}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
+    }
+  });
+
+  // — Xuất file —
+  doc.save(`TopProducts_${startDate.value}_to_${endDate.value}.pdf`);
+};
+
+
+
+
 // Computed totals
 const totalQuantity = computed(() => topProducts.value.reduce((sum, item) => sum + item.totalQuantity, 0));
 const outOfStock = computed(() => topProducts.value.filter(p => p.product.variants.every(v => v.stock === 0)).length);
@@ -282,6 +439,17 @@ const paginatedProducts = computed(() => {
   const end = start + itemsPerPage;
   return topProducts.value.slice(start, end);
 });
+
+// Tổng số lượng sản phẩm đã bán (cộng tất cả quantity)
+const totalSoldQuantity = computed(() => 
+  topProducts.value.reduce((sum, item) => sum + item.totalQuantity, 0)
+);
+
+// Tổng doanh thu (cộng tất cả revenue)
+const totalRevenue = computed(() => 
+  topProducts.value.reduce((sum, item) => sum + (item.totalRevenue || 0), 0)
+);
+
 
 const previousPage = () => {
   if (currentPage.value > 1) currentPage.value--;
