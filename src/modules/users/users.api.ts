@@ -10,6 +10,7 @@ import {
   type PagedData,
   type UpdateUserRequest,
   type Role,
+  type RoleRequest,
   UpdateProfileForm,
   ChangePasswordForm,
   type UploadAvatarResponse,
@@ -647,7 +648,56 @@ export const getAllRoles = async (): Promise<Role[]> => {
     return []
   }
 }
+/**
+ * ✅ THÊM MỚI - API để tạo role mới
+ * BE: POST /api/roles
+ */
+export const createRole = async (request: RoleRequest): Promise<Role> => {
+  console.log('=== CREATE ROLE ===')
+  console.log('Request:', request)
+  console.log('Token exists:', !!cookie.get('jwt_token'))
+  console.log('Full endpoint:', `${import.meta.env.VITE_API_URL}/roles`)
+  console.log('===================')
 
+  try {
+    const response = await axiosHttpClient.post('/roles', request)
+    console.log('✅ Create role success:', response)
+
+    // ✅ Handle response structure theo BE format: { result: RoleDto, success: true }
+    if (response && isRecord(response)) {
+      // Case 1: { result: RoleDto, success: true }
+      if (hasProperty(response, 'result') && response.result && isRecord(response.result)) {
+        const roleData = response.result as Role
+        console.log('✅ Parsed result structure:', roleData)
+        return roleData
+      }
+
+      // Case 2: Direct RoleDto response
+      if (
+        hasProperty(response, 'id') &&
+        hasProperty(response, 'name') &&
+        hasProperty(response, 'description')
+      ) {
+        console.log('✅ Direct RoleDto response')
+        return response as Role
+      }
+    }
+
+    console.error('❌ Invalid create role response structure:', response)
+    throw new Error('Invalid response format')
+  } catch (error: any) {
+    console.error('❌ Create role error:', error)
+
+    // ✅ Enhanced error handling
+    if (error?.response?.data?.message) {
+      throw new Error(error.response.data.message)
+    } else if (error?.message) {
+      throw new Error(error.message)
+    } else {
+      throw new Error('Không thể tạo vai trò mới')
+    }
+  }
+}
 /**
  * API để gỡ role khỏi user
  * BE: DELETE /api/users/{userId}/roles/{roleId}
@@ -783,4 +833,48 @@ export const getUserInitials = (user: UserDto): string => {
   }
 
   return user.username?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'
+}
+/**
+ * ✅ THÊM MỚI - Validation function cho RoleRequest
+ */
+export const validateRoleRequest = (request: RoleRequest): string[] => {
+  const errors: string[] = []
+
+  console.log('=== VALIDATE ROLE REQUEST ===')
+  console.log('Request:', request)
+
+  // Name validation
+  if (!request.name?.trim()) {
+    errors.push('Tên vai trò là bắt buộc')
+  } else if (request.name.length < 2) {
+    errors.push('Tên vai trò phải có ít nhất 2 ký tự')
+  } else if (request.name.length > 50) {
+    errors.push('Tên vai trò không được vượt quá 50 ký tự')
+  }
+
+  // Description validation
+  if (!request.description?.trim()) {
+    errors.push('Mô tả vai trò là bắt buộc')
+  } else if (request.description.length > 255) {
+    errors.push('Mô tả vai trò không được vượt quá 255 ký tự')
+  }
+
+  console.log('Validation errors:', errors)
+  console.log('==============================')
+
+  return errors
+}
+
+/**
+ * ✅ THÊM MỚI - Helper để format role name
+ */
+export const formatRoleName = (name: string): string => {
+  const roleNameMap: Record<string, string> = {
+    ADMIN: 'Quản trị viên',
+    MANAGER: 'Quản lý',
+    USER: 'Người dùng',
+    CUSTOMER: 'Khách hàng',
+    STAFF: 'Nhân viên',
+  }
+  return roleNameMap[name] || name
 }

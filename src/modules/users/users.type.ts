@@ -178,3 +178,8 @@ export interface Role {
   createdAt: string
   updatedAt?: string
 }
+// ✅ THÊM MỚI - Interface cho RoleRequest tạo role mới
+export interface RoleRequest {
+  name: string // Required, 2-50 chars
+  description: string // Required, max 255 chars
+}
