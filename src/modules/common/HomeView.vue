@@ -196,7 +196,7 @@
                   </div>
                 </div>
                 <button
-                  @click.stop="addToCart(product)"
+                  @click.stop="handleProductClick(product)"
                   class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                 >
                   Thêm vào giỏ hàng
@@ -582,11 +582,6 @@ const handleViewAll = () => {
 const toggleWishlist = (product: any) => {
   product.isWishlisted = !product.isWishlisted
   // Implement wishlist API
-}
-
-const addToCart = (product: any) => {
-  // Implement add to cart functionality
-  console.log('Add to cart:', product.name)
 }
 
 const updateCartQuantity = (item: any, newQuantity: number) => {

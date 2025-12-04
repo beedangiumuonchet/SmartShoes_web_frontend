@@ -8,4 +8,13 @@ export const reportRoutes = [
       title: 'Top sản phẩm bán chạy',
     },
   },
-];
+  {
+    path: '/manager/report/top-customer',
+    component: () => import('./TopCustomer.vue'),
+    meta: {
+      requiresAuth: true,
+      layout: 'sidebar',
+      title: 'Top khách hàng tiềm năng',
+    },
+  },
+]
