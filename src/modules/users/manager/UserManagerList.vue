@@ -1535,8 +1535,6 @@ const formatRoleName = (role: string): string => {
   const names: Record<string, string> = {
     ADMIN: 'Admin',
     ROLE_ADMIN: 'Admin',
-    MANAGER: 'Manager',
-    ROLE_MANAGER: 'Manager',
     USER: 'User',
     ROLE_USER: 'User',
   }

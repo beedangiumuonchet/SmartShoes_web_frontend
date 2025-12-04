@@ -362,7 +362,7 @@
           <RouterLink
             v-for="product in products"
             :key="product.id"
-            :to="`/products/${product.slug}`"
+            :to="`/products/slug/${product.slug}`"
             class="bg-white border border-gray-200 rounded-2xl shadow hover:shadow-lg overflow-hidden transition-transform group hover:scale-105"
           >
             <div class="relative w-full min-h-[300px] overflow-hidden">

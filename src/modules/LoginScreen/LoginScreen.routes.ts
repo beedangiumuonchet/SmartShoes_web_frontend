@@ -7,4 +7,12 @@ export const loginScreenRoutes = [
       layout: 'blank',
     },
   },
+  {
+    path: '/register',
+    component: () => import('./RegisterView.vue'),
+    meta: {
+      requiresAuth: false,
+      layout: 'blank',
+    },
+  },
 ]

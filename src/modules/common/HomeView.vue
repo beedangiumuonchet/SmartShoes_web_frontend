@@ -196,7 +196,7 @@
                   </div>
                 </div>
                 <button
-                  @click.stop="addToCart(product)"
+                  @click.stop="handleProductClick(product)"
                   class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                 >
                   Thêm vào giỏ hàng
@@ -224,7 +224,6 @@
             class="flex items-center justify-center p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
           >
             <span class="text-lg font-semibold text-gray-800">{{ brand.name }}</span>
-
           </div>
         </div>
       </div>
@@ -336,7 +335,6 @@ import { getAllProductsApi } from '../products/product.api'
 import { getAllBrandsApi } from '../brand/brand.api'
 import { getAllCategoriesApi } from '../category/category.api'
 
-
 const router = useRouter()
 
 // State
@@ -376,10 +374,8 @@ const heroSlides = ref([
 const categories = ref<any[]>([])
 const brands = ref<any[]>([])
 
-
 // Featured Products (mock data)
 const featuredProducts = ref<any[]>([])
-
 
 // Cart
 const cartItems = ref([
@@ -420,7 +416,6 @@ onMounted(() => {
     nextSlide()
   }, 5000)
 })
-
 
 onUnmounted(() => {
   if (slideInterval) {
@@ -467,11 +462,10 @@ const fetchFeaturedProducts = async () => {
 
         // --- 3. Nếu variant nhỏ nhất không có ảnh → tìm ảnh từ variant khác ---
         if (!selectedImage) {
-          const variantWithImage = variants.find(v => v.images && v.images.length > 0)
+          const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
           if (variantWithImage) {
             selectedImage =
-              variantWithImage.images.find((img: any) => img.isMain) ||
-              variantWithImage.images[0]
+              variantWithImage.images.find((img: any) => img.isMain) || variantWithImage.images[0]
           }
         }
 
@@ -499,9 +493,6 @@ const fetchFeaturedProducts = async () => {
   }
 }
 
-
-
-
 const fetchBrands = async () => {
   try {
     const response = await getAllBrandsApi()
@@ -521,8 +512,6 @@ const fetchCategories = async () => {
     console.error('Lỗi khi tải thương hiệu:', error)
   }
 }
-
-
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
@@ -568,24 +557,23 @@ const handleCategoryClick = (category: any) => {
   router.push({
     path: '/products',
     query: {
-      categoryId: category.id
-    }
+      categoryId: category.id,
+    },
   })
 }
 
 const handleProductClick = (product: any) => {
-  router.push(`/products/${product.slug}`)
+  router.push(`/products/slug/${product.slug}`)
 }
 
 const handleBrandClick = (brand: any) => {
   router.push({
     path: '/products',
     query: {
-      brandId: brand.id
-    }
+      brandId: brand.id,
+    },
   })
 }
-
 
 const handleViewAll = () => {
   router.push('/products')
@@ -594,11 +582,6 @@ const handleViewAll = () => {
 const toggleWishlist = (product: any) => {
   product.isWishlisted = !product.isWishlisted
   // Implement wishlist API
-}
-
-const addToCart = (product: any) => {
-  // Implement add to cart functionality
-  console.log('Add to cart:', product.name)
 }
 
 const updateCartQuantity = (item: any, newQuantity: number) => {
@@ -631,9 +614,9 @@ const handleClickOutside = (event: Event) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-    fetchFeaturedProducts()
-    fetchBrands()
-    fetchCategories()
+  fetchFeaturedProducts()
+  fetchBrands()
+  fetchCategories()
   slideInterval = setInterval(() => {
     nextSlide()
   }, 5000)
