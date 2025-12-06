@@ -57,12 +57,11 @@
 
         <!-- Dev only button -->
         <button
-          v-if="isDev"
           type="button"
-          @click="useFakeToken"
+          @click="routerRegister"
           class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
         >
-          🚀 Dev: Sử dụng token giả
+          🚀 Chưa có tài khoản? Đăng ký ngay !!
         </button>
 
         <div
@@ -180,29 +179,7 @@ const login = async () => {
   }
 }
 
-const useFakeToken = () => {
-  console.log(Info('Using fake token for development', {}, DebugContexts.AUTH))
-
-  // Sample admin JWT token
-  const sampleToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6WyJhZG1pbiJdLCJpYXQiOjE1MTYyMzkwMjJ9.CIvtAWDAOgORXRVZR8Ja-yJytoIwLpGRYSm-b7qxO8w'
-
-  try {
-    setToken(sampleToken)
-    console.log(
-      Info(
-        'Fake token login successful',
-        {
-          user: getCurrentUser()?.name,
-          roles: getCurrentUser()?.role,
-        },
-        DebugContexts.AUTH,
-      ),
-    )
-    router.push('/manager')
-  } catch (err) {
-    console.log(ErrorLog('Fake token login failed', err, DebugContexts.AUTH))
-    error.value = 'Không thể sử dụng token giả: ' + (err as Error).message
-  }
+const routerRegister = () => {
+  router.push('/register')
 }
 </script>

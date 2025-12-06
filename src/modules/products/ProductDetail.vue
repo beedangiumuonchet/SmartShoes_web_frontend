@@ -956,40 +956,59 @@ const addToCart = async () => {
 
 onMounted(async () => {
   try {
-    // const id = route.params.id as string
-    // const res = await getProductByIdApi(id)
     const slug = route.params.slug as string
-    const res = await getProductBySlugApi(slug)
+    const id = route.params.id as string
+
+    console.log('=== MOUNTING PRODUCT DETAIL PAGE ===')
+    console.log('Product:', getProductByIdApi(id))
+    let res = null
+
+    console.log('=== DEBUG ROUTE PARAMS ===')
+    console.log('Slug:', slug)
+    console.log('ID:', id)
+
+    // ===============================
+    //  🔥 ƯU TIÊN SLUG, fallback sang ID
+    // ===============================
+    if (slug) {
+      res = await getProductBySlugApi(slug)
+    } else if (id) {
+      res = await getProductByIdApi(id)
+    } else {
+      console.error('❌ Không có slug hoặc id từ route!')
+      return
+    }
 
     console.log('=== API RESPONSE DEBUG ===')
     console.log('Full response:', res)
     console.log('===========================')
 
-    // ✅ Gán product trực tiếp từ response
     product.value = res ?? null
-    console.log('✅ Product sau khi gán:', product.value)
 
     if (!product.value) {
       console.warn('⚠️ Không có dữ liệu sản phẩm, kiểm tra API!')
       return
     }
 
-    // ✅ Hiển thị ảnh mặc định
+    // ===============================
+    //   🔥 Xử lý ảnh mặc định variant
+    // ===============================
     if (product.value?.variants?.length) {
       const firstVariant = product.value.variants.find((v) => v.images?.length)
+
       selectedImage.value = getDirectImageUrl(
-        firstVariant?.images?.find((i: any) => i.isMain)?.url ||
-          firstVariant?.images?.[0]?.url ||
-          '',
+        firstVariant?.images?.find((i) => i.isMain)?.url || firstVariant?.images?.[0]?.url || '',
       )
 
       console.log('✅ Ảnh sản phẩm đã chọn:', selectedImage.value)
     }
+
     await loadReviews()
   } catch (err) {
     console.error('❌ Lỗi tải sản phẩm:', err)
   }
 })
+
 // watch(currentVariant, (newVal) => {
 //   if (newVal?.images?.length) {
 //     selectedImage.value = getDirectImageUrl(

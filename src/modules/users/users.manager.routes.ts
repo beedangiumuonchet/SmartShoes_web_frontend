@@ -7,4 +7,12 @@ export const usersManagerRoutes = [
       layout: 'blank',
     },
   },
+  {
+    path: '/manager/settings',
+    component: () => import('./manager/RoleManagerList.vue'),
+    meta: {
+      requiresAuth: true,
+      layout: 'blank',
+    },
+  },
 ]

@@ -210,8 +210,7 @@ const navigationItems = ref<NavigationMenuItem[][]>([
     {
       label: 'Khuyến mãi',
       to: '/manager/promotions',
-      icon: 'i-heroicons-percent-badge'
-
+      icon: 'i-heroicons-percent-badge',
     },
     {
       label: 'Đơn Hàng',
@@ -231,7 +230,12 @@ const navigationItems = ref<NavigationMenuItem[][]>([
           label: 'Báo cáo theo sản phẩm',
           to: '/manager/report/top-products',
           icon: 'i-heroicons-chart-bar',
-        }
+        },
+        {
+          label: 'Báo cáo theo khách hàng',
+          to: '/manager/report/top-customer',
+          icon: 'i-heroicons-chart-pie',
+        },
       ],
     },
 
