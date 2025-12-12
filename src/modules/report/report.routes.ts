@@ -26,6 +26,16 @@ export const reportRoutes = [
       layout: 'blank',
       title: 'In báo cáo',
     },
+  },
+    {
+    path: "/print-customer-report",
+    name: "PrintCustomerReport",
+    component: () => import('./PrintCustomerReport.vue'),
+    meta: {
+      requiresAuth: false,
+      layout: 'blank',
+      title: 'In báo cáo khách hàng',
+    },
   }
 
 ]

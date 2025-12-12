@@ -43,6 +43,13 @@
             </svg>
             Lọc
           </button>
+
+          <button
+            @click="openPrintPage"
+            class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Xuất PDF
+          </button>
         </div>
       </div>
     </div>
@@ -434,7 +441,8 @@ import {
   formatCustomerName,
 } from './report.api'
 import type { TopCustomerDTO } from '../users/users.type'
-
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 // State
 const topCustomers = ref<TopCustomerDTO[]>([])
 const loading = ref(false)
@@ -574,6 +582,17 @@ const getStatusLabel = (status: string): string => {
       return status
   }
 }
+
+
+
+// -----------------
+// 2️⃣ Export PDF / In
+// -----------------
+const openPrintPage = () => {
+  const url = `/print-customer-report?start=${startDate.value}&end=${endDate.value}&limit=${selectedLimit.value}`;
+  window.open(url, "_blank");
+};
+
 
 // Initialize data on mount
 onMounted(() => {

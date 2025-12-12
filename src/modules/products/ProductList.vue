@@ -665,37 +665,78 @@ const handleSortChange = () => {
 }
 
 // ✅ CẬP NHẬT - getMainImage với logic mới
+// const getMainImage = (product: Product) => {
+//   const variants = product.variants || []
+
+//   if (variants.length === 0) {
+//     return 'https://via.placeholder.com/200x200?text=No+Image'
+//   }
+
+//   // 1. Tìm variant có ID nhỏ nhất
+//   const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+
+//   // 2. Tìm ảnh isMain trong variant nhỏ nhất
+//   let selectedImage =
+//     smallestVariant.images?.find((img: any) => img.isMain) || smallestVariant.images?.[0] || null
+
+//   // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
+//   if (!selectedImage) {
+//     const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
+//     if (variantWithImage) {
+//       selectedImage =
+//         variantWithImage.images.find((img: any) => img.isMain) || variantWithImage.images[0]
+//     }
+//   }
+
+//   // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
+//   if (!selectedImage?.url) {
+//     return 'https://via.placeholder.com/200x200?text=No+Image'
+//   }
+
+//   return selectedImage.url
+// }
 const getMainImage = (product: Product) => {
-  const variants = product.variants || []
+  const variants = product.variants || [];
 
   if (variants.length === 0) {
-    return 'https://via.placeholder.com/200x200?text=No+Image'
+    return "https://via.placeholder.com/200x200?text=No+Image";
   }
 
-  // 1. Tìm variant có ID nhỏ nhất
-  const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+  // 1️⃣ Tìm bất kỳ ảnh nào có isMain = true trên toàn bộ biến thể
+  let mainImage = null;
 
-  // 2. Tìm ảnh isMain trong variant nhỏ nhất
-  let selectedImage =
-    smallestVariant.images?.find((img: any) => img.isMain) || smallestVariant.images?.[0] || null
-
-  // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
-  if (!selectedImage) {
-    const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
-    if (variantWithImage) {
-      selectedImage =
-        variantWithImage.images.find((img: any) => img.isMain) || variantWithImage.images[0]
+  for (const variant of variants) {
+    if (!variant.images) continue;
+    const img = variant.images.find((i) => i.isMain);
+    if (img) {
+      mainImage = img;
+      break;
     }
   }
 
-  // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
-  if (!selectedImage?.url) {
-    return 'https://via.placeholder.com/200x200?text=No+Image'
+  // 2️⃣ Nếu không có ảnh nào isMain, lấy ảnh đầu tiên có tồn tại
+  if (!mainImage) {
+    const variantWithImage = variants.find(
+      (v) => v.images && v.images.length > 0
+    );
+    if (variantWithImage) {
+      mainImage = variantWithImage.images[0];
+    }
   }
 
-  return selectedImage.url
-}
+  // 3️⃣ Nếu vẫn không có → trả placeholder
+  if (!mainImage?.url) {
+    return "https://via.placeholder.com/200x200?text=No+Image";
+  }
 
+  // 4️⃣ Convert link Google Drive
+  const url = mainImage.url;
+  const match = url.match(/\/d\/([^/]+)/);
+
+  return match
+    ? `http://localhost:8080/api/v1/images/${match[1]}`
+    : url;
+};
 // ✅ THÊM MỚI - getDirectImageUrl
 function getDirectImageUrl(driveUrl: string) {
   const match = driveUrl?.match(/\/d\/([^/]+)/)
@@ -709,7 +750,7 @@ function getDirectImageUrl(driveUrl: string) {
 const getProductMinPrice = (product: Product) => {
   const variants = product.variants || []
   if (!variants.length) return 0
-  return Math.min(...variants.map((v) => v.price || Infinity))
+  return Math.min(...variants.map((v) => v.priceSale || Infinity))
 }
 
 // ✅ THÊM MỚI - getStatusLabel cho AI results
