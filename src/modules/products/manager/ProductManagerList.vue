@@ -336,41 +336,6 @@
                 </div>
               </th>
 
-              <!-- Giá -->
-              <!-- <th
-                class="px-4 py-3 text-left text-sm font-medium text-gray-700 cursor-pointer"
-                @click="toggleSort('price')"
-              >
-                <div class="flex items-center space-x-1 hover:text-gray-700 transition-colors">
-                  <span>Giá</span>
-                  <div class="flex flex-col">
-                    <svg
-                      :class="[
-                        'w-3 h-3 transition-colors',
-                        sortColumn === 'price' && sortDirection === 'asc'
-                          ? 'text-indigo-600'
-                          : 'text-gray-400'
-                      ]"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    <svg
-                      :class="[
-                        'w-3 h-3 -mt-1 transition-colors',
-                        sortColumn === 'price' && sortDirection === 'desc'
-                          ? 'text-indigo-600'
-                          : 'text-gray-400'
-                      ]"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </th> -->
 
               <!-- Trạng thái -->
               <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Trạng thái</th>
@@ -762,7 +727,7 @@
                     <input
                       type="checkbox"
                       v-model="img.isMain"
-                      @change="setMainImage(vIdx)"
+                      @change="setMainImageGlobal(vIdx, iIdx)"
                     />
                     Ảnh chính
                   </label>
@@ -1057,6 +1022,18 @@ const setMainImage = (variant) => {
     variant.images[0].isMain = true
   }
 }
+const setMainImageGlobal = (variantIndex, imageIndex) => {
+  // 1. Bỏ isMain trên TẤT CẢ ảnh của TẤT CẢ biến thể
+  form.value.variants.forEach(v => {
+    v.images.forEach(img => {
+      img.isMain = false;
+    });
+  });
+
+  // 2. Đặt isMain cho đúng ảnh vừa chỉnh
+  form.value.variants[variantIndex].images[imageIndex].isMain = true;
+};
+
 
 
 const uniqueKeys = computed(() => [...new Set(attributes.value.map(a => a.key))])
@@ -1380,43 +1357,85 @@ function getDirectImageUrl(driveUrl: string) {
 }
 
 /* --------- image helper (main image) --------- */
+// const getMainImage = (product: Product) => {
+//   const variants = product.variants || []
+
+//   if (variants.length === 0) {
+//     return 'https://via.placeholder.com/200x200?text=No+Image'
+//   }
+
+//   // 1. Tìm variant có ID nhỏ nhất
+//   const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+
+//   // 2. Tìm ảnh isMain trong variant nhỏ nhất
+//   let selectedImage =
+//     smallestVariant.images?.find((img: any) => img.isMain) ||
+//     smallestVariant.images?.[0] ||
+//     null
+
+//   // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
+//   if (!selectedImage) {
+//     const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
+//     if (variantWithImage) {
+//       selectedImage =
+//         variantWithImage.images.find((img: any) => img.isMain) ||
+//         variantWithImage.images[0]
+//     }
+//   }
+
+//   // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
+//   if (!selectedImage?.url) {
+//     return 'https://via.placeholder.com/200x200?text=No+Image'
+//   }
+
+//   const url = selectedImage.url
+
+//   // 5. Convert Google Drive link → direct link (giống code cũ)
+//   const match = url.match(/\/d\/([^/]+)/)
+//   return match ? `http://localhost:8080/api/v1/images/${match[1]}` : url
+// }
 const getMainImage = (product: Product) => {
-  const variants = product.variants || []
+  const variants = product.variants || [];
 
   if (variants.length === 0) {
-    return 'https://via.placeholder.com/200x200?text=No+Image'
+    return "https://via.placeholder.com/200x200?text=No+Image";
   }
 
-  // 1. Tìm variant có ID nhỏ nhất
-  const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+  // 1️⃣ Tìm bất kỳ ảnh nào có isMain = true trên toàn bộ biến thể
+  let mainImage = null;
 
-  // 2. Tìm ảnh isMain trong variant nhỏ nhất
-  let selectedImage =
-    smallestVariant.images?.find((img: any) => img.isMain) ||
-    smallestVariant.images?.[0] ||
-    null
-
-  // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
-  if (!selectedImage) {
-    const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
-    if (variantWithImage) {
-      selectedImage =
-        variantWithImage.images.find((img: any) => img.isMain) ||
-        variantWithImage.images[0]
+  for (const variant of variants) {
+    if (!variant.images) continue;
+    const img = variant.images.find((i) => i.isMain);
+    if (img) {
+      mainImage = img;
+      break;
     }
   }
 
-  // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
-  if (!selectedImage?.url) {
-    return 'https://via.placeholder.com/200x200?text=No+Image'
+  // 2️⃣ Nếu không có ảnh nào isMain, lấy ảnh đầu tiên có tồn tại
+  if (!mainImage) {
+    const variantWithImage = variants.find(
+      (v) => v.images && v.images.length > 0
+    );
+    if (variantWithImage) {
+      mainImage = variantWithImage.images[0];
+    }
   }
 
-  const url = selectedImage.url
+  // 3️⃣ Nếu vẫn không có → trả placeholder
+  if (!mainImage?.url) {
+    return "https://via.placeholder.com/200x200?text=No+Image";
+  }
 
-  // 5. Convert Google Drive link → direct link (giống code cũ)
-  const match = url.match(/\/d\/([^/]+)/)
-  return match ? `http://localhost:8080/api/v1/images/${match[1]}` : url
-}
+  // 4️⃣ Convert link Google Drive
+  const url = mainImage.url;
+  const match = url.match(/\/d\/([^/]+)/);
+
+  return match
+    ? `http://localhost:8080/api/v1/images/${match[1]}`
+    : url;
+};
 
 
 /* --------- format helpers --------- */

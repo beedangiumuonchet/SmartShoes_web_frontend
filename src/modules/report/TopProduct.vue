@@ -158,6 +158,7 @@
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Xếp hạng</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên sản phẩm</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thương hiệu</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thể loại</th>
@@ -167,7 +168,19 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="item in paginatedProducts" :key="item.product.id">
+            <tr v-for="(item, index) in paginatedProducts" :key="item.product.id">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div
+                    :class="[
+                      'flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold text-white',
+                      getRankingColor(index + (currentPage - 1) * itemsPerPage),
+                    ]"
+                  >
+                    {{ index + (currentPage - 1) * itemsPerPage + 1 }}
+                  </div>
+                </div>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.product.name }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.product.brand.name }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.product.category.name }}</td>
@@ -391,7 +404,19 @@ const totalRevenue = computed(() =>
   topProducts.value.reduce((sum, item) => sum + (item.totalRevenue || 0), 0)
 );
 
-
+// Helper functions
+const getRankingColor = (rank: number): string => {
+  switch (rank) {
+    case 0:
+      return 'bg-yellow-500' // Gold
+    case 1:
+      return 'bg-gray-400' // Silver
+    case 2:
+      return 'bg-yellow-600' // Bronze
+    default:
+      return 'bg-blue-500' // Default blue
+  }
+}
 const previousPage = () => {
   if (currentPage.value > 1) currentPage.value--;
 };
