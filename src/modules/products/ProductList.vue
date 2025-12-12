@@ -229,6 +229,16 @@
       <div
         class="md:w-1/5 sticky top-24 h-fit bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-4"
       >
+            <!-- SEARCH BY NAME -->
+<div class="mb-6">
+  <input
+    v-model="filters.q"
+    @keyup.enter="fetchProducts"
+    type="text"
+    placeholder="Tìm sản phẩm theo tên..."
+    class="w-full border px-4 py-3 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 text-gray-700"
+  />
+</div>
         <!-- THƯƠNG HIỆU -->
         <div class="border-b pb-3">
           <div
@@ -331,7 +341,32 @@
       </div>
 
       <!-- Products grid -->
+       <!-- <div v-if="uploadedImagePreview" class="text-center mb-6">
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">Ảnh bạn vừa tìm kiếm</h3>
+        <img
+          :src="uploadedImagePreview"
+          class="mx-auto w-48 h-48 object-cover rounded-xl shadow-lg border"
+          alt="Uploaded Image Preview"
+        />
+      </div> -->
+
+
+
       <div class="md:w-4/5">
+          <div
+    v-if="uploadedImagePreview"
+    class="w-full flex flex-col items-center mb-8 pt-2 pb-4 border-b border-gray-200"
+  >
+    <h3 class="text-lg font-semibold text-gray-700 mb-3">
+      Ảnh bạn vừa tìm kiếm
+    </h3>
+
+    <img
+      :src="uploadedImagePreview"
+      class="w-40 h-40 object-cover rounded-xl shadow-md border"
+      alt="Uploaded Image Preview"
+    />
+  </div>
         <!-- Loading / Empty States -->
         <div v-if="isAiSearching" class="text-center py-20">
           <div class="inline-flex items-center space-x-2 text-purple-600">
@@ -550,6 +585,10 @@ const aiLastSearchQuery = ref<string>('')
 const isShowingAiResults = ref<boolean>(false)
 const aiSuggestions = ref<string[]>([])
 
+const uploadedImagePreview = ref<string | null>(null)
+
+
+
 // AI Search mapping để lưu score và text theo product ID
 const aiProductScores = ref<Record<string, number>>({})
 const aiProductTexts = ref<Record<string, string>>({})
@@ -693,6 +732,8 @@ const handleImageUpload = async (event: Event) => {
   if (!target.files || !target.files[0]) return
 
   const file = target.files[0]
+  // 👉 Tạo preview ảnh
+  uploadedImagePreview.value = URL.createObjectURL(file)
   try {
     isImageSearching.value = true
     console.log('📸 Searching products by image:', file.name)
@@ -713,6 +754,8 @@ const handleImageUpload = async (event: Event) => {
     isImageSearching.value = false
   }
 }
+
+
 
 // ========== AI SEARCH METHODS - GIỮ NGUYÊN ==========
 const handleAiSearch = async (): Promise<void> => {
@@ -852,6 +895,8 @@ const clearAiSearchData = (): void => {
   aiProductTexts.value = {}
   aiProductStocks.value = {}
   aiProductStatuses.value = {}
+  uploadedImagePreview.value = null
+
 }
 
 // ✅ Utility functions - GIỮ NGUYÊN
@@ -914,6 +959,21 @@ onMounted(async () => {
   // ⭐ Còn lại → fetch bình thường
   await fetchProducts()
 })
+watch(
+  () => filters.value.q,
+  () => {
+    debounceSearch()
+  }
+)
+let debounceTimer: any = null
+
+const debounceSearch = () => {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    fetchProducts()
+  }, 300)
+}
+
 </script>
 <style scoped>
 .line-clamp-2 {

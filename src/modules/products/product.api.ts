@@ -273,6 +273,7 @@ export const updateProductApi = async (id: string, formData: FormData) => {
       {
         headers: {
           "Content-Type": "multipart/form-data",
+          
         },
       }
     );
