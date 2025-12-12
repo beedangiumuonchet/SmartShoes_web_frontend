@@ -1506,6 +1506,104 @@ const closeModal = () => {
   showModal.value = false
 }
 
+// const save = async () => {
+//   try {
+//     if (!form.value.name.trim())
+//       return showError("Vui lòng nhập tên sản phẩm!");
+
+//     if (!form.value.brandId || !form.value.categoryId)
+//       return showError("Vui lòng chọn thương hiệu và danh mục!");
+//       console.log("===== DEBUG VARIANTS BEFORE BUILD =====");
+//       form.value.variants.forEach((v, vIdx) => {
+//         console.log(`--- Variant ${vIdx} ---`);
+//         v.images.forEach((img, iIdx) => {
+//           console.log(
+//             `Image ${iIdx}: id=${img.id}, file=${!!img.file}, deleted=${img._deleted}, isMain=${img.isMain}`
+//           );
+//         });
+//       });
+//       console.log("=========================================");
+
+//     const formData = new FormData();
+
+//     // ===========================
+//     // Product fields
+//     // ===========================
+//     formData.append("name", form.value.name);
+//     formData.append("brandId", form.value.brandId);
+//     formData.append("categoryId", form.value.categoryId);
+//     formData.append("description", form.value.description || "");
+//     formData.append("status", form.value.status || "ACTIVE");
+
+//     // ===========================
+//     // Attributes
+//     // ===========================
+//     form.value.attributes.forEach((a, aIdx) => {
+//       if (!a.attribute?.key || !a.attribute?.value) return;
+
+//       formData.append(`attributes[${aIdx}].attributeId`, a.attribute.id || "");
+//       formData.append(`attributes[${aIdx}].key`, a.attribute.key);
+//       formData.append(`attributes[${aIdx}].value`, a.attribute.value);
+//     });
+
+//     // ===========================
+//     // Variants + Images
+//     // ===========================
+//     form.value.variants.forEach((v, vIdx) => {
+//       // ===== Base fields =====
+//       formData.append(`variants[${vIdx}].id`, v.id || "");
+//       formData.append(`variants[${vIdx}].colorId`, v.colorId);
+//       formData.append(`variants[${vIdx}].size`, v.size);
+//       formData.append(`variants[${vIdx}].price`, String(v.price));
+//       formData.append(`variants[${vIdx}].stock`, String(v.stock));
+
+//       // đảm bảo có isMain đúng
+//       setMainImage(v);
+
+//       // ======================================
+//       // SEND REMAINING IMAGES (có thứ tự sạch)
+//       // ======================================
+//       let cleanIndex = 0;
+//       v.images.forEach((img) => {
+//         if (img._deleted) return; // bỏ qua ảnh đã xoá
+
+//         formData.append(
+//           `variants[${vIdx}].images[${cleanIndex}].isMain`,
+//           String(img.isMain)
+//         );
+
+//         if (img.id) {
+//           formData.append(`variants[${vIdx}].images[${cleanIndex}].id`, img.id);
+//         }
+
+//         if (img.file) {
+//           formData.append(`variants[${vIdx}].images[${cleanIndex}].file`, img.file);
+//         }
+
+//         cleanIndex++;
+//       });
+//     });
+
+//     // ===== START LOADING =====
+//     loading.value = true
+//     if (isEdit.value && form.value.id) {
+//       await updateProductApi(form.value.id, formData);
+//       showSuccess("Cập nhật sản phẩm thành công!");
+//     } else {
+//       await createProductApi(formData);
+//       showSuccess("Thêm sản phẩm thành công!");
+//     }
+
+//     await fetchProducts();
+//     closeModal();
+//   } catch (err) {
+//     console.error("❌ Lưu sản phẩm thất bại:", err);
+//     showError("Lưu sản phẩm thất bại, vui lòng thử lại!");
+//   } finally {
+//     // ===== STOP LOADING =====
+//     loading.value = false
+//   }
+// };
 const save = async () => {
   try {
     if (!form.value.name.trim())
@@ -1526,63 +1624,48 @@ const save = async () => {
 
     const formData = new FormData();
 
-    // ===========================
-    // Product fields
-    // ===========================
-    formData.append("name", form.value.name);
-    formData.append("brandId", form.value.brandId);
-    formData.append("categoryId", form.value.categoryId);
-    formData.append("description", form.value.description || "");
-    formData.append("status", form.value.status || "ACTIVE");
+    // ===== JSON PRODUCT (text only) =====
+    const json = {
+      name: form.value.name,
+      brandId: form.value.brandId,
+      categoryId: form.value.categoryId,
+      description: form.value.description,
+      status: form.value.status,
 
-    // ===========================
-    // Attributes
-    // ===========================
-    form.value.attributes.forEach((a, aIdx) => {
-      if (!a.attribute?.key || !a.attribute?.value) return;
+      attributes: form.value.attributes.map(a => ({
+        attributeId: a.attribute.id
+      })),
 
-      formData.append(`attributes[${aIdx}].attributeId`, a.attribute.id || "");
-      formData.append(`attributes[${aIdx}].key`, a.attribute.key);
-      formData.append(`attributes[${aIdx}].value`, a.attribute.value);
-    });
+      variants: form.value.variants.map(v => ({
+        id: v.id || null,
+        colorId: v.colorId,
+        size: v.size,
+        price: v.price,
+        stock: v.stock,
+        images: v.images
+      .filter(img => !img._deleted) // không gửi ảnh xoá
+      .map(img => ({
+        id: img.id,        // ảnh cũ: id có giá trị
+        isMain: img.isMain // không gửi file ở JSON
+      }))
 
-    // ===========================
-    // Variants + Images
-    // ===========================
+      }))
+    };
+
+    formData.append(
+      "product",
+      new Blob([JSON.stringify(json)], { type: "application/json" })
+    );
+
+    // ===== FILES: tất cả ảnh mới =====
     form.value.variants.forEach((v, vIdx) => {
-      // ===== Base fields =====
-      formData.append(`variants[${vIdx}].id`, v.id || "");
-      formData.append(`variants[${vIdx}].colorId`, v.colorId);
-      formData.append(`variants[${vIdx}].size`, v.size);
-      formData.append(`variants[${vIdx}].price`, String(v.price));
-      formData.append(`variants[${vIdx}].stock`, String(v.stock));
-
-      // đảm bảo có isMain đúng
-      setMainImage(v);
-
-      // ======================================
-      // SEND REMAINING IMAGES (có thứ tự sạch)
-      // ======================================
-      let cleanIndex = 0;
-      v.images.forEach((img) => {
-        if (img._deleted) return; // bỏ qua ảnh đã xoá
-
-        formData.append(
-          `variants[${vIdx}].images[${cleanIndex}].isMain`,
-          String(img.isMain)
-        );
-
-        if (img.id) {
-          formData.append(`variants[${vIdx}].images[${cleanIndex}].id`, img.id);
-        }
-
+      v.images.forEach(img => {
         if (img.file) {
-          formData.append(`variants[${vIdx}].images[${cleanIndex}].file`, img.file);
+          formData.append("variantImages", img.file);
         }
-
-        cleanIndex++;
       });
     });
+
 
     // ===== START LOADING =====
     loading.value = true
@@ -1604,7 +1687,6 @@ const save = async () => {
     loading.value = false
   }
 };
-
 const openMenuId = ref(null)
 
 const toggleActionMenu = (id) => {

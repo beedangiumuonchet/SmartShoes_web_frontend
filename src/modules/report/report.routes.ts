@@ -17,4 +17,15 @@ export const reportRoutes = [
       title: 'Top khách hàng tiềm năng',
     },
   },
+  {
+    path: "/print-report",
+    name: "PrintReport",
+    component: () => import('./PrintReport.vue'),
+    meta: {
+      requiresAuth: false,
+      layout: 'blank',
+      title: 'In báo cáo',
+    },
+  }
+
 ]
