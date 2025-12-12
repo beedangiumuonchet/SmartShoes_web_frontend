@@ -336,41 +336,6 @@
                 </div>
               </th>
 
-              <!-- Giá -->
-              <!-- <th
-                class="px-4 py-3 text-left text-sm font-medium text-gray-700 cursor-pointer"
-                @click="toggleSort('price')"
-              >
-                <div class="flex items-center space-x-1 hover:text-gray-700 transition-colors">
-                  <span>Giá</span>
-                  <div class="flex flex-col">
-                    <svg
-                      :class="[
-                        'w-3 h-3 transition-colors',
-                        sortColumn === 'price' && sortDirection === 'asc'
-                          ? 'text-indigo-600'
-                          : 'text-gray-400'
-                      ]"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    <svg
-                      :class="[
-                        'w-3 h-3 -mt-1 transition-colors',
-                        sortColumn === 'price' && sortDirection === 'desc'
-                          ? 'text-indigo-600'
-                          : 'text-gray-400'
-                      ]"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </th> -->
 
               <!-- Trạng thái -->
               <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Trạng thái</th>
@@ -762,7 +727,7 @@
                     <input
                       type="checkbox"
                       v-model="img.isMain"
-                      @change="setMainImage(vIdx)"
+                      @change="setMainImageGlobal(vIdx, iIdx)"
                     />
                     Ảnh chính
                   </label>
@@ -1057,6 +1022,18 @@ const setMainImage = (variant) => {
     variant.images[0].isMain = true
   }
 }
+const setMainImageGlobal = (variantIndex, imageIndex) => {
+  // 1. Bỏ isMain trên TẤT CẢ ảnh của TẤT CẢ biến thể
+  form.value.variants.forEach(v => {
+    v.images.forEach(img => {
+      img.isMain = false;
+    });
+  });
+
+  // 2. Đặt isMain cho đúng ảnh vừa chỉnh
+  form.value.variants[variantIndex].images[imageIndex].isMain = true;
+};
+
 
 
 const uniqueKeys = computed(() => [...new Set(attributes.value.map(a => a.key))])
@@ -1380,43 +1357,85 @@ function getDirectImageUrl(driveUrl: string) {
 }
 
 /* --------- image helper (main image) --------- */
+// const getMainImage = (product: Product) => {
+//   const variants = product.variants || []
+
+//   if (variants.length === 0) {
+//     return 'https://via.placeholder.com/200x200?text=No+Image'
+//   }
+
+//   // 1. Tìm variant có ID nhỏ nhất
+//   const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+
+//   // 2. Tìm ảnh isMain trong variant nhỏ nhất
+//   let selectedImage =
+//     smallestVariant.images?.find((img: any) => img.isMain) ||
+//     smallestVariant.images?.[0] ||
+//     null
+
+//   // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
+//   if (!selectedImage) {
+//     const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
+//     if (variantWithImage) {
+//       selectedImage =
+//         variantWithImage.images.find((img: any) => img.isMain) ||
+//         variantWithImage.images[0]
+//     }
+//   }
+
+//   // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
+//   if (!selectedImage?.url) {
+//     return 'https://via.placeholder.com/200x200?text=No+Image'
+//   }
+
+//   const url = selectedImage.url
+
+//   // 5. Convert Google Drive link → direct link (giống code cũ)
+//   const match = url.match(/\/d\/([^/]+)/)
+//   return match ? `http://localhost:8080/api/v1/images/${match[1]}` : url
+// }
 const getMainImage = (product: Product) => {
-  const variants = product.variants || []
+  const variants = product.variants || [];
 
   if (variants.length === 0) {
-    return 'https://via.placeholder.com/200x200?text=No+Image'
+    return "https://via.placeholder.com/200x200?text=No+Image";
   }
 
-  // 1. Tìm variant có ID nhỏ nhất
-  const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+  // 1️⃣ Tìm bất kỳ ảnh nào có isMain = true trên toàn bộ biến thể
+  let mainImage = null;
 
-  // 2. Tìm ảnh isMain trong variant nhỏ nhất
-  let selectedImage =
-    smallestVariant.images?.find((img: any) => img.isMain) ||
-    smallestVariant.images?.[0] ||
-    null
-
-  // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
-  if (!selectedImage) {
-    const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
-    if (variantWithImage) {
-      selectedImage =
-        variantWithImage.images.find((img: any) => img.isMain) ||
-        variantWithImage.images[0]
+  for (const variant of variants) {
+    if (!variant.images) continue;
+    const img = variant.images.find((i) => i.isMain);
+    if (img) {
+      mainImage = img;
+      break;
     }
   }
 
-  // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
-  if (!selectedImage?.url) {
-    return 'https://via.placeholder.com/200x200?text=No+Image'
+  // 2️⃣ Nếu không có ảnh nào isMain, lấy ảnh đầu tiên có tồn tại
+  if (!mainImage) {
+    const variantWithImage = variants.find(
+      (v) => v.images && v.images.length > 0
+    );
+    if (variantWithImage) {
+      mainImage = variantWithImage.images[0];
+    }
   }
 
-  const url = selectedImage.url
+  // 3️⃣ Nếu vẫn không có → trả placeholder
+  if (!mainImage?.url) {
+    return "https://via.placeholder.com/200x200?text=No+Image";
+  }
 
-  // 5. Convert Google Drive link → direct link (giống code cũ)
-  const match = url.match(/\/d\/([^/]+)/)
-  return match ? `http://localhost:8080/api/v1/images/${match[1]}` : url
-}
+  // 4️⃣ Convert link Google Drive
+  const url = mainImage.url;
+  const match = url.match(/\/d\/([^/]+)/);
+
+  return match
+    ? `http://localhost:8080/api/v1/images/${match[1]}`
+    : url;
+};
 
 
 /* --------- format helpers --------- */
@@ -1506,6 +1525,104 @@ const closeModal = () => {
   showModal.value = false
 }
 
+// const save = async () => {
+//   try {
+//     if (!form.value.name.trim())
+//       return showError("Vui lòng nhập tên sản phẩm!");
+
+//     if (!form.value.brandId || !form.value.categoryId)
+//       return showError("Vui lòng chọn thương hiệu và danh mục!");
+//       console.log("===== DEBUG VARIANTS BEFORE BUILD =====");
+//       form.value.variants.forEach((v, vIdx) => {
+//         console.log(`--- Variant ${vIdx} ---`);
+//         v.images.forEach((img, iIdx) => {
+//           console.log(
+//             `Image ${iIdx}: id=${img.id}, file=${!!img.file}, deleted=${img._deleted}, isMain=${img.isMain}`
+//           );
+//         });
+//       });
+//       console.log("=========================================");
+
+//     const formData = new FormData();
+
+//     // ===========================
+//     // Product fields
+//     // ===========================
+//     formData.append("name", form.value.name);
+//     formData.append("brandId", form.value.brandId);
+//     formData.append("categoryId", form.value.categoryId);
+//     formData.append("description", form.value.description || "");
+//     formData.append("status", form.value.status || "ACTIVE");
+
+//     // ===========================
+//     // Attributes
+//     // ===========================
+//     form.value.attributes.forEach((a, aIdx) => {
+//       if (!a.attribute?.key || !a.attribute?.value) return;
+
+//       formData.append(`attributes[${aIdx}].attributeId`, a.attribute.id || "");
+//       formData.append(`attributes[${aIdx}].key`, a.attribute.key);
+//       formData.append(`attributes[${aIdx}].value`, a.attribute.value);
+//     });
+
+//     // ===========================
+//     // Variants + Images
+//     // ===========================
+//     form.value.variants.forEach((v, vIdx) => {
+//       // ===== Base fields =====
+//       formData.append(`variants[${vIdx}].id`, v.id || "");
+//       formData.append(`variants[${vIdx}].colorId`, v.colorId);
+//       formData.append(`variants[${vIdx}].size`, v.size);
+//       formData.append(`variants[${vIdx}].price`, String(v.price));
+//       formData.append(`variants[${vIdx}].stock`, String(v.stock));
+
+//       // đảm bảo có isMain đúng
+//       setMainImage(v);
+
+//       // ======================================
+//       // SEND REMAINING IMAGES (có thứ tự sạch)
+//       // ======================================
+//       let cleanIndex = 0;
+//       v.images.forEach((img) => {
+//         if (img._deleted) return; // bỏ qua ảnh đã xoá
+
+//         formData.append(
+//           `variants[${vIdx}].images[${cleanIndex}].isMain`,
+//           String(img.isMain)
+//         );
+
+//         if (img.id) {
+//           formData.append(`variants[${vIdx}].images[${cleanIndex}].id`, img.id);
+//         }
+
+//         if (img.file) {
+//           formData.append(`variants[${vIdx}].images[${cleanIndex}].file`, img.file);
+//         }
+
+//         cleanIndex++;
+//       });
+//     });
+
+//     // ===== START LOADING =====
+//     loading.value = true
+//     if (isEdit.value && form.value.id) {
+//       await updateProductApi(form.value.id, formData);
+//       showSuccess("Cập nhật sản phẩm thành công!");
+//     } else {
+//       await createProductApi(formData);
+//       showSuccess("Thêm sản phẩm thành công!");
+//     }
+
+//     await fetchProducts();
+//     closeModal();
+//   } catch (err) {
+//     console.error("❌ Lưu sản phẩm thất bại:", err);
+//     showError("Lưu sản phẩm thất bại, vui lòng thử lại!");
+//   } finally {
+//     // ===== STOP LOADING =====
+//     loading.value = false
+//   }
+// };
 const save = async () => {
   try {
     if (!form.value.name.trim())
@@ -1526,63 +1643,48 @@ const save = async () => {
 
     const formData = new FormData();
 
-    // ===========================
-    // Product fields
-    // ===========================
-    formData.append("name", form.value.name);
-    formData.append("brandId", form.value.brandId);
-    formData.append("categoryId", form.value.categoryId);
-    formData.append("description", form.value.description || "");
-    formData.append("status", form.value.status || "ACTIVE");
+    // ===== JSON PRODUCT (text only) =====
+    const json = {
+      name: form.value.name,
+      brandId: form.value.brandId,
+      categoryId: form.value.categoryId,
+      description: form.value.description,
+      status: form.value.status,
 
-    // ===========================
-    // Attributes
-    // ===========================
-    form.value.attributes.forEach((a, aIdx) => {
-      if (!a.attribute?.key || !a.attribute?.value) return;
+      attributes: form.value.attributes.map(a => ({
+        attributeId: a.attribute.id
+      })),
 
-      formData.append(`attributes[${aIdx}].attributeId`, a.attribute.id || "");
-      formData.append(`attributes[${aIdx}].key`, a.attribute.key);
-      formData.append(`attributes[${aIdx}].value`, a.attribute.value);
-    });
+      variants: form.value.variants.map(v => ({
+        id: v.id || null,
+        colorId: v.colorId,
+        size: v.size,
+        price: v.price,
+        stock: v.stock,
+        images: v.images
+      .filter(img => !img._deleted) // không gửi ảnh xoá
+      .map(img => ({
+        id: img.id,        // ảnh cũ: id có giá trị
+        isMain: img.isMain // không gửi file ở JSON
+      }))
 
-    // ===========================
-    // Variants + Images
-    // ===========================
+      }))
+    };
+
+    formData.append(
+      "product",
+      new Blob([JSON.stringify(json)], { type: "application/json" })
+    );
+
+    // ===== FILES: tất cả ảnh mới =====
     form.value.variants.forEach((v, vIdx) => {
-      // ===== Base fields =====
-      formData.append(`variants[${vIdx}].id`, v.id || "");
-      formData.append(`variants[${vIdx}].colorId`, v.colorId);
-      formData.append(`variants[${vIdx}].size`, v.size);
-      formData.append(`variants[${vIdx}].price`, String(v.price));
-      formData.append(`variants[${vIdx}].stock`, String(v.stock));
-
-      // đảm bảo có isMain đúng
-      setMainImage(v);
-
-      // ======================================
-      // SEND REMAINING IMAGES (có thứ tự sạch)
-      // ======================================
-      let cleanIndex = 0;
-      v.images.forEach((img) => {
-        if (img._deleted) return; // bỏ qua ảnh đã xoá
-
-        formData.append(
-          `variants[${vIdx}].images[${cleanIndex}].isMain`,
-          String(img.isMain)
-        );
-
-        if (img.id) {
-          formData.append(`variants[${vIdx}].images[${cleanIndex}].id`, img.id);
-        }
-
+      v.images.forEach(img => {
         if (img.file) {
-          formData.append(`variants[${vIdx}].images[${cleanIndex}].file`, img.file);
+          formData.append("variantImages", img.file);
         }
-
-        cleanIndex++;
       });
     });
+
 
     // ===== START LOADING =====
     loading.value = true
@@ -1604,7 +1706,6 @@ const save = async () => {
     loading.value = false
   }
 };
-
 const openMenuId = ref(null)
 
 const toggleActionMenu = (id) => {

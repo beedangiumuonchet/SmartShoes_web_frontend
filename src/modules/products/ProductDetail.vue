@@ -11,7 +11,44 @@
       </div>
 
       <!-- Danh sách ảnh thumbnail -->
-      <div class="flex gap-3 mt-4 justify-center flex-wrap">
+       <div class="relative w-full mt-4">
+  <!-- Arrow Left -->
+  <button
+    @click="scrollThumbnails('left')"
+    class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-1 z-10"
+  >
+    ‹
+  </button>
+
+  <!-- Thumbnails container -->
+  <div
+    ref="thumbContainer"
+    class="flex gap-3 justify-start overflow-x-auto no-scrollbar scroll-smooth"
+    style="white-space: nowrap;"
+  >
+    <img
+      v-for="(img, i) in displayedImages"
+      :key="i"
+      :src="getDirectImageUrl(img.url)"
+      :alt="'image-' + i"
+      @click="selectedImage = getDirectImageUrl(img.url)"
+      class="w-20 h-20 rounded-xl object-cover cursor-pointer border transition-all duration-300 flex-none"
+      :class="selectedImage === getDirectImageUrl(img.url)
+              ? 'border-blue-500 scale-105'
+              : 'border-gray-200 hover:scale-105'"
+    />
+  </div>
+
+  <!-- Arrow Right -->
+  <button
+    @click="scrollThumbnails('right')"
+    class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-1 z-10"
+  >
+    ›
+  </button>
+</div>
+
+      <!-- <div class="flex gap-3 mt-4 justify-center flex-wrap">
         <img
           v-for="(img, i) in displayedImages"
           :key="i"
@@ -25,7 +62,7 @@
               : 'border-gray-200 hover:scale-105'
           "
         />
-      </div>
+      </div> -->
     </div>
 
     <!-- Right: Info -->
@@ -735,6 +772,7 @@ const availableColors = computed(() => {
 })
 
 const displayedImages = computed(() => {
+  const variants = product.value?.variants || [];
   // Nếu user đã chọn màu → dùng ảnh theo màu
   if (selectedColor.value && imagesByColor.value[selectedColor.value]) {
     return imagesByColor.value[selectedColor.value]
@@ -745,14 +783,15 @@ const displayedImages = computed(() => {
     return currentVariant.value.images
   }
 
-  // Nếu chưa chọn, hiển thị ảnh chính (main images)
-  const mainImgs = product.value?.variants?.flatMap((v) => v.images?.filter((i) => i.isMain)) || []
+  // 3️⃣ Nếu chưa chọn gì → hiển thị tất cả ảnh của tất cả variants
+  const allImages = variants.flatMap((v) => v.images || []);
 
-  if (!mainImgs.length && product.value?.variants?.length) {
-    return product.value.variants[0].images || []
+  if (allImages.length) {
+    return allImages;
   }
 
-  return mainImgs
+  // 4️⃣ Nếu không có ảnh nào → trả rỗng
+  return [];
 })
 
 const imagesByColor = computed(() => {
@@ -954,6 +993,22 @@ const addToCart = async () => {
   }
 }
 
+const thumbContainer = ref(null)
+
+const scrollThumbnails = (direction) => {
+  const container = thumbContainer.value
+  if (!container) return
+
+  const scrollAmount = 120 // scroll đúng 1 ảnh
+
+  if (direction === 'left') {
+    container.scrollLeft -= scrollAmount
+  } else {
+    container.scrollLeft += scrollAmount
+  }
+}
+
+
 onMounted(async () => {
   try {
     const slug = route.params.slug as string
@@ -1026,3 +1081,14 @@ watch(selectedColor, (color) => {
   }
 })
 </script>
+<style scoped>
+  .no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+</style>
+

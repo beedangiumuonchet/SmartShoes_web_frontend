@@ -59,11 +59,12 @@
           </button>
 
           <button
-            @click="exportPDF"
+            @click="openPrintPage"
             class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
             Xuất PDF
           </button>
+
 
         </div>
       </div>
@@ -157,29 +158,36 @@
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Xếp hạng</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên sản phẩm</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thương hiệu</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thể loại</th>
+              <!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phân loại</th> -->
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số lượng bán</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doanh thu</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="item in paginatedProducts" :key="item.product.id">
+            <tr v-for="(item, index) in paginatedProducts" :key="item.product.id">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div
+                    :class="[
+                      'flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold text-white',
+                      getRankingColor(index + (currentPage - 1) * itemsPerPage),
+                    ]"
+                  >
+                    {{ index + (currentPage - 1) * itemsPerPage + 1 }}
+                  </div>
+                </div>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.product.name }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.product.brand.name }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.product.category.name }}</td>
+              <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ getClassification(item.product.variants) }}</td> -->
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.totalQuantity }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ item.totalRevenue ? formatPrice(item.totalRevenue) : formatPrice(getMainVariantPrice(item.product.variants)) }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <span
-                  :class="item.product.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'"
-                >
-                  {{ item.product.status }}
-                </span>
               </td>
             </tr>
           </tbody>
@@ -284,6 +292,13 @@ const fetchTopProducts = async () => {
   }
 };
 
+const getClassification = (variants: ProductVariant[]) => {
+  if (!variants || !variants.length) return "-";
+  const v = variants[0];
+  return `${v.colorName || "N/A"} - Size ${v.size || "?"}`;
+};
+
+
 const exportExcel = async () => {
   if (!topProducts.value.length) {
     alert("Không có dữ liệu để xuất!");
@@ -358,72 +373,11 @@ const exportExcel = async () => {
   saveAs(new Blob([buf]), `TopSanPham_${startDate.value}_to_${endDate.value}.xlsx`);
 };
 
-
-const exportPDF = () => {
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
-
-  // — Header chính —
-  const title = "BÁO CÁO TOP SẢN PHẨM BÁN CHẠY";
-  doc.setFontSize(16);
-  doc.setFont(undefined, "bold");
-  doc.text(title, 105, 15, { align: "center" });
-
-  // — Thông tin báo cáo —
-  doc.setFontSize(10);
-  doc.setFont(undefined, "normal");
-  doc.text(`Từ: ${startDate.value}  -  Đến: ${endDate.value}`, 14, 25);
-  doc.text(`Tổng sản phẩm: ${topProducts.value.length}`, 14, 31);
-  const totalQuantity = topProducts.value.reduce((sum, p) => sum + p.totalQuantity, 0);
-  doc.text(`Tổng số lượng bán: ${totalQuantity}`, 14, 37);
-
-  // — Chuẩn bị dữ liệu bảng —
-  const rows = topProducts.value.map((item, index) => [
-    index + 1,
-    item.product.name,
-    item.product.brand.name,
-    item.product.category.name,
-    item.totalQuantity,
-    formatPrice(item.totalRevenue || 0),
-    item.product.status
-  ]);
-
-  const head = [["#", "Tên sản phẩm", "Brand", "Category", "SL bán", "Doanh thu", "Trạng thái"]];
-
-  // — Xuất bảng autoTable —
-  autoTable(doc, {
-    head,
-    body: rows,
-    startY: 45,
-    styles: {
-      fontSize: 9,
-      cellPadding: 3
-    },
-    headStyles: {
-      fillColor: [76, 175, 80],
-      textColor: 255,
-      fontStyle: "bold",
-      halign: "center"
-    },
-    alternateRowStyles: {
-      fillColor: [240, 240, 240] // xen kẽ màu nhẹ
-    },
-    columnStyles: {
-      0: { halign: "center", cellWidth: 10 }, // cột #
-      4: { halign: "right" }, // SL bán
-      5: { halign: "right" }  // Doanh thu
-    },
-    margin: { left: 14, right: 14 },
-    didDrawPage: (data) => {
-      // — Footer: số trang —
-      const page = doc.internal.getNumberOfPages();
-      doc.setFontSize(9);
-      doc.text(`Trang ${page}`, doc.internal.pageSize.getWidth() - 20, doc.internal.pageSize.getHeight() - 10);
-    }
-  });
-
-  // — Xuất file —
-  doc.save(`TopProducts_${startDate.value}_to_${endDate.value}.pdf`);
+const openPrintPage = () => {
+  const url = `/print-report?start=${startDate.value}&end=${endDate.value}&limit=${selectedLimit.value}`;
+  window.open(url, "_blank");
 };
+
 
 
 
@@ -450,7 +404,19 @@ const totalRevenue = computed(() =>
   topProducts.value.reduce((sum, item) => sum + (item.totalRevenue || 0), 0)
 );
 
-
+// Helper functions
+const getRankingColor = (rank: number): string => {
+  switch (rank) {
+    case 0:
+      return 'bg-yellow-500' // Gold
+    case 1:
+      return 'bg-gray-400' // Silver
+    case 2:
+      return 'bg-yellow-600' // Bronze
+    default:
+      return 'bg-blue-500' // Default blue
+  }
+}
 const previousPage = () => {
   if (currentPage.value > 1) currentPage.value--;
 };

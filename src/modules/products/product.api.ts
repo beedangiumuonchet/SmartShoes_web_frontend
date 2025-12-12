@@ -264,11 +264,16 @@ export const updateProductApi = async (id: string, formData: FormData) => {
   console.log('Current User:', currentUser)
 
   try {
-    const response = await axiosHttpClient.put<IApiResponse<Product>>(`/products/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await axiosHttpClient.put<IApiResponse<Product>>(
+      `/products/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          
+        },
+      }
+    );
 
     console.log('✅ Update product success:', response)
     return response
