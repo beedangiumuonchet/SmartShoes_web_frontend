@@ -16,17 +16,25 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@fontsource/noto-sans": "^5.2.10",
     "@nuxt/ui": "^3.3.3",
     "@vueuse/core": "^13.9.0",
     "@vueuse/head": "^2.0.0",
     "axios": "^1.12.1",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.6.0",
+    "jspdf-font": "^1.0.7",
     "pinia": "^3.0.3",
     "universal-cookie": "^7.2.2",
     "vue": "^3.5.18",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^22.16.5",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vitejs/plugin-vue-jsx": "^5.0.1",

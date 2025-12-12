@@ -94,12 +94,15 @@
           >
             <input type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M3 7h2l2-3h10l2 3h2a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V8a1 1 0 011-1zM12 15a3 3 0 100-6 3 3 0 000 6z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 7h2l2-3h10l2 3h2a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V8a1 1 0 011-1zM12 15a3 3 0 100-6 3 3 0 000 6z"
+              />
             </svg>
             Tìm kiếm bằng hình ảnh
           </label>
-
         </div>
 
         <!-- Quick AI Search Examples -->
@@ -384,8 +387,8 @@
               </p>
 
               <div class="flex items-center justify-between">
-                <span class="text-blue-600 font-semibold">{{
-                  formatPrice(getProductMinPrice(product))}}
+                <span class="text-blue-600 font-semibold"
+                  >{{ formatPrice(getProductMinPrice(product)) }}
                 </span>
                 <span
                   v-if="hasDiscount(product)"
@@ -491,7 +494,7 @@ import {
   getAllProductsApi,
   getProductByIdApi,
   searchProductsWithAiApi,
-  searchProductsByImageApi  
+  searchProductsByImageApi,
 } from '../products/product.api'
 import { getAllBrandsApi } from '../brand/brand.api'
 import { getAllCategoriesApi } from '../category/category.api'
@@ -514,7 +517,6 @@ const brands = ref<Brand[]>([])
 const categories = ref<Category[]>([])
 const colors = ref<Color[]>([]) // ✅ THÊM MỚI
 const isImageSearching = ref(false)
-
 
 // ✅ THÊM MỚI - UI Toggle states
 const showBrand = ref(false)
@@ -558,11 +560,11 @@ const aiProductStatuses = ref<Record<string, string>>({})
 
 // AI Search Examples
 const aiSearchExamples = ref<string[]>([
-  'Giày chạy bộ màu trắng size 42 dưới 2 triệu',
+  'Giày chạy bộ màu trắng size 42 ',
   'Sneakers Nike Air Force màu đen cho nam',
-  'Giày cao gót đỏ cho nữ đi tiệc',
+  'Giày leo núi cổ thấp nhẹ nhàng',
   'Giày thể thao thoáng khí cho tập gym',
-  'Giày da công sở màu nâu lịch sự',
+  'Giày tennis độ bám tốt',
   'Giày bóng đá sân cỏ tự nhiên',
 ])
 
@@ -698,7 +700,7 @@ const handleImageUpload = async (event: Event) => {
     console.log('📸 Searching products by image:', file.name)
 
     const response = await searchProductsByImageApi(file)
-    
+
     // Giả sử API trả về mảng Product[]
     products.value = response?.data || response
 
@@ -874,16 +876,15 @@ const statusLabel = (status: string) => {
 // Kiểm tra sản phẩm có đang khuyến mãi hay không
 const hasDiscount = (product: Product): boolean => {
   const variants = product.variants || []
-  return variants.some(v => (v.price || 0) > (v.priceSale || 0))
+  return variants.some((v) => (v.price || 0) > (v.priceSale || 0))
 }
 
 // Lấy nhãn status hiển thị
 const getProductTag = (product: Product): string => {
   if (hasDiscount(product)) return 'Giảm giá sốc'
-  
-  return ""
-}
 
+  return ''
+}
 
 // ✅ CẬP NHẬT - onMounted với logic mới
 onMounted(async () => {

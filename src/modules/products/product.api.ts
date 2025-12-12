@@ -136,6 +136,7 @@ export const getVariantWithProductByIdApi = async (id: string) => {
       productName: response.product?.name,
       colorName: response.colorName || response.color?.name,
       size: response.size,
+      priceSale: response.priceSale,
       price: response.price,
       imagesCount: response.images?.length || 0,
     })
@@ -210,30 +211,26 @@ export const getProductsByCategoryApi = async (categoryId: string, params?: Prod
 //   }
 // }
 export const createProductApi = async (formData: FormData) => {
-  console.log("=== CREATE PRODUCT ===");
-  console.log("Form Data:", formData);
+  console.log('=== CREATE PRODUCT ===')
+  console.log('Form Data:', formData)
 
-  const currentUser = getCurrentUser();
-  console.log("Current User:", currentUser);
+  const currentUser = getCurrentUser()
+  console.log('Current User:', currentUser)
 
   try {
-    const response = await axiosHttpClient.post<IApiResponse<Product>>(
-      "/products",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const response = await axiosHttpClient.post<IApiResponse<Product>>('/products', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
 
-    console.log("✅ Create product success:", response);
-    return response;
+    console.log('✅ Create product success:', response)
+    return response
   } catch (error) {
-    console.error("❌ Create product error:", error);
-    throw error;
+    console.error('❌ Create product error:', error)
+    throw error
   }
-};
+}
 
 /**
  * 🟡 Cập nhật sản phẩm theo ID
@@ -259,31 +256,27 @@ export const createProductApi = async (formData: FormData) => {
 //   }
 // }
 export const updateProductApi = async (id: string, formData: FormData) => {
-  console.log("=== UPDATE PRODUCT ===");
-  console.log("Product ID:", id);
-  console.log("Form Data:", formData);
+  console.log('=== UPDATE PRODUCT ===')
+  console.log('Product ID:', id)
+  console.log('Form Data:', formData)
 
-  const currentUser = getCurrentUser();
-  console.log("Current User:", currentUser);
+  const currentUser = getCurrentUser()
+  console.log('Current User:', currentUser)
 
   try {
-    const response = await axiosHttpClient.put<IApiResponse<Product>>(
-      `/products/${id}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const response = await axiosHttpClient.put<IApiResponse<Product>>(`/products/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
 
-    console.log("✅ Update product success:", response);
-    return response;
+    console.log('✅ Update product success:', response)
+    return response
   } catch (error) {
-    console.error("❌ Update product error:", error);
-    throw error;
+    console.error('❌ Update product error:', error)
+    throw error
   }
-};
+}
 
 /**
  * 🟢 Tìm sản phẩm dựa trên ảnh (CBIR)
@@ -306,7 +299,7 @@ export const searchProductsByImageApi = async (file: File) => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-      }
+      },
     )
 
     console.log('✅ Search products by image success:', response)
@@ -377,48 +370,47 @@ export const searchProductsWithAiApi = async (searchRequest: AiSearchRequest) =>
  * DELETE /product-variants/{id}
  */
 export const deleteVariantApi = async (id: string) => {
-  console.log("=== DELETE VARIANT ===");
-  console.log("Variant ID:", id);
-  console.log("Full URL:", `${import.meta.env.VITE_API_URL}/product-variants/${id}`);
-  console.log("=======================");
+  console.log('=== DELETE VARIANT ===')
+  console.log('Variant ID:', id)
+  console.log('Full URL:', `${import.meta.env.VITE_API_URL}/product-variants/${id}`)
+  console.log('=======================')
 
   try {
-    const response = await axiosHttpClient.delete(`/product-variants/${id}`);
-    console.log("🗑️ Delete variant success:", response);
-    return response;
+    const response = await axiosHttpClient.delete(`/product-variants/${id}`)
+    console.log('🗑️ Delete variant success:', response)
+    return response
   } catch (error: any) {
-    console.error("❌ Delete variant error:", error);
+    console.error('❌ Delete variant error:', error)
 
     if (error?.response?.data) {
-      console.error("📍 Server error:", error.response.data);
+      console.error('📍 Server error:', error.response.data)
     }
 
-    throw error;
+    throw error
   }
-};
+}
 
 /**
  * 🔴 Delete product by ID
  * DELETE /products/{id}
  */
 export const deleteProductApi = async (id: string) => {
-  console.log("=== DELETE PRODUCT ===");
-  console.log("Product ID:", id);
-  console.log("Full URL:", `${import.meta.env.VITE_API_URL}/products/${id}`);
-  console.log("=======================");
+  console.log('=== DELETE PRODUCT ===')
+  console.log('Product ID:', id)
+  console.log('Full URL:', `${import.meta.env.VITE_API_URL}/products/${id}`)
+  console.log('=======================')
 
   try {
-    const response = await axiosHttpClient.delete(`/products/${id}`);
-    console.log("🗑️ Delete product success:", response);
-    return response;
+    const response = await axiosHttpClient.delete(`/products/${id}`)
+    console.log('🗑️ Delete product success:', response)
+    return response
   } catch (error: any) {
-    console.error("❌ Delete product error:", error);
+    console.error('❌ Delete product error:', error)
 
     if (error?.response?.data) {
-      console.error("📍 Server error:", error.response.data);
+      console.error('📍 Server error:', error.response.data)
     }
 
-    throw error;
+    throw error
   }
-};
-
+}

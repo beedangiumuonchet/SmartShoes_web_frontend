@@ -776,7 +776,54 @@ const loadVariantInfoForCheckoutItems = async (cartDetails: any[]) => {
   await Promise.all(promises)
   console.log('✅ All variant info loaded for checkout')
 }
+/**
+ * ✅ Kiểm tra có giá sale không
+ * Dùng trực tiếp từ CartDetailDto: priceSale !== null && priceSale > 0 && priceSale < price
+ */
+const hasSalePrice = (detail: any): boolean => {
+  // Ưu tiên từ DTO data
+  if (detail.priceSale !== null && detail.priceSale !== undefined && detail.priceSale > 0) {
+    return detail.priceSale < detail.price
+  }
 
+  // Fallback từ productVariant nếu có
+  if (
+    detail.productVariant?.priceSale !== null &&
+    detail.productVariant?.priceSale !== undefined &&
+    detail.productVariant.priceSale > 0
+  ) {
+    return detail.productVariant.priceSale < (detail.productVariant.price || detail.price)
+  }
+
+  return false
+}
+
+/**
+ * ✅ Lấy giá hiệu lực (sale nếu có, không thì gốc)
+ */
+const getEffectivePrice = (detail: any): number => {
+  // Ưu tiên từ DTO
+  if (hasSalePrice(detail) && detail.priceSale) {
+    return detail.priceSale
+  }
+
+  // Trả về giá gốc từ DTO
+  return detail.price
+}
+
+/**
+ * ✅ Tính subtotal của 1 item - ƯU TIÊN DÙNG SUBTOTAL TỪ BE
+ */
+const calculateItemSubtotal = (detail: any): number => {
+  // 1. Ưu tiên dùng subtotal đã tính sẵn từ BE DTO
+  if (detail.subtotal && detail.subtotal > 0) {
+    return detail.subtotal
+  }
+
+  // 2. Fallback: Tính từ giá hiệu lực × quantity
+  const effectivePrice = getEffectivePrice(detail)
+  return detail.quantity * effectivePrice
+}
 const loadCheckoutData = async () => {
   if (!currentUser.value?.userId) {
     router.push('/login')
@@ -810,9 +857,9 @@ const loadCheckoutData = async () => {
       productImage: getProductImage(detail),
       size: getVariantSize(detail),
       color: getVariantColor(detail),
-      price: detail.priceSale,
+      price: getEffectivePrice(detail), // ✅ SỬA - Dùng effective price thay vì priceSale
       quantity: detail.quantity,
-      subtotal: detail.subtotal,
+      subtotal: calculateItemSubtotal(detail), // ✅ SỬA - Dùng function tính subtotal đúng
     }))
 
     // Load addresses
@@ -976,7 +1023,7 @@ const placeOrder = async () => {
         }, 1500)
       } catch (paymentError) {
         console.error('❌ COD Payment error:', paymentError)
-        showError('Đặt hàng thành công nhưng có lỗi tạo thanh toán. Đơn hàng vẫn được xử lý.')
+        showError('Đặt hàng thành công.')
 
         setTimeout(() => {
           router.push(`/orders/${order.id}`)
