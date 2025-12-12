@@ -10,6 +10,42 @@
           </p>
         </div>
         <div class="flex items-center space-x-3">
+          <!-- ✅ THÊM MỚI - Export buttons -->
+          <div class="flex items-center space-x-2">
+            <button
+              @click="exportToExcel"
+              :disabled="loading || !topCustomers.length"
+              class="inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm leading-4 font-medium rounded-md text-green-700 bg-green-50 hover:bg-green-100 disabled:opacity-50 transition-colors"
+              title="Xuất file Excel"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              Excel
+            </button>
+
+            <button
+              @click="exportToPDF"
+              :disabled="loading || !topCustomers.length"
+              class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50 transition-colors"
+              title="Xuất file PDF"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              PDF
+            </button>
+          </div>
           <select
             v-model="selectedLimit"
             class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
@@ -441,6 +477,19 @@ import {
   formatCustomerName,
 } from './report.api'
 import type { TopCustomerDTO } from '../users/users.type'
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
+import { saveAs } from 'file-saver'
+import autoTable from 'jspdf-autotable'
+import '@/assets/fonts/roboto-condensed-vietnamese-normal.js'
+
+// Extend jsPDF type for autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => void
+  }
+}
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 // State
@@ -484,6 +533,241 @@ const paginatedCustomers = computed(() => {
   const end = start + itemsPerPage
   return topCustomers.value.slice(start, end)
 })
+// ✅ THAY THẾ HOÀN TOÀN - Excel export với design đẹp
+const exportToExcel = () => {
+  try {
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet([])
+
+    // ======================== TITLE SECTION ===========================
+    const titleSection = [
+      ['BÁO CÁO TOP KHÁCH HÀNG TIỀM NĂNG - SMARTSHOES'],
+      [''],
+      ['Thời gian báo cáo:', `${startDate.value} đến ${endDate.value}`],
+      ['Thời gian xuất:', new Date().toLocaleString('vi-VN')],
+      [''],
+      ['THỐNG KÊ TỔNG QUAN'],
+      ['Tổng KH:', topCustomers.value.length, '', 'Tổng đơn hàng:', totalOrders.value],
+      [
+        'Tổng doanh thu:',
+        formatCurrency(totalRevenue.value),
+        '',
+        'Trung bình/KH:',
+        formatCurrency(averageSpent.value),
+      ],
+      [''],
+      ['DANH SÁCH CHI TIẾT'],
+      [''],
+    ]
+
+    XLSX.utils.sheet_add_aoa(ws, titleSection, { origin: 'A1' })
+
+    // ======================== TABLE HEADER ============================
+    const headers = [
+      'Xếp hạng',
+      'Tên khách hàng',
+      'Email',
+      'Tên đăng nhập',
+      'Số đơn hàng',
+      'Tổng chi tiêu',
+      'Trung bình/Đơn',
+      'Trạng thái',
+      'Ngày tạo',
+    ]
+    XLSX.utils.sheet_add_aoa(ws, [headers], { origin: 'A12' })
+
+    // ======================== DATA ================================
+    const excelData = topCustomers.value.map((c, i) => [
+      i + 1,
+      formatCustomerName(c.customer),
+      c.customer.email,
+      c.customer.username,
+      c.totalOrders,
+      c.totalSpent,
+      c.totalOrders ? Math.round(c.totalSpent / c.totalOrders) : 0,
+      getStatusLabel(c.customer.status),
+      c.customer.createdAt ? new Date(c.customer.createdAt).toLocaleDateString('vi-VN') : 'N/A',
+    ])
+
+    XLSX.utils.sheet_add_aoa(ws, excelData, { origin: 'A13' })
+
+    // ======================== COLUMN WIDTH =============================
+    ws['!cols'] = [
+      { wch: 10 },
+      { wch: 25 },
+      { wch: 30 },
+      { wch: 20 },
+      { wch: 12 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 12 },
+    ]
+
+    // ======================== MERGE CELLS ==============================
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } }, // Title
+      { s: { r: 5, c: 0 }, e: { r: 5, c: 8 } }, // Thống kê tổng quan
+      { s: { r: 9, c: 0 }, e: { r: 9, c: 8 } }, // Danh sách chi tiết
+    ]
+
+    // ======================== STYLE (SIMPLE, WORKING 100%) =============
+    Object.keys(ws).forEach((cell) => {
+      if (cell[0] === 'A' && cell === 'A1') {
+        ws[cell].s = {
+          font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
+          fill: { fgColor: { rgb: '2563EB' } },
+          alignment: { horizontal: 'center', vertical: 'center' },
+        }
+      }
+    })
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Top Khách Hàng')
+
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '').replace('T', '_')
+    XLSX.writeFile(wb, `TopCustomers_${startDate.value}_to_${endDate.value}_${timestamp}.xlsx`)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const exportToPDF = () => {
+  try {
+    console.log('📄 Exporting top customers to PDF...')
+
+    // Create PDF document
+    const doc = new jsPDF('landscape', 'mm', 'a4')
+
+    // ⭐ Dùng font tiếng Việt Roboto Condensed
+    doc.setFont('RobotoCondensed', 'normal')
+
+    // Title
+    doc.setFontSize(18)
+    doc.text('BÁO CÁO TOP KHÁCH HÀNG TIỀM NĂNG', 148, 20, { align: 'center' })
+
+    // Metadata
+    doc.setFontSize(10)
+    doc.text(`Thời gian: ${startDate.value} đến ${endDate.value}`, 20, 35)
+    doc.text(`Xuất lúc: ${new Date().toLocaleString('vi-VN')}`, 20, 42)
+    doc.text(`Tổng số khách hàng: ${topCustomers.value.length}`, 20, 49)
+    doc.text(`Tổng số đơn hàng: ${totalOrders.value}`, 150, 35)
+    doc.text(`Tổng doanh thu: ${formatCurrency(totalRevenue.value)}`, 150, 42)
+    doc.text(`Trung bình/KH: ${formatCurrency(averageSpent.value)}`, 150, 49)
+
+    // Prepare table data
+    const tableData = topCustomers.value.map((customer, index) => [
+      index + 1,
+      formatCustomerName(customer.customer),
+      customer.customer.email,
+      customer.customer.username,
+      customer.totalOrders,
+      formatCurrency(customer.totalSpent),
+      formatCurrency(customer.totalOrders > 0 ? customer.totalSpent / customer.totalOrders : 0),
+      getStatusLabel(customer.customer.status),
+    ])
+
+    // Add table
+    doc.autoTable({
+      head: [
+        [
+          'STT',
+          'Tên khách hàng',
+          'Email',
+          'Username',
+          'Đơn hàng',
+          'Tổng chi tiêu',
+          'TB/Đơn',
+          'Trạng thái',
+        ],
+      ],
+      body: tableData,
+      startY: 60,
+      styles: {
+        font: 'RobotoCondensed', // ⭐ Quan trọng
+        fontStyle: 'normal',
+        fontSize: 8,
+        cellPadding: 3,
+        halign: 'center',
+      },
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: 255,
+        fontStyle: 'bold',
+        font: 'RobotoCondensed', // ⭐
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 15 },
+        1: { halign: 'left', cellWidth: 40 },
+        2: { halign: 'left', cellWidth: 45 },
+        3: { halign: 'left', cellWidth: 25 },
+        4: { halign: 'center', cellWidth: 20 },
+        5: { halign: 'right', cellWidth: 35 },
+        6: { halign: 'right', cellWidth: 30 },
+        7: { halign: 'center', cellWidth: 25 },
+      },
+      margin: { left: 20, right: 20 },
+      didDrawCell: (data: any) => {
+        if (data.section === 'body' && data.column.index === 0) {
+          const rank = parseInt(data.cell.text[0])
+          if (rank <= 3) {
+            let color
+            switch (rank) {
+              case 1:
+                color = [255, 215, 0]
+                break
+              case 2:
+                color = [192, 192, 192]
+                break
+              case 3:
+                color = [205, 127, 50]
+                break
+            }
+            if (color) {
+              doc.setFillColor(...color)
+              doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F')
+              doc.setTextColor(0, 0, 0)
+              doc.text(
+                data.cell.text,
+                data.cell.x + data.cell.width / 2,
+                data.cell.y + data.cell.height / 2,
+                { align: 'center', baseline: 'middle' },
+              )
+            }
+          }
+        }
+      },
+    })
+
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i)
+      doc.setFontSize(8)
+      doc.setFont('RobotoCondensed', 'normal') // ⭐ để footer có tiếng Việt
+      doc.text(
+        `Trang ${i} / ${pageCount} - SmartShoes Report System`,
+        doc.internal.pageSize.width - 20,
+        doc.internal.pageSize.height - 10,
+        { align: 'right' },
+      )
+    }
+
+    // Generate filename
+    const now = new Date()
+    const timestamp = now.toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_')
+    const filename = `TopCustomers_${startDate.value}_to_${endDate.value}_${timestamp}.pdf`
+
+    doc.save(filename)
+
+    console.log('✅ PDF export completed:', filename)
+  } catch (error) {
+    console.error('❌ PDF export failed:', error)
+    errorMessage.value = 'Không thể xuất file PDF. Vui lòng thử lại.'
+  }
+}
 
 // Methods
 const fetchTopCustomers = async () => {
@@ -669,6 +953,64 @@ button:hover:not(:disabled) {
     flex-direction: column;
     space-x: 0;
     gap: 0.5rem;
+  }
+}
+/* ✅ THÊM MỚI - Export button styles */
+.export-buttons button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.export-buttons button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Export button specific colors */
+.export-excel {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.export-pdf {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* Loading state for export buttons */
+.export-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.export-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: exportShimmer 1.5s infinite;
+}
+
+@keyframes exportShimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Responsive export buttons */
+@media (max-width: 640px) {
+  .flex.items-center.space-x-3 .flex.items-center.space-x-2 {
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .flex.items-center.space-x-3 .flex.items-center.space-x-2 button {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
