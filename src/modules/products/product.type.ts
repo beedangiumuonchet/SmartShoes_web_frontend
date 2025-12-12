@@ -16,6 +16,7 @@ export interface Product {
 export interface SimpleProduct {
   id: string
   name: string
+  status: string
 }
 
 export interface Brand {

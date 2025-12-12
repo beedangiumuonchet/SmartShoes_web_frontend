@@ -32,7 +32,13 @@
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Giỏ Hàng</h1>
         <p class="mt-2 text-gray-600">
-          {{ cart && !isCartEmpty(cart) ? `${getCartItemCount(cart)} sản phẩm` : 'Giỏ hàng trống' }}
+          <span v-if="cart && !isCartEmpty(cart)">
+            {{ activeItems.length }} sản phẩm có thể mua
+            <span v-if="inactiveItems.length > 0" class="text-red-600">
+              ({{ inactiveItems.length }} sản phẩm ngưng bán)
+            </span>
+          </span>
+          <span v-else>Giỏ hàng trống</span>
         </p>
       </div>
 
@@ -56,178 +62,381 @@
             <div class="col-span-1 text-center">Thao Tác</div>
           </div>
         </div>
-
-        <!-- ✅ Cart Items - Shopee Style -->
-        <div class="space-y-4">
-          <div
-            v-for="detail in cart.details"
-            :key="detail.id"
-            class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200"
-          >
-            <div class="grid grid-cols-12 gap-4 items-center">
-              <div class="col-span-1 flex items-center">
-                <input
-                  class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
-                  :checked="selectedItems.includes(detail.id)"
-                  @change="toggleSelectItem(detail.id)"
+        <!-- ✅ THÊM MỚI - Thông báo sản phẩm ngưng bán -->
+        <div
+          v-if="inactiveItems.length > 0"
+          class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <svg
+                class="w-5 h-5 text-red-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z"
                 />
+              </svg>
+              <div>
+                <p class="text-red-800 font-medium">
+                  Có {{ inactiveItems.length }} sản phẩm không thể mua
+                </p>
+                <p class="text-red-600 text-sm">Các sản phẩm này đã ngưng bán hoặc hết hàng</p>
               </div>
+            </div>
+            <button
+              @click="removeInactiveItems"
+              :disabled="isUpdating"
+              class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition-colors disabled:opacity-50"
+            >
+              Xóa tất cả
+            </button>
+          </div>
+        </div>
+        <!-- ✅ Cart Items - Shopee Style -->
+        <div class="space-y-6">
+          <!-- Section: Sản phẩm có thể mua (ACTIVE) -->
+          <div v-if="activeItems.length > 0" class="space-y-4">
+            <div
+              class="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3"
+            >
+              <h3 class="text-lg font-semibold text-green-800">
+                Sản phẩm có thể mua ({{ activeItems.length }})
+              </h3>
+            </div>
 
-              <!-- ✅ Product Info (5 columns) -->
-              <div class="col-span-5 flex items-center space-x-4">
-                <!-- Product Image -->
-                <div class="flex-shrink-0">
-                  <img
-                    :src="getProductImage(detail)"
-                    :alt="getProductName(detail)"
-                    class="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
-                    @click="goToProductDetail(detail)"
+            <div
+              v-for="detail in activeItems"
+              :key="detail.id"
+              class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200"
+            >
+              <!-- Cart item content - giữ nguyên như cũ -->
+              <div class="grid grid-cols-12 gap-4 items-center">
+                <div class="col-span-1 flex items-center">
+                  <input
+                    class="rounded border-gray-300 text-rose-500 focus:ring-rose-500"
+                    :checked="selectedItems.includes(detail.id)"
+                    @change="toggleSelectItem(detail.id)"
                   />
                 </div>
 
-                <!-- Product Details -->
-                <div class="flex-1 min-w-0">
-                  <h3
-                    class="text-base font-medium text-gray-900 line-clamp-2 mb-2 cursor-pointer hover:text-rose-600 transition-colors"
-                    @click="goToProductDetail(detail)"
-                  >
-                    {{ getProductName(detail) }}
-                  </h3>
-                  <div class="flex flex-wrap gap-2 text-sm">
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800"
+                <!-- Product Info (5 columns) - giữ nguyên -->
+                <div class="col-span-5 flex items-center space-x-4">
+                  <!-- Product Image -->
+                  <div class="flex-shrink-0">
+                    <img
+                      :src="getProductImage(detail)"
+                      :alt="getProductName(detail)"
+                      class="w-20 h-20 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                      @click="goToProductDetail(detail)"
+                    />
+                  </div>
+
+                  <!-- Product Details -->
+                  <div class="flex-1 min-w-0">
+                    <h3
+                      class="text-base font-medium text-gray-900 line-clamp-2 mb-2 cursor-pointer hover:text-rose-600 transition-colors"
+                      @click="goToProductDetail(detail)"
                     >
-                      Size: {{ getVariantSize(detail) }}
-                    </span>
-                    <span
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                    >
-                      Màu: {{ getVariantColor(detail) }}
-                    </span>
+                      {{ getProductName(detail) }}
+                    </h3>
+                    <div class="flex flex-wrap gap-2 text-sm">
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800"
+                      >
+                        Size: {{ getVariantSize(detail) }}
+                      </span>
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                      >
+                        Màu: {{ getVariantColor(detail) }}
+                      </span>
+                      <!-- ✅ THÊM - Status badge -->
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                      >
+                        {{ getProductStatusText(detail) }}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- ✅ Đơn Giá (2 columns) - DÙNG TRỰC TIẾP TỪ DTO -->
-              <div class="col-span-2 text-center">
-                <div class="flex flex-col items-center space-y-1">
-                  <!-- Hiển thị giá sale nếu có và khác null -->
-                  <div v-if="hasSalePrice(detail)" class="text-lg font-semibold text-rose-600">
-                    {{ formatPrice(detail.priceSale) }}
+                <!-- ✅ Đơn Giá (2 columns) - DÙNG TRỰC TIẾP TỪ DTO -->
+                <div class="col-span-2 text-center">
+                  <div class="flex flex-col items-center space-y-1">
+                    <!-- Hiển thị giá sale nếu có và khác null -->
+                    <div v-if="hasSalePrice(detail)" class="text-lg font-semibold text-rose-600">
+                      {{ formatPrice(detail.priceSale) }}
+                    </div>
+
+                    <!-- Hiển thị giá gốc -->
+                    <div
+                      :class="[
+                        hasSalePrice(detail)
+                          ? 'text-sm text-gray-500 line-through'
+                          : 'text-lg font-semibold text-rose-600',
+                      ]"
+                    >
+                      {{ formatPrice(detail.price) }}
+                    </div>
+
+                    <!-- Badge giảm giá nếu có sale -->
+                    <div
+                      v-if="hasSalePrice(detail)"
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                    >
+                      -{{ getDiscountPercentage(detail) }}%
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ✅ Số Lượng (2 columns) -->
+                <div class="col-span-2 flex items-center justify-center">
+                  <div
+                    class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white"
+                  >
+                    <!-- Nút giảm -->
+                    <button
+                      @click="updateQuantity(detail.id, detail.quantity - 1)"
+                      :disabled="detail.quantity <= 1 || isUpdating"
+                      class="w-10 h-10 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border-r border-gray-300"
+                    >
+                      <svg
+                        class="w-4 h-4 text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M20 12H4"
+                        />
+                      </svg>
+                    </button>
+
+                    <!-- Input số lượng -->
+                    <input
+                      type="number"
+                      :value="detail.quantity"
+                      @change="updateQuantityInput(detail.id, $event)"
+                      class="w-16 h-10 text-center border-0 focus:ring-0 text-sm bg-gray-50"
+                      min="1"
+                      :disabled="isUpdating"
+                    />
+
+                    <!-- Nút tăng -->
+                    <button
+                      @click="updateQuantity(detail.id, detail.quantity + 1)"
+                      :disabled="isUpdating"
+                      class="w-10 h-10 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border-l border-gray-300"
+                    >
+                      <svg
+                        class="w-4 h-4 text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- ✅ Số Tiền (1 column) - TÍNH THEO GIÁ HIỆU LỰC -->
+                <div class="col-span-1 text-center">
+                  <div class="flex flex-col items-center space-y-1">
+                    <!-- Subtotal hiện tại theo giá hiệu lực -->
+                    <div class="text-lg font-bold text-rose-600">
+                      {{ formatPrice(calculateItemSubtotal(detail)) }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ✅ Thao Tác (1 column) -->
+                <div class="col-span-1 text-center">
+                  <button
+                    @click="removeFromCart(detail.id)"
+                    :disabled="isUpdating"
+                    class="p-2 text-gray-400 hover:text-rose-500 disabled:opacity-50 transition-colors rounded-lg hover:bg-rose-50"
+                    title="Xóa sản phẩm"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Section: Sản phẩm không thể mua (INACTIVE) -->
+          <div v-if="inactiveItems.length > 0" class="space-y-4">
+            <div
+              class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3"
+            >
+              <h3 class="text-lg font-semibold text-red-800">
+                Sản phẩm không thể mua ({{ inactiveItems.length }})
+              </h3>
+              <button
+                @click="removeInactiveItems"
+                :disabled="isUpdating"
+                class="text-sm text-red-600 hover:text-red-700 font-medium"
+              >
+                Xóa tất cả
+              </button>
+            </div>
+
+            <div
+              v-for="detail in inactiveItems"
+              :key="detail.id"
+              class="bg-gray-50 rounded-lg shadow-sm border border-gray-300 p-4 opacity-75"
+            >
+              <div class="grid grid-cols-12 gap-4 items-center">
+                <!-- Checkbox bị disable -->
+                <div class="col-span-1 flex items-center">
+                  <input
+                    type="checkbox"
+                    disabled
+                    class="rounded border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+                  />
+                </div>
+
+                <!-- Product Info - style xám -->
+                <div class="col-span-5 flex items-center space-x-4">
+                  <div class="flex-shrink-0 relative">
+                    <img
+                      :src="getProductImage(detail)"
+                      :alt="getProductName(detail)"
+                      class="w-20 h-20 object-cover rounded-lg border border-gray-300 grayscale"
+                    />
+                    <!-- Overlay "Ngưng bán" -->
+                    <div
+                      class="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center"
+                    >
+                      <span class="text-white text-xs font-bold">Ngưng bán</span>
+                    </div>
                   </div>
 
-                  <!-- Hiển thị giá gốc -->
-                  <div
-                    :class="[
-                      hasSalePrice(detail)
-                        ? 'text-sm text-gray-500 line-through'
-                        : 'text-lg font-semibold text-rose-600',
-                    ]"
-                  >
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-medium text-gray-500 line-clamp-2 mb-2">
+                      {{ getProductName(detail) }}
+                    </h3>
+                    <div class="flex flex-wrap gap-2 text-sm">
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-600"
+                      >
+                        Size: {{ getVariantSize(detail) }}
+                      </span>
+                      <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-600"
+                      >
+                        Màu: {{ getVariantColor(detail) }}
+                      </span>
+                      <!-- Status badge -->
+                      <span
+                        :class="[
+                          'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                          getProductStatusClass(detail),
+                        ]"
+                      >
+                        {{ getProductStatusText(detail) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Đơn Giá - xám -->
+                <div class="col-span-2 text-center">
+                  <div class="text-gray-400 line-through">
                     {{ formatPrice(detail.price) }}
                   </div>
+                </div>
 
-                  <!-- Badge giảm giá nếu có sale -->
+                <!-- Số Lượng - disable -->
+                <div class="col-span-2 flex items-center justify-center">
                   <div
-                    v-if="hasSalePrice(detail)"
-                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                    class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-gray-100"
                   >
-                    -{{ getDiscountPercentage(detail) }}%
+                    <button
+                      disabled
+                      class="w-10 h-10 flex items-center justify-center text-gray-400 cursor-not-allowed"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M20 12H4"
+                        />
+                      </svg>
+                    </button>
+                    <input
+                      type="number"
+                      :value="detail.quantity"
+                      disabled
+                      class="w-16 h-10 text-center border-0 bg-gray-100 text-gray-500 cursor-not-allowed"
+                    />
+                    <button
+                      disabled
+                      class="w-10 h-10 flex items-center justify-center text-gray-400 cursor-not-allowed"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              <!-- ✅ Số Lượng (2 columns) -->
-              <div class="col-span-2 flex items-center justify-center">
-                <div
-                  class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white"
-                >
-                  <!-- Nút giảm -->
-                  <button
-                    @click="updateQuantity(detail.id, detail.quantity - 1)"
-                    :disabled="detail.quantity <= 1 || isUpdating"
-                    class="w-10 h-10 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border-r border-gray-300"
-                  >
-                    <svg
-                      class="w-4 h-4 text-gray-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M20 12H4"
-                      />
-                    </svg>
-                  </button>
-
-                  <!-- Input số lượng -->
-                  <input
-                    type="number"
-                    :value="detail.quantity"
-                    @change="updateQuantityInput(detail.id, $event)"
-                    class="w-16 h-10 text-center border-0 focus:ring-0 text-sm bg-gray-50"
-                    min="1"
-                    :disabled="isUpdating"
-                  />
-
-                  <!-- Nút tăng -->
-                  <button
-                    @click="updateQuantity(detail.id, detail.quantity + 1)"
-                    :disabled="isUpdating"
-                    class="w-10 h-10 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border-l border-gray-300"
-                  >
-                    <svg
-                      class="w-4 h-4 text-gray-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- ✅ Số Tiền (1 column) - TÍNH THEO GIÁ HIỆU LỰC -->
-              <div class="col-span-1 text-center">
-                <div class="flex flex-col items-center space-y-1">
-                  <!-- Subtotal hiện tại theo giá hiệu lực -->
-                  <div class="text-lg font-bold text-rose-600">
+                <!-- Số Tiền - xám -->
+                <div class="col-span-1 text-center">
+                  <div class="text-gray-400 line-through">
                     {{ formatPrice(calculateItemSubtotal(detail)) }}
                   </div>
                 </div>
-              </div>
 
-              <!-- ✅ Thao Tác (1 column) -->
-              <div class="col-span-1 text-center">
-                <button
-                  @click="removeFromCart(detail.id)"
-                  :disabled="isUpdating"
-                  class="p-2 text-gray-400 hover:text-rose-500 disabled:opacity-50 transition-colors rounded-lg hover:bg-rose-50"
-                  title="Xóa sản phẩm"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                </button>
+                <!-- Thao Tác - chỉ có nút xóa -->
+                <div class="col-span-1 text-center">
+                  <button
+                    @click="removeFromCart(detail.id)"
+                    :disabled="isUpdating"
+                    class="p-2 text-red-400 hover:text-red-600 disabled:opacity-50 transition-colors rounded-lg hover:bg-red-50"
+                    title="Xóa sản phẩm"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
         <!-- ✅ Cart Summary - Shopee Style -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -249,7 +458,7 @@
                 <div class="flex flex-col items-end gap-1">
                   <!-- Tổng tiền label -->
                   <div class="flex items-center gap-2 text-sm text-gray-600">
-                    <span>Tổng thanh toán ({{ selectedItems.length }} Sản phẩm):</span>
+                    <span>Tổng thanh toán ({{ selectedActiveItems.length }} Sản phẩm):</span>
                   </div>
 
                   <!-- Tổng tiền hiện tại -->
@@ -276,11 +485,11 @@
               <div class="flex-shrink-0">
                 <button
                   @click="goToCheckout"
-                  :disabled="selectedItems.length === 0"
+                  :disabled="selectedActiveItems.length === 0"
                   class="px-8 py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:cursor-not-allowed disabled:transform-none min-w-[200px]"
                 >
-                  <span v-if="selectedItems.length === 0">Chọn sản phẩm</span>
-                  <span v-else>Mua Hàng ({{ selectedItems.length }})</span>
+                  <span v-if="selectedActiveItems.length === 0">Chọn sản phẩm</span>
+                  <span v-else>Mua Hàng ({{ selectedActiveItems.length }})</span>
                 </button>
               </div>
             </div>
@@ -405,15 +614,24 @@ const isIndeterminate = computed(() => {
 
 /**
  * ✅ Kiểm tra có giá sale không
- * Dùng trực tiếp từ CartDetail DTO: priceSale !== null && priceSale > 0 && priceSale < price
+ * Dùng trực tiếp từ CartDetailDto: priceSale !== null && priceSale > 0 && priceSale < price
  */
 const hasSalePrice = (detail: CartDetail): boolean => {
-  return (
-    detail.priceSale !== null &&
-    detail.priceSale !== undefined &&
-    detail.priceSale > 0 &&
-    detail.priceSale < detail.price
-  )
+  // Ưu tiên từ DTO data
+  if (detail.priceSale !== null && detail.priceSale !== undefined && detail.priceSale > 0) {
+    return detail.priceSale < detail.price
+  }
+
+  // Fallback từ productVariant nếu có
+  if (
+    detail.productVariant?.priceSale !== null &&
+    detail.productVariant?.priceSale !== undefined &&
+    detail.productVariant.priceSale > 0
+  ) {
+    return detail.productVariant.priceSale < (detail.productVariant.price || detail.price)
+  }
+
+  return false
 }
 
 /**
@@ -422,23 +640,47 @@ const hasSalePrice = (detail: CartDetail): boolean => {
 const getDiscountPercentage = (detail: CartDetail): number => {
   if (!hasSalePrice(detail)) return 0
 
+  // Ưu tiên từ DTO
   const originalPrice = detail.price
-  const salePrice = detail.priceSale!
+  const salePrice = detail.priceSale
 
-  return Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+  if (salePrice && originalPrice && salePrice > 0 && originalPrice > salePrice) {
+    return Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+  }
+
+  // Fallback từ productVariant
+  if (detail.productVariant?.price && detail.productVariant?.priceSale) {
+    const variantOriginal = detail.productVariant.price
+    const variantSale = detail.productVariant.priceSale
+    return Math.round(((variantOriginal - variantSale) / variantOriginal) * 100)
+  }
+
+  return 0
 }
 
 /**
  * ✅ Lấy giá hiệu lực (sale nếu có, không thì gốc)
  */
 const getEffectivePrice = (detail: CartDetail): number => {
-  return hasSalePrice(detail) ? detail.priceSale! : detail.price
+  // Ưu tiên từ DTO
+  if (hasSalePrice(detail) && detail.priceSale) {
+    return detail.priceSale
+  }
+
+  // Trả về giá gốc từ DTO
+  return detail.price
 }
 
 /**
- * ✅ Tính subtotal của 1 item theo giá hiệu lực
+ * ✅ Tính subtotal của 1 item - ƯU TIÊN DÙNG SUBTOTAL TỪ BE
  */
 const calculateItemSubtotal = (detail: CartDetail): number => {
+  // 1. Ưu tiên dùng subtotal đã tính sẵn từ BE DTO
+  if (detail.subtotal && detail.subtotal > 0) {
+    return detail.subtotal
+  }
+
+  // 2. Fallback: Tính từ giá hiệu lực × quantity
   const effectivePrice = getEffectivePrice(detail)
   return detail.quantity * effectivePrice
 }
@@ -454,7 +696,10 @@ const selectedTotal = computed(() => {
   if (!cart.value?.details) return 0
 
   return cart.value.details
-    .filter((detail) => selectedItems.value.includes(detail.id))
+    .filter(
+      (detail) =>
+        selectedActiveItems.value.includes(detail.id) && getProductStatus(detail) === 'ACTIVE',
+    )
     .reduce((total, detail) => total + calculateItemSubtotal(detail), 0)
 })
 
@@ -465,7 +710,10 @@ const selectedOriginalTotal = computed(() => {
   if (!cart.value?.details) return 0
 
   return cart.value.details
-    .filter((detail) => selectedItems.value.includes(detail.id))
+    .filter(
+      (detail) =>
+        selectedActiveItems.value.includes(detail.id) && getProductStatus(detail) === 'ACTIVE',
+    )
     .reduce((total, detail) => total + detail.quantity * detail.price, 0)
 })
 
@@ -503,6 +751,53 @@ const loadCart = async () => {
     cart.value = null
   } finally {
     loading.value = false
+  }
+}
+
+// ✅ THÊM MỚI - Helper để lấy product status
+const getProductStatus = (detail: CartDetail): string => {
+  // Từ cache variant đã fetch
+  const variantInfo = variantCache.value.get(detail.productVariantId)
+  if (variantInfo?.product?.status) {
+    return variantInfo.product.status
+  }
+
+  // Default là INACTIVE nếu không có thông tin
+  return 'INACTIVE'
+}
+
+// ✅ THÊM MỚI - Kiểm tra sản phẩm có active không
+const isProductActive = (detail: CartDetail): boolean => {
+  return getProductStatus(detail) === 'ACTIVE'
+}
+
+// ✅ THÊM MỚI - Lấy text trạng thái
+const getProductStatusText = (detail: CartDetail): string => {
+  const status = getProductStatus(detail)
+  switch (status) {
+    case 'ACTIVE':
+      return 'Còn hàng'
+    case 'INACTIVE':
+      return 'Ngưng bán'
+    case 'OUT_OF_STOCK':
+      return 'Hết hàng'
+    default:
+      return 'Không hoạt động'
+  }
+}
+
+// ✅ THÊM MỚI - Lấy CSS class cho trạng thái
+const getProductStatusClass = (detail: CartDetail): string => {
+  const status = getProductStatus(detail)
+  switch (status) {
+    case 'ACTIVE':
+      return 'text-green-600 bg-green-100'
+    case 'INACTIVE':
+      return 'text-red-600 bg-red-100'
+    case 'OUT_OF_STOCK':
+      return 'text-yellow-600 bg-yellow-100'
+    default:
+      return 'text-gray-600 bg-gray-100'
   }
 }
 
@@ -564,9 +859,47 @@ const selectAllItems = (event: Event) => {
   if (!cart.value?.details) return
 
   if (target.checked) {
-    selectedItems.value = cart.value.details.map((detail) => detail.id)
+    // ✅ SỬA - Chỉ chọn sản phẩm ACTIVE
+    selectedItems.value = cart.value.details
+      .filter((detail) => getProductStatus(detail) === 'ACTIVE')
+      .map((detail) => detail.id)
   } else {
     selectedItems.value = []
+  }
+}
+
+// ✅ THÊM MỚI - Xóa tất cả sản phẩm INACTIVE
+const removeInactiveItems = async () => {
+  if (inactiveItems.value.length === 0) {
+    showToast('Không có sản phẩm ngưng bán để xóa', 'error')
+    return
+  }
+
+  if (!confirm(`Bạn có chắc chắn muốn xóa ${inactiveItems.value.length} sản phẩm ngưng bán?`))
+    return
+
+  try {
+    isUpdating.value = true
+
+    for (const item of inactiveItems.value) {
+      await deleteCartDetail(item.id)
+
+      // Xóa khỏi selectedItems nếu có
+      const index = selectedItems.value.indexOf(item.id)
+      if (index > -1) {
+        selectedItems.value.splice(index, 1)
+      }
+    }
+
+    await loadCart()
+    window.dispatchEvent(new CustomEvent('cart-updated'))
+
+    showToast('Đã xóa các sản phẩm ngưng bán')
+  } catch (error) {
+    console.error('❌ Error removing inactive items:', error)
+    showToast('Có lỗi xảy ra khi xóa sản phẩm', 'error')
+  } finally {
+    isUpdating.value = false
   }
 }
 
@@ -643,33 +976,24 @@ const removeFromCart = async (detailId: string) => {
   }
 }
 
-const clearSelectedItems = async () => {
-  if (selectedItems.value.length === 0) {
-    showToast('Vui lòng chọn sản phẩm để xóa', 'error')
-    return
-  }
+// ✅ THÊM MỚI - Phân loại sản phẩm theo status
+const activeItems = computed(() => {
+  if (!cart.value?.details) return []
+  return cart.value.details.filter((detail) => getProductStatus(detail) === 'ACTIVE')
+})
 
-  if (!confirm(`Bạn có chắc chắn muốn xóa ${selectedItems.value.length} sản phẩm đã chọn?`)) return
+const inactiveItems = computed(() => {
+  if (!cart.value?.details) return []
+  return cart.value.details.filter((detail) => getProductStatus(detail) !== 'ACTIVE')
+})
 
-  try {
-    isUpdating.value = true
-
-    for (const itemId of selectedItems.value) {
-      await deleteCartDetail(itemId)
-    }
-
-    selectedItems.value = []
-    await loadCart()
-    window.dispatchEvent(new CustomEvent('cart-updated'))
-
-    showToast('Đã xóa sản phẩm đã chọn')
-  } catch (error) {
-    console.error('❌ Error clearing selected items:', error)
-    showToast('Có lỗi xảy ra khi xóa sản phẩm', 'error')
-  } finally {
-    isUpdating.value = false
-  }
-}
+// ✅ THÊM MỚI - Chỉ tính tổng từ sản phẩm ACTIVE
+const selectedActiveItems = computed(() => {
+  return selectedItems.value.filter((itemId) => {
+    const detail = cart.value?.details.find((d) => d.id === itemId)
+    return detail && getProductStatus(detail) === 'ACTIVE'
+  })
+})
 
 // ================================
 // NAVIGATION & CHECKOUT

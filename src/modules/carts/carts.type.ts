@@ -2,7 +2,6 @@
 export interface Cart {
   id: string
   userId: string
-  total: number
   details: CartDetail[]
   createdAt: string
   updatedAt?: string
@@ -25,6 +24,8 @@ export interface CartDetail {
   productVariant?: {
     id: string
     size: string
+    price: number // ✅ THÊM - Giá gốc
+    priceSale?: number // ✅ THÊM - Giá sale
     color?: {
       id: string
       name: string
