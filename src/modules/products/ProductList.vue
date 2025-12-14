@@ -232,16 +232,16 @@
       <div
         class="md:w-1/5 sticky top-24 h-fit bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-4"
       >
-            <!-- SEARCH BY NAME -->
-<div class="mb-6">
-  <input
-    v-model="filters.q"
-    @keyup.enter="fetchProducts"
-    type="text"
-    placeholder="Tìm sản phẩm theo tên..."
-    class="w-full border px-4 py-3 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 text-gray-700"
-  />
-</div>
+        <!-- SEARCH BY NAME -->
+        <div class="mb-6">
+          <input
+            v-model="filters.q"
+            @keyup.enter="fetchProducts"
+            type="text"
+            placeholder="Tìm sản phẩm theo tên..."
+            class="w-full border px-4 py-3 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 text-gray-700"
+          />
+        </div>
         <!-- THƯƠNG HIỆU -->
         <div class="border-b pb-3">
           <div
@@ -325,7 +325,6 @@
             <option value="price-desc">Giá giảm dần</option>
           </select>
         </div>
-
         <!-- APPLY BTN -->
         <button
           @click="fetchProducts"
@@ -344,7 +343,7 @@
       </div>
 
       <!-- Products grid -->
-       <!-- <div v-if="uploadedImagePreview" class="text-center mb-6">
+      <!-- <div v-if="uploadedImagePreview" class="text-center mb-6">
         <h3 class="text-lg font-semibold text-gray-700 mb-2">Ảnh bạn vừa tìm kiếm</h3>
         <img
           :src="uploadedImagePreview"
@@ -353,23 +352,19 @@
         />
       </div> -->
 
-
-
       <div class="md:w-4/5">
-          <div
-    v-if="uploadedImagePreview"
-    class="w-full flex flex-col items-center mb-8 pt-2 pb-4 border-b border-gray-200"
-  >
-    <h3 class="text-lg font-semibold text-gray-700 mb-3">
-      Ảnh bạn vừa tìm kiếm
-    </h3>
+        <div
+          v-if="uploadedImagePreview"
+          class="w-full flex flex-col items-center mb-8 pt-2 pb-4 border-b border-gray-200"
+        >
+          <h3 class="text-lg font-semibold text-gray-700 mb-3">Ảnh bạn vừa tìm kiếm</h3>
 
-    <img
-      :src="uploadedImagePreview"
-      class="w-40 h-40 object-cover rounded-xl shadow-md border"
-      alt="Uploaded Image Preview"
-    />
-  </div>
+          <img
+            :src="uploadedImagePreview"
+            class="w-40 h-40 object-cover rounded-xl shadow-md border"
+            alt="Uploaded Image Preview"
+          />
+        </div>
         <!-- Loading / Empty States -->
         <div v-if="isAiSearching" class="text-center py-20">
           <div class="inline-flex items-center space-x-2 text-purple-600">
@@ -544,6 +539,7 @@ import type {
   Color, // ✅ THÊM MỚI
 } from '../products/product.type'
 import { useRoute } from 'vue-router'
+import { useFilteredProducts } from '@/common/store/productFilter.store'
 
 const route = useRoute()
 
@@ -557,6 +553,8 @@ const isImageSearching = ref(false)
 const showBrand = ref(false)
 const showCategory = ref(false)
 const showColor = ref(false)
+
+const { getFilteredProducts, clearFilteredProducts } = useFilteredProducts()
 
 // ✅ CẬP NHẬT - Filters với structure mới
 const filters = ref<ProductFilter>({
@@ -588,8 +586,6 @@ const isShowingAiResults = ref<boolean>(false)
 const aiSuggestions = ref<string[]>([])
 
 const uploadedImagePreview = ref<string | null>(null)
-
-
 
 // AI Search mapping để lưu score và text theo product ID
 const aiProductScores = ref<Record<string, number>>({})
@@ -698,47 +694,43 @@ const handleSortChange = () => {
 //   return selectedImage.url
 // }
 const getMainImage = (product: Product) => {
-  const variants = product.variants || [];
+  const variants = product.variants || []
 
   if (variants.length === 0) {
-    return "https://via.placeholder.com/200x200?text=No+Image";
+    return 'https://via.placeholder.com/200x200?text=No+Image'
   }
 
   // 1️⃣ Tìm bất kỳ ảnh nào có isMain = true trên toàn bộ biến thể
-  let mainImage = null;
+  let mainImage = null
 
   for (const variant of variants) {
-    if (!variant.images) continue;
-    const img = variant.images.find((i) => i.isMain);
+    if (!variant.images) continue
+    const img = variant.images.find((i) => i.isMain)
     if (img) {
-      mainImage = img;
-      break;
+      mainImage = img
+      break
     }
   }
 
   // 2️⃣ Nếu không có ảnh nào isMain, lấy ảnh đầu tiên có tồn tại
   if (!mainImage) {
-    const variantWithImage = variants.find(
-      (v) => v.images && v.images.length > 0
-    );
+    const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
     if (variantWithImage) {
-      mainImage = variantWithImage.images[0];
+      mainImage = variantWithImage.images[0]
     }
   }
 
   // 3️⃣ Nếu vẫn không có → trả placeholder
   if (!mainImage?.url) {
-    return "https://via.placeholder.com/200x200?text=No+Image";
+    return 'https://via.placeholder.com/200x200?text=No+Image'
   }
 
   // 4️⃣ Convert link Google Drive
-  const url = mainImage.url;
-  const match = url.match(/\/d\/([^/]+)/);
+  const url = mainImage.url
+  const match = url.match(/\/d\/([^/]+)/)
 
-  return match
-    ? `http://localhost:8080/api/v1/images/${match[1]}`
-    : url;
-};
+  return match ? `http://localhost:8080/api/v1/images/${match[1]}` : url
+}
 // ✅ THÊM MỚI - getDirectImageUrl
 function getDirectImageUrl(driveUrl: string) {
   const match = driveUrl?.match(/\/d\/([^/]+)/)
@@ -798,8 +790,6 @@ const handleImageUpload = async (event: Event) => {
   }
 }
 
-
-
 // ========== AI SEARCH METHODS - GIỮ NGUYÊN ==========
 const handleAiSearch = async (): Promise<void> => {
   const query = aiSearchQuery.value.trim()
@@ -815,7 +805,7 @@ const handleAiSearch = async (): Promise<void> => {
 
     const aiSearchRequest: AiSearchRequest = {
       query: query,
-      threshold: 0.15,
+      threshold: 0.4,
       max_candidates: 16,
       rerank: true,
     }
@@ -939,7 +929,6 @@ const clearAiSearchData = (): void => {
   aiProductStocks.value = {}
   aiProductStatuses.value = {}
   uploadedImagePreview.value = null
-
 }
 
 // ✅ Utility functions - GIỮ NGUYÊN
@@ -971,10 +960,70 @@ const getProductTag = (product: Product): string => {
 
   return ''
 }
+// ✅ THÊM - States cho filter banner
+const showFilterFromHome = ref(false)
+const filterBannerTitle = ref('')
+const filterBannerDescription = ref('')
+
+// ✅ THÊM - Show filter banner
+const showFilterBanner = (filterType: string) => {
+  const bannerConfig: Record<string, { title: string; description: string }> = {
+    'new-collection': {
+      title: '🚀 Sản phẩm mới nhất',
+      description: 'Hiển thị những đôi giày vừa ra mắt, cập nhật theo thời gian',
+    },
+    sale: {
+      title: '🎉 Sản phẩm đang SALE',
+      description: 'Chỉ hiển thị sản phẩm có giá khuyến mãi, tiết kiệm tối đa',
+    },
+    premium: {
+      title: '💎 Sản phẩm cao cấp',
+      description: 'Những đôi giày chất lượng premium từ 2 triệu đồng',
+    },
+  }
+
+  const config = bannerConfig[filterType]
+  if (config) {
+    filterBannerTitle.value = config.title
+    filterBannerDescription.value = config.description
+    showFilterFromHome.value = true
+  }
+}
+
+// ✅ THÊM - Clear home filter
+const clearHomeFilter = async () => {
+  showFilterFromHome.value = false
+  filterBannerTitle.value = ''
+  filterBannerDescription.value = ''
+
+  // Reset và fetch tất cả sản phẩm
+  await fetchProducts()
+}
 
 // ✅ CẬP NHẬT - onMounted với logic mới
 onMounted(async () => {
   await fetchFilters()
+
+  // ✅ THÊM - Check xem có dữ liệu từ Home không
+  const filteredState = getFilteredProducts()
+
+  if (filteredState.isFromHome && filteredState.products.length > 0) {
+    console.log(
+      `🎯 Using filtered products from Home (${filteredState.filterType}):`,
+      filteredState.products.length,
+    )
+
+    // Set products từ Home
+    products.value = filteredState.products
+
+    // Show notification
+    showFilterBanner(filteredState.filterType)
+
+    // Clear state để lần sau không bị conflict
+    clearFilteredProducts()
+
+    return // Không fetch lại nữa
+  }
 
   if (route.query.brandId) {
     filters.value.brandIds = Array.isArray(route.query.brandId)
@@ -1005,7 +1054,7 @@ watch(
   () => filters.value.q,
   () => {
     debounceSearch()
-  }
+  },
 )
 let debounceTimer: any = null
 
@@ -1015,7 +1064,6 @@ const debounceSearch = () => {
     fetchProducts()
   }, 300)
 }
-
 </script>
 <style scoped>
 .line-clamp-2 {
