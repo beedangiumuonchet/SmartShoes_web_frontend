@@ -3,9 +3,8 @@ export const routes = [
     path: '/',
     component: () => import('./HomeView.vue'),
     meta: {
-      requiresAuth: true,
+      requiresAuth: false,
       layout: 'topbar',
-      requiredRoles: ['USER', 'ADMIN'],
     },
   },
   {

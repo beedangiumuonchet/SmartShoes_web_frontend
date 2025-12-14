@@ -30,7 +30,7 @@
             </button>
 
             <button
-              @click="exportToPDF"
+              @click="openPrintPage"
               :disabled="loading || !topCustomers.length"
               class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50 transition-colors"
               title="Xuất file PDF"
@@ -78,13 +78,6 @@
               />
             </svg>
             Lọc
-          </button>
-
-          <button
-            @click="openPrintPage"
-            class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Xuất PDF
           </button>
         </div>
       </div>
@@ -490,8 +483,8 @@ declare module 'jspdf' {
     autoTable: (options: any) => void
   }
 }
-import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
+import ExcelJS from 'exceljs'
+import { saveAs } from 'file-saver'
 // State
 const topCustomers = ref<TopCustomerDTO[]>([])
 const loading = ref(false)
@@ -867,16 +860,13 @@ const getStatusLabel = (status: string): string => {
   }
 }
 
-
-
 // -----------------
 // 2️⃣ Export PDF / In
 // -----------------
 const openPrintPage = () => {
-  const url = `/print-customer-report?start=${startDate.value}&end=${endDate.value}&limit=${selectedLimit.value}`;
-  window.open(url, "_blank");
-};
-
+  const url = `/print-customer-report?start=${startDate.value}&end=${endDate.value}&limit=${selectedLimit.value}`
+  window.open(url, '_blank')
+}
 
 // Initialize data on mount
 onMounted(() => {
