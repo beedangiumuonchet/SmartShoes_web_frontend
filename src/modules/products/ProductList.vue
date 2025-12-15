@@ -293,6 +293,34 @@
           </div>
         </div>
 
+        <!-- GIỚI TÍNH (Frontend only) -->
+        <div class="border-b pb-3">
+          <h3 class="font-semibold text-gray-800 text-sm mb-2">Giới tính</h3>
+
+          <div class="space-y-1">
+            <label class="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                value="FEMALE"
+                v-model="genderDraft"
+                class="w-4 h-4"
+              />
+              Nữ (35–39)
+            </label>
+
+            <label class="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                value="MALE"
+                v-model="genderDraft"
+                class="w-4 h-4"
+              />
+              Nam (40–45)
+            </label>
+          </div>
+        </div>
+        
+
         <!-- GIÁ -->
         <div class="border-b pb-3">
           <h3 class="font-semibold text-gray-800 text-sm mb-1">Giá (VNĐ)</h3>
@@ -327,7 +355,7 @@
         </div>
         <!-- APPLY BTN -->
         <button
-          @click="fetchProducts"
+          @click="applyFilters"
           class="w-full bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all"
         >
           Áp dụng bộ lọc
@@ -389,21 +417,21 @@
 
         <!-- Products Grid -->
         <div
-          v-else-if="products.length"
+          v-else-if="paginatedProducts.length"
           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
           <RouterLink
-            v-for="product in products"
+            v-for="product in paginatedProducts"
             :key="product.id"
             :to="`/products/slug/${product.slug}`"
             class="bg-white border border-gray-200 rounded-2xl shadow hover:shadow-lg overflow-hidden transition-transform group hover:scale-105"
           >
-            <div class="relative w-full min-h-[300px] overflow-hidden">
+            <div class="relative w-full h-[220px] overflow-hidden bg-gray-50">
               <img
-                :src="getDirectImageUrl(getMainImage(product))"
-                alt="Product Image"
-                class="w-full h-full object-cover"
-              />
+  :src="getDirectImageUrl(getMainImage(product))"
+  class="w-full h-full object-contain group-hover:scale-105 transition"
+/>
+
             </div>
             <div class="p-4 space-y-2">
               <h3
@@ -512,13 +540,45 @@
             </div>
           </div>
         </div>
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="flex justify-center mt-10 gap-2">
+          <button
+            class="px-3 py-1 rounded-lg border text-sm"
+            :disabled="currentPage === 1"
+            @click="currentPage--"
+          >
+            ←
+          </button>
+
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            @click="currentPage = page"
+            class="px-3 py-1 rounded-lg border text-sm"
+            :class="{
+              'bg-blue-600 text-white border-blue-600': page === currentPage,
+              'hover:bg-gray-100': page !== currentPage,
+            }"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            class="px-3 py-1 rounded-lg border text-sm"
+            :disabled="currentPage === totalPages"
+            @click="currentPage++"
+          >
+            →
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   getAllProductsApi,
@@ -540,6 +600,7 @@ import type {
 } from '../products/product.type'
 import { useRoute } from 'vue-router'
 import { useFilteredProducts } from '@/common/store/productFilter.store'
+import { fi } from '@nuxt/ui/runtime/locale/index.js'
 
 const route = useRoute()
 
@@ -553,6 +614,18 @@ const isImageSearching = ref(false)
 const showBrand = ref(false)
 const showCategory = ref(false)
 const showColor = ref(false)
+
+const currentPage = ref(1)
+const pageSize = 8
+
+
+// gender
+type Gender = 'MALE' | 'FEMALE'
+
+const genderDraft = ref<Gender[]>([])       // checkbox đang chọn
+const appliedGenders = ref<Gender[]>([])    // đã bấm Apply
+
+
 
 const { getFilteredProducts, clearFilteredProducts } = useFilteredProducts()
 
@@ -606,6 +679,10 @@ const aiSearchExamples = ref<string[]>([
 // ✅ CẬP NHẬT - fetchProducts với structure mới
 const fetchProducts = async () => {
   try {
+        // ✅ APPLY gender tại đây
+    // appliedGenders.value = [...genderDraft.value]
+    currentPage.value = 1   // ✅ RESET PAGE
+
     const res = await getAllProductsApi(filters.value)
     products.value = res.content ?? []
     console.log('✅ Products loaded:', products.value)
@@ -613,6 +690,13 @@ const fetchProducts = async () => {
     console.error('❌ Lỗi tải danh sách sản phẩm:', err)
   }
 }
+
+const applyFilters = () => {
+  appliedGenders.value = [...genderDraft.value]
+  currentPage.value = 1
+  fetchProducts()
+}
+
 
 // ✅ CẬP NHẬT - fetchFilters thêm colors
 const fetchFilters = async () => {
@@ -638,6 +722,9 @@ const resetFilters = () => {
   filters.value.minPrice = null
   filters.value.maxPrice = null
   selectedSort.value = 'createdAt-desc'
+  genderDraft.value = []
+  appliedGenders.value = []
+
 
   clearAiSearchData() // ✅ Clear AI data nếu có
   fetchProducts()
@@ -777,6 +864,7 @@ const handleImageUpload = async (event: Event) => {
 
     // Giả sử API trả về mảng Product[]
     products.value = response?.data || response
+    currentPage.value = 1
 
     // Lưu vào sessionStorage nếu cần redirect từ trang khác
     // sessionStorage.setItem('imageSearchResults', JSON.stringify(products.value))
@@ -899,6 +987,7 @@ const fetchAiResultProducts = async (): Promise<void> => {
     })
 
     products.value = fetchedProducts
+    currentPage.value = 1
 
     console.log('✅ AI search products loaded:', {
       totalResults: aiSearchResults.value.length,
@@ -953,6 +1042,54 @@ const hasDiscount = (product: Product): boolean => {
   const variants = product.variants || []
   return variants.some((v) => (v.price || 0) > (v.priceSale || 0))
 }
+
+type InferredGender = 'MALE' | 'FEMALE' | 'BOTH' | 'UNKNOWN'
+
+const inferGenderFromProduct = (product: Product): InferredGender => {
+  const variants = product.variants || []
+
+  const sizes = variants
+    .filter(v => v.stock > 0)
+    .map(v => v.size)
+    .filter(Boolean)
+
+  if (!sizes.length) return 'UNKNOWN'
+
+  const hasFemale = sizes.some(s => s >= 35 && s <= 39)
+  const hasMale = sizes.some(s => s >= 40 && s <= 45)
+
+  if (hasFemale && hasMale) return 'BOTH'
+  if (hasFemale) return 'FEMALE'
+  if (hasMale) return 'MALE'
+
+  return 'UNKNOWN'
+}
+
+const filteredProducts = computed(() => {
+  if (!appliedGenders.value.length) return products.value
+
+  return products.value.filter(product => {
+    const gender = inferGenderFromProduct(product)
+
+    return appliedGenders.value.some(g =>
+      g === 'FEMALE'
+        ? gender === 'FEMALE' || gender === 'BOTH'
+        : gender === 'MALE' || gender === 'BOTH'
+    )
+  })
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredProducts.value.length / pageSize)
+})
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  const end = start + pageSize
+  return filteredProducts.value.slice(start, end)
+})
+
+
 
 // Lấy nhãn status hiển thị
 const getProductTag = (product: Product): string => {
@@ -1031,21 +1168,23 @@ onMounted(async () => {
       : [route.query.brandId]
   }
 
+  
+  // CATEGORY
   if (route.query.categoryId) {
     filters.value.categoryIds = Array.isArray(route.query.categoryId)
       ? route.query.categoryId
       : [route.query.categoryId]
   }
 
-  // ⭐ Nếu đến từ image search → lấy data từ sessionStorage
-  // if (route.query.fromImageSearch === '1') {
-  //   const raw = sessionStorage.getItem('imageSearchResults')
-  //   if (raw) {
-  //     products.value = JSON.parse(raw)
-  //     console.log('🎯 Load products from image search:', products.value)
-  //     return
-  //   }
-  // }
+  // GENDER (frontend only)
+  if (route.query.gender) {
+    const gender = route.query.gender as Gender
+    if (gender === 'MALE' || gender === 'FEMALE') {
+      genderDraft.value = [gender]
+      appliedGenders.value = [gender]
+    }
+  }
+
 
   // ⭐ Còn lại → fetch bình thường
   await fetchProducts()
@@ -1056,6 +1195,46 @@ watch(
     debounceSearch()
   },
 )
+
+watch(
+  () => route.query,
+  async () => {
+    // BRAND
+    if (route.query.brandId) {
+      filters.value.brandIds = Array.isArray(route.query.brandId)
+        ? route.query.brandId
+        : [route.query.brandId]
+    } else {
+      filters.value.brandIds = []
+    }
+
+    // CATEGORY
+    if (route.query.categoryId) {
+      filters.value.categoryIds = Array.isArray(route.query.categoryId)
+        ? route.query.categoryId
+        : [route.query.categoryId]
+    } else {
+      filters.value.categoryIds = []
+    }
+
+    // GENDER (frontend only)
+    if (route.query.gender) {
+      const gender = route.query.gender as Gender
+      if (gender === 'MALE' || gender === 'FEMALE') {
+        genderDraft.value = [gender]
+        appliedGenders.value = [gender]
+      }
+    } else {
+      genderDraft.value = []
+      appliedGenders.value = []
+    }
+
+    currentPage.value = 1
+    await fetchProducts()
+  },
+  { deep: true },
+)
+
 let debounceTimer: any = null
 
 const debounceSearch = () => {

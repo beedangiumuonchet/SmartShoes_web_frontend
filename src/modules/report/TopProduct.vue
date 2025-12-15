@@ -8,6 +8,41 @@
           <p class="text-gray-600 mt-1">Báo cáo thống kê các sản phẩm bán chạy theo thời gian</p>
         </div>
         <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-2">
+            <button
+              @click="exportExcel"
+              :disabled="loading || !topProducts.length"
+              class="inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm leading-4 font-medium rounded-md text-green-700 bg-green-50 hover:bg-green-100 disabled:opacity-50 transition-colors"
+              title="Xuất file Excel"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              Excel
+            </button>
+
+            <button
+              @click="openPrintPage"
+              :disabled="loading || !topProducts.length"
+              class="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50 transition-colors"
+              title="Xuất file PDF"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              PDF
+            </button>
+          </div>
           <select
             v-model="selectedLimit"
             class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
@@ -50,22 +85,6 @@
             </svg>
             Lọc
           </button>
-
-          <button
-            @click="exportExcel"
-            class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Xuất Excel
-          </button>
-
-          <button
-            @click="openPrintPage"
-            class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Xuất PDF
-          </button>
-
-
         </div>
       </div>
     </div>

@@ -3,6 +3,8 @@ export interface Category {
   id: string
   name: string
   description?: string
+  url?: string
+  slug: string
 }
 
 export class CategoryForm {
