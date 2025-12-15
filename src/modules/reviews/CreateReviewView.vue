@@ -174,15 +174,23 @@
                 </div>
 
                 <!-- Compact Product Image -->
-                <div class="relative group mb-4">
-                  <img
-                    :src="productImage"
-                    :alt="product.name"
-                    class="w-full h-48 object-cover rounded-xl border-2 border-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105"
-                  />
+                <div class="relative group mb-6">
+                  <!-- Image wrapper -->
                   <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-xl"
-                  ></div>
+                    class="w-32 h-32 sm:w-36 sm:h-36 rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm group-hover:shadow-md transition-all duration-300 cursor-pointer"
+                    @click="goToProductDetail(product.id)"
+                  >
+                    <img
+                      :src="getProductImage(product.id)"
+                      :alt="product.name"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+
+                    <!-- Overlay hover -->
+                    <div
+                      class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-xl"
+                    ></div>
+                  </div>
                 </div>
 
                 <!-- Compact Product Details -->
@@ -750,6 +758,7 @@ const showErrorToast = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const error = ref('')
+const productCache = ref<Map<string, Product>>(new Map())
 
 // Data
 const product = ref<Product | null>(null)
@@ -874,6 +883,9 @@ const loadData = async () => {
     // Load product info
     const productData = await getProductByIdApi(productId)
     product.value = productData
+    // ✅ THÊM - Lưu product vào cache để dùng cho getProductImage
+    productCache.value.set(productData.id, productData)
+    console.log('✅ Cached main product for image display')
 
     // Load existing review if in edit mode
     if (reviewId && isEditMode.value) {
@@ -886,6 +898,11 @@ const loadData = async () => {
         reviewForm.comment = reviewData.comment
 
         console.log('✅ Loaded existing review for editing:', reviewData)
+
+        // ✅ THÊM - Load product của review vào cache nếu khác với main product
+        if (reviewData.productId !== productData.id) {
+          await loadProductsToCache([reviewData])
+        }
       } catch (reviewError) {
         console.error('❌ Error loading existing review:', reviewError)
         showError('Không thể tải thông tin đánh giá cần chỉnh sửa')
@@ -900,7 +917,130 @@ const loadData = async () => {
     loading.value = false
   }
 }
+// ✅ CẬP NHẬT - getMainImage với logic mới
+const getMainImage = (product: Product) => {
+  const variants = product.variants || []
 
+  if (variants.length === 0) {
+    return 'https://via.placeholder.com/200x200?text=No+Image'
+  }
+
+  // 1. Tìm variant có ID nhỏ nhất
+  const smallestVariant = [...variants].sort((a, b) => a.id.localeCompare(b.id))[0]
+
+  // 2. Tìm ảnh isMain trong variant nhỏ nhất
+  let selectedImage =
+    smallestVariant.images?.find((img: any) => img.isMain) || smallestVariant.images?.[0] || null
+
+  // 3. Nếu variant nhỏ nhất không có ảnh → lấy ảnh từ variant khác
+  if (!selectedImage) {
+    const variantWithImage = variants.find((v) => v.images && v.images.length > 0)
+    if (variantWithImage) {
+      selectedImage =
+        variantWithImage.images.find((img: any) => img.isMain) || variantWithImage.images[0]
+    }
+  }
+
+  // 4. Nếu không có ảnh nào trong toàn bộ sản phẩm → trả placeholder
+  if (!selectedImage?.url) {
+    return 'https://via.placeholder.com/200x200?text=No+Image'
+  }
+
+  return selectedImage.url
+}
+
+// ✅ THÊM MỚI - getDirectImageUrl
+function getDirectImageUrl(driveUrl: string) {
+  const match = driveUrl?.match(/\/d\/([^/]+)/)
+  if (!match) return driveUrl
+
+  const driveId = match[1]
+  return `http://localhost:8080/api/v1/images/${driveId}`
+}
+const goToProductDetail = (productId: string) => {
+  router.push(`/products/id/${productId}`)
+}
+// ✅ SỬA - getProductImage dùng getMainImage từ product đầy đủ
+const getProductImage = (productId: string) => {
+  console.log('🖼️ Getting product image for productId:', productId)
+
+  // 1️⃣ Lấy product từ cache bằng productId
+  const cachedProduct = productCache.value.get(productId)
+
+  if (cachedProduct) {
+    console.log('✅ Found cached product:', {
+      id: cachedProduct.id,
+      name: cachedProduct.name,
+      variantsCount: cachedProduct.variants?.length || 0,
+    })
+
+    // 2️⃣ Kiểm tra xem product có variants đầy đủ không
+    if (cachedProduct.variants && cachedProduct.variants.length > 0) {
+      // Sử dụng getMainImage để lấy ảnh từ product (tìm variant có ảnh đầu tiên)
+      const productImageUrl = getMainImage(cachedProduct)
+
+      console.log('🎯 Main image URL from variants:', productImageUrl)
+
+      // Convert Google Drive URL thành localhost URL
+      if (
+        productImageUrl &&
+        productImageUrl !== 'https://via.placeholder.com/200x200?text=No+Image'
+      ) {
+        return getDirectImageUrl(productImageUrl)
+      }
+
+      return productImageUrl
+    }
+  }
+
+  console.log('⚠️ Product not found in cache or no variants, using placeholder')
+
+  // 3️⃣ Fallback nếu không có product trong cache hoặc chưa load đầy đủ
+  return 'https://via.placeholder.com/150x150/f3f4f6/9ca3af?text=SmartShoes'
+}
+// ✅ THÊM MỚI - Load products vào cache để hiển thị ảnh
+const loadProductsToCache = async (reviews: Review[]) => {
+  console.log('🔄 Loading products to cache for image display...')
+
+  // Lấy danh sách unique productIds từ reviews
+  const productIds = [...new Set(reviews.map((review) => review.productId))]
+
+  console.log('📝 Unique product IDs to load:', productIds)
+
+  const loadPromises = productIds.map(async (productId) => {
+    if (!productCache.value.has(productId)) {
+      try {
+        console.log(`🔍 Fetching product data for: ${productId}`)
+
+        // Fetch product đầy đủ với variants để có ảnh
+        const fullProduct = await getProductByIdApi(productId)
+
+        // Lưu vào cache
+        productCache.value.set(productId, fullProduct)
+
+        console.log(`✅ Cached product: ${fullProduct.name}`, {
+          id: fullProduct.id,
+          variantsCount: fullProduct.variants?.length || 0,
+          hasImages: fullProduct.variants?.some((v) => v.images?.length > 0) || false,
+        })
+      } catch (error) {
+        console.error(`❌ Error loading product ${productId}:`, error)
+
+        // Tạo product giả để avoid lỗi
+        const placeholderProduct = {
+          id: productId,
+          name: `Sản phẩm #${productId.slice(-6)}`,
+          variants: [],
+        } as Product
+
+        productCache.value.set(productId, placeholderProduct)
+      }
+    }
+  })
+
+  await Promise.all(loadPromises)
+  console.log('✅ All products loaded to cache for image display')
+}
 const submitReview = async () => {
   if (!validateForm() || !product.value || !currentUser.value) return
 
