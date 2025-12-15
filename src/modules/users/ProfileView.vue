@@ -435,33 +435,45 @@ const handleSetDefaultAddress = async (addressId: string) => {
   }
 }
 
+// ✅ SỬA - Enhanced change password method
+// ✅ SỬA - Đơn giản hóa change password method
 const changeUserPassword = async () => {
-  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
-    showNotice('Mật khẩu xác nhận không khớp!')
-    return
-  }
-
   try {
+    // ✅ Validation đơn giản - chỉ check required fields
+    if (!passwordForm.value.oldPassword?.trim()) {
+      showNotice('Mật khẩu hiện tại là bắt buộc')
+      return
+    }
+
+    if (!passwordForm.value.newPassword?.trim()) {
+      showNotice('Mật khẩu mới là bắt buộc')
+      return
+    }
+
+    if (!passwordForm.value.confirmPassword?.trim()) {
+      showNotice('Xác nhận mật khẩu là bắt buộc')
+      return
+    }
+
+    if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+      showNotice('Mật khẩu xác nhận không khớp')
+      return
+    }
+
     changingPassword.value = true
+    console.log('🔐 Starting password change...')
 
-    const response = await changePassword(passwordForm.value)
+    // ✅ Gọi API với form đầy đủ 3 fields
+    await changePassword(passwordForm.value)
 
-    if (response) {
-      passwordForm.value = new ChangePasswordForm('', '', '')
-      showSuccess('Đổi mật khẩu thành công!')
-    } else {
-      throw new Error('Invalid response')
-    }
+    console.log('✅ Password change success')
+
+    // ✅ Reset form và show success
+    passwordForm.value = new ChangePasswordForm('', '', '')
+    showSuccess('Đổi mật khẩu thành công!')
   } catch (err: any) {
-    console.error('Change password error:', err)
-
-    if (err.response?.status === 401) {
-      error.value = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
-      cookie.remove('jwt_token')
-      router.push('/login')
-    } else {
-      error.value = err.message || 'Đã xảy ra lỗi khi đổi mật khẩu'
-    }
+    console.error('❌ Change password error:', err)
+    showNotice(err.message || 'Đổi mật khẩu thất bại, vui lòng thử lại!')
   } finally {
     changingPassword.value = false
   }
@@ -980,55 +992,79 @@ onMounted(() => {
               <!-- Password Change Section -->
               <div>
                 <h3 class="text-md font-medium text-gray-900 mb-4">Đổi mật khẩu</h3>
+                <!-- ✅ SỬA - Form đơn giản với validation built-in -->
                 <form @submit.prevent="changeUserPassword" class="space-y-6">
                   <div>
-                    <label
-                      for="currentPassword"
-                      class="block text-sm font-medium text-gray-700 mb-2"
-                      >Mật khẩu hiện tại</label
-                    >
+                    <label for="oldPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                      Mật khẩu hiện tại <span class="text-red-500">*</span>
+                    </label>
                     <input
-                      id="currentPassword"
-                      v-model="passwordForm.currentPassword"
+                      id="oldPassword"
+                      v-model="passwordForm.oldPassword"
                       type="password"
+                      required
                       class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Nhập mật khẩu hiện tại"
-                      required
                     />
                   </div>
+
                   <div>
-                    <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2"
-                      >Mật khẩu mới</label
-                    >
+                    <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                      Mật khẩu mới <span class="text-red-500">*</span>
+                    </label>
                     <input
                       id="newPassword"
                       v-model="passwordForm.newPassword"
                       type="password"
+                      required
                       class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Nhập mật khẩu mới"
-                      required
                     />
                   </div>
+
                   <div>
                     <label
                       for="confirmPassword"
                       class="block text-sm font-medium text-gray-700 mb-2"
-                      >Xác nhận mật khẩu mới</label
                     >
+                      Xác nhận mật khẩu mới <span class="text-red-500">*</span>
+                    </label>
                     <input
                       id="confirmPassword"
                       v-model="passwordForm.confirmPassword"
                       type="password"
-                      class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Nhập lại mật khẩu mới"
                       required
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      :class="{
+                        'border-red-300':
+                          passwordForm.newPassword &&
+                          passwordForm.confirmPassword &&
+                          passwordForm.newPassword !== passwordForm.confirmPassword,
+                      }"
+                      placeholder="Nhập lại mật khẩu mới"
                     />
+                    <!-- Real-time validation feedback -->
+                    <p
+                      v-if="
+                        passwordForm.newPassword &&
+                        passwordForm.confirmPassword &&
+                        passwordForm.newPassword !== passwordForm.confirmPassword
+                      "
+                      class="mt-1 text-sm text-red-600"
+                    >
+                      Mật khẩu xác nhận không khớp
+                    </p>
                   </div>
 
                   <div class="flex justify-end pt-4">
                     <button
                       type="submit"
-                      :disabled="changingPassword"
+                      :disabled="
+                        changingPassword ||
+                        !passwordForm.oldPassword ||
+                        !passwordForm.newPassword ||
+                        !passwordForm.confirmPassword
+                      "
                       class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center"
                     >
                       <svg
@@ -1052,7 +1088,7 @@ onMounted(() => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      {{ changingPassword ? 'Đang đổi...' : 'Đổi mật khẩu' }}
+                      {{ changingPassword ? 'Đang đổi mật khẩu...' : 'Đổi mật khẩu' }}
                     </button>
                   </div>
                 </form>

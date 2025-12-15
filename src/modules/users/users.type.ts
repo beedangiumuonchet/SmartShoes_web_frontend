@@ -109,12 +109,12 @@ export class UpdateProfileForm {
 
 // Form đổi mật khẩu
 export class ChangePasswordForm {
-  currentPassword: string
+  oldPassword: string
   newPassword: string
   confirmPassword: string
 
-  constructor(currentPassword: string, newPassword: string, confirmPassword: string) {
-    this.currentPassword = currentPassword
+  constructor(oldPassword: string, newPassword: string, confirmPassword: string) {
+    this.oldPassword = oldPassword
     this.newPassword = newPassword
     this.confirmPassword = confirmPassword
   }

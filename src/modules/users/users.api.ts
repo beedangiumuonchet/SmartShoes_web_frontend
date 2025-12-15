@@ -141,24 +141,62 @@ export const updateMyProfile = async (form: UpdateProfileForm) => {
   }
 }
 
-// API để đổi mật khẩu
+// ✅ SỬA - API đổi mật khẩu
 export const changePassword = async (form: ChangePasswordForm) => {
   console.log('=== CHANGE PASSWORD ===')
-  console.log('Form has currentPassword:', !!form.currentPassword)
-  console.log('Form has newPassword:', !!form.newPassword)
-  console.log('Token exists:', !!cookie.get('jwt_token'))
-  console.log('=======================')
+  console.log('Form validation:')
+  console.log('- Has oldPassword:', !!form.oldPassword)
+  console.log('- Has newPassword:', !!form.newPassword)
+  console.log('- Has confirmPassword:', !!form.confirmPassword)
+  console.log('- Token exists:', !!cookie.get('jwt_token'))
+
+  // ✅ Lấy userId từ token
+  const currentUser = getCurrentUser()
+  if (!currentUser?.userId) {
+    throw new Error('Không thể xác định người dùng hiện tại')
+  }
+
+  const userId = currentUser.userId
+  console.log('UserId:', userId)
+  console.log('Endpoint:', `/users/${userId}/change-password`)
 
   try {
-    const response = await axiosHttpClient.put<IApiResponse<void>, ChangePasswordForm>(
-      '/v1/auth/change-password',
-      form,
-    )
-    console.log('✅ Change password success:', response)
+    // ✅ Payload đúng theo BE ChangePasswordRequest
+    const payload = {
+      oldPassword: form.oldPassword,
+      newPassword: form.newPassword,
+      confirmPassword: form.confirmPassword, // ✅ THÊM field này vì BE cần
+    }
+
+    console.log('Payload:', {
+      ...payload,
+      oldPassword: '***',
+      newPassword: '***',
+      confirmPassword: '***',
+    })
+
+    // ✅ Gọi API PUT /users/{id}/change-password
+    const response = await axiosHttpClient.put(`/users/${userId}/change-password`, payload)
+
+    console.log('✅ Change password API success:', response)
+
+    // ✅ BE trả về ResponseUtils.success(null) nên chỉ cần không throw error là OK
     return response
-  } catch (error) {
-    console.error('❌ Change password error:', error)
-    throw error
+  } catch (error: any) {
+    console.error('❌ Change password API error:', error)
+
+    // ✅ Enhanced error handling theo BE response
+    if (error?.response?.status === 400) {
+      // BE validation error hoặc sai mật khẩu
+      const errorMessage = error.response?.data?.message || 'Mật khẩu hiện tại không đúng'
+      throw new Error(errorMessage)
+    } else if (error?.response?.status === 401) {
+      throw new Error('Bạn không có quyền thay đổi mật khẩu')
+    } else if (error?.response?.data?.message) {
+      throw new Error(error.response.data.message)
+    } else {
+      throw new Error('Đổi mật khẩu thất bại, vui lòng thử lại')
+    }
   }
 }
 
