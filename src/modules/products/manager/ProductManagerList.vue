@@ -401,7 +401,7 @@
                     'px-2 py-1 rounded-md text-xs font-semibold': true,
                     'bg-green-100 text-green-700': p.status === 'ACTIVE',
                     'bg-gray-200 text-gray-600': p.status === 'INACTIVE',
-                    'bg-yellow-100 text-yellow-700': p.status === 'OUT_OF_STOCK'
+                    // 'bg-yellow-100 text-yellow-700': p.status === 'OUT_OF_STOCK'
                   }"
                 >
                   {{ statusLabel(p.status) }}
@@ -496,7 +496,7 @@
             <select v-model="form.status" class="w-full border rounded px-3 py-2">
               <option value="ACTIVE">ACTIVE</option>
               <option value="INACTIVE">INACTIVE</option>
-              <option value="OUT_OF_STOCK">OUT_OF_STOCK</option>
+              <!-- <option value="OUT_OF_STOCK">OUT_OF_STOCK</option> -->
             </select>
           </div>
 

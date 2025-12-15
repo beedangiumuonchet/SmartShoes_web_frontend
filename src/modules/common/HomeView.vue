@@ -172,7 +172,7 @@
             <!-- Category Image -->
             <div class="aspect-w-1 aspect-h-1 relative overflow-hidden">
               <img
-                :src="category.imageUrl || getCategoryDefaultImage(category.name)"
+                :src="getDirectImageUrl(category.url) || getCategoryDefaultImage(category.name)"
                 :alt="category.name"
                 class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
               />
@@ -218,7 +218,7 @@
               <!-- Brand Logo -->
               <div class="w-16 h-16 mb-3 flex items-center justify-center">
                 <img
-                  :src="brand.logoUrl || getBrandDefaultLogo(brand.name)"
+                  :src="getDirectImageUrl(brand.url) || getBrandDefaultLogo(brand.name)"
                   :alt="brand.name"
                   class="max-w-full max-h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
                 />
@@ -668,6 +668,8 @@ import type { Product } from '../products/product.type'
 import type { Brand } from '../brand/brand.type'
 import type { Category } from '../category/category.type'
 import { useFilteredProducts } from '@/common/store/productFilter.store'
+import { ca } from '@nuxt/ui/runtime/locale/index.js'
+import { get } from 'http'
 const router = useRouter()
 
 // State

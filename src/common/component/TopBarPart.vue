@@ -34,6 +34,171 @@
             </div>
           </div>
 
+          <!-- Navigation Menu -->
+          <nav
+            class="hidden md:flex items-center space-x-8 absolute left-1/2 transform -translate-x-1/2"
+          >
+            <!-- NAM -->
+            <div
+              class="relative"
+              @mouseenter="openMenu('men')"
+            >
+              <button
+                class="relative font-semibold text-gray-800 hover:text-rose-600
+                      flex items-center gap-1 px-2 py-1 transition"
+              >
+                Nam
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+
+              <!-- ✅ TRANSITION -->
+              <Transition
+                enter-active-class="transition ease-out duration-200"
+                enter-from-class="opacity-0 translate-y-2 scale-95"
+                enter-to-class="opacity-100 translate-y-0 scale-100"
+                leave-active-class="transition ease-in duration-150"
+                leave-from-class="opacity-100 translate-y-0 scale-100"
+                leave-to-class="opacity-0 translate-y-2 scale-95"
+              >
+                <div
+                  v-if="activeMenu === 'men'"
+                  class="absolute top-full left-1/2 -translate-x-1/2 mt-3
+                        w-60 bg-white rounded-xl shadow-xl border border-gray-100
+                        p-2 z-50"
+                  @mouseleave="closeMenu"
+                >
+                  <button
+                    v-for="c in categories"
+                    :key="c.id"
+                    @click="goToCategory(c.id, 'MALE')"
+                    class="group w-full text-left px-4 py-2 rounded-lg text-sm
+                          font-medium text-gray-700
+                          hover:bg-rose-50 hover:text-rose-600 transition"
+                  >
+                    {{ c.name }}
+                  </button>
+                </div>
+              </Transition>
+            </div>
+
+            <!-- NỮ -->
+            <div
+              class="relative"
+              @mouseenter="openMenu('women')"
+            >
+              <button
+                class="relative font-semibold text-gray-800 hover:text-rose-600
+                      flex items-center gap-1 px-2 py-1 transition"
+              >
+                Nữ
+                <svg
+                  class="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              <!-- DROPDOWN -->
+              <Transition
+                enter-active-class="transition ease-out duration-200"
+                enter-from-class="opacity-0 translate-y-2 scale-95"
+                enter-to-class="opacity-100 translate-y-0 scale-100"
+                leave-active-class="transition ease-in duration-150"
+                leave-from-class="opacity-100 translate-y-0 scale-100"
+                leave-to-class="opacity-0 translate-y-2 scale-95"
+              >
+                <div
+                  v-if="activeMenu === 'women'"
+                  class="absolute top-full left-1/2 -translate-x-1/2 mt-3
+                        w-60 bg-white rounded-xl shadow-xl
+                        border border-gray-100 p-2 z-50"
+                  @mouseleave="closeMenu"
+                >
+                  <button
+                    v-for="c in categories"
+                    :key="c.id"
+                    @click="goToCategory(c.id, 'FEMALE')"
+                    class="group w-full text-left px-4 py-2 rounded-lg
+                          text-sm font-medium text-gray-700
+                          hover:bg-rose-50 hover:text-rose-600 transition"
+                  >
+                    {{ c.name }}
+                  </button>
+                </div>
+              </Transition>
+            </div>
+
+            <!-- THƯƠNG HIỆU -->
+            <div
+              class="relative"
+              @mouseenter="openMenu('brand')"
+            >
+              <button
+                class="relative font-semibold text-gray-800 hover:text-rose-600
+                      flex items-center gap-1 px-2 py-1 transition"
+              >
+                Thương hiệu
+                <svg
+                  class="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              <!-- DROPDOWN -->
+              <Transition
+                enter-active-class="transition ease-out duration-200"
+                enter-from-class="opacity-0 translate-y-2 scale-95"
+                enter-to-class="opacity-100 translate-y-0 scale-100"
+                leave-active-class="transition ease-in duration-150"
+                leave-from-class="opacity-100 translate-y-0 scale-100"
+                leave-to-class="opacity-0 translate-y-2 scale-95"
+              >
+                <div
+                  v-if="activeMenu === 'brand'"
+                  class="absolute top-full left-1/2 -translate-x-1/2 mt-3
+                        w-64 bg-white rounded-xl shadow-xl
+                        border border-gray-100 p-3
+                        z-50 grid grid-cols-2 gap-2"
+                  @mouseleave="closeMenu"
+                >
+                  <button
+                    v-for="b in brands"
+                    :key="b.id"
+                    @click="goToBrand(b.id)"
+                    class="text-sm px-3 py-2 rounded-lg text-left
+                          text-gray-700 hover:bg-rose-50
+                          hover:text-rose-600 transition"
+                  >
+                    {{ b.name }}
+                  </button>
+                </div>
+              </Transition>
+            </div>
+
+
+          </nav>
+
+
           <!-- Search Bar -->
           <div class="flex-1 max-w-lg mx-8">
             <div class="relative">
@@ -324,6 +489,8 @@ import { getUserCart, getCartItemCount } from '@/modules/carts/carts.api'
 import type { Cart } from '@/modules/carts/carts.type'
 import { searchProductsByImageApi } from '@/modules/products/product.api'
 import type { Product } from '@/modules/products/product.type'
+import { getAllCategoriesApi } from '../../modules/category/category.api'
+import { getAllBrandsApi } from '../../modules/brand/brand.api'
 
 // Router
 const router = useRouter()
@@ -338,6 +505,42 @@ const cartItemsCount = ref(0)
 
 // Computed
 const currentUser = computed(() => getCurrentUser())
+
+const activeMenu = ref<string | null>(null)
+const categories = ref<any[]>([])
+const brands = ref<any[]>([])
+
+const menCategories = computed(() =>
+  categories.value.filter(c => c.gender === 'MEN')
+)
+
+const womenCategories = computed(() =>
+  categories.value.filter(c => c.gender === 'WOMEN')
+)
+
+const openMenu = (menu: string) => {
+  activeMenu.value = menu
+}
+
+const closeMenu = () => {
+  activeMenu.value = null
+}
+
+const goToCategory = (categoryId: string, gender: string) => {
+  closeMenu()
+  router.push({
+    path: '/products',
+    query: { categoryId, gender }
+  })
+}
+
+const goToBrand = (brandId: string) => {
+  closeMenu()
+  router.push({
+    path: '/products',
+    query: { brandId }
+  })
+}
 
 // Methods
 const handleLogoClick = () => {
@@ -475,6 +678,17 @@ onMounted(() => {
 
   // Load initial cart count
   updateCartCount()
+})
+onMounted(async () => {
+  try {
+    const cateRes = await getAllCategoriesApi()
+    categories.value = cateRes
+
+    const brandRes = await getAllBrandsApi()
+    brands.value = brandRes
+  } catch (e) {
+    console.error('Load menu data error', e)
+  }
 })
 
 onUnmounted(() => {
