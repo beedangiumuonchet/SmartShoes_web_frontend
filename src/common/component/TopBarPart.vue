@@ -56,8 +56,7 @@
                 </svg>
                 <span class="text-sm text-gray-700">Tìm bằng ảnh</span>
               </label> -->
-          <!-- </div> -->
-
+              <!-- </div> -->
 
               <!-- <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg
@@ -102,6 +101,7 @@
             </button>
 
             <!-- User Menu -->
+            <!-- User Menu - ✅ SỬA: Hiển thị cho cả guest và user -->
             <div class="relative">
               <button
                 @click="showUserMenu = !showUserMenu"
@@ -109,16 +109,21 @@
               >
                 <!-- User Avatar -->
                 <div
-                  class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center"
+                  :class="[
+                    'w-8 h-8 rounded-full flex items-center justify-center',
+                    currentUser
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                      : 'bg-gradient-to-r from-orange-400 to-pink-500',
+                  ]"
                 >
                   <span class="text-sm font-medium text-white">
-                    {{ getUserInitials() }}
+                    {{ currentUser ? getUserInitials() : 'U' }}
                   </span>
                 </div>
 
-                <!-- User Name (hidden on mobile) -->
+                <!-- User Name (hidden on mobile) - ✅ SỬA: Conditional text -->
                 <span class="hidden md:block text-sm font-medium">
-                  {{ currentUser?.firstName || currentUser?.name || 'User' }}
+                  {{ currentUser ? currentUser.firstName || currentUser.name || 'User' : 'Khách' }}
                 </span>
 
                 <!-- Dropdown Arrow -->
@@ -132,67 +137,171 @@
                 </svg>
               </button>
 
-              <!-- User Dropdown Menu -->
+              <!-- ✅ SỬA: Dropdown Menu - Conditional content -->
               <div
                 v-if="showUserMenu"
                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                 @click.stop
               >
-                <!-- User Info Header -->
-                <div class="px-4 py-2 border-b border-gray-200">
-                  <p class="text-sm font-semibold text-gray-900">
-                    {{ currentUser?.fullName || currentUser?.name || 'User' }}
-                  </p>
-                  <p class="text-xs text-gray-600">{{ currentUser?.email }}</p>
-                </div>
+                <!-- ✅ THÊM: Guest User Menu -->
+                <template v-if="!currentUser">
+                  <!-- Guest Info Header -->
+                  <div class="px-4 py-3 border-b border-gray-200">
+                    <div class="flex items-center space-x-3">
+                      <div
+                        class="w-10 h-10 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center"
+                      >
+                        <svg
+                          class="w-5 h-5 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold text-orange-600">Khách hàng</p>
+                        <p class="text-xs text-pink-500">Chưa đăng nhập</p>
+                      </div>
+                    </div>
+                  </div>
 
-                <!-- Menu Items -->
-                <div class="py-1">
-                  <button
-                    @click="handleProfile"
-                    class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                    Thông tin cá nhân
-                  </button>
+                  <!-- Guest Menu Items -->
+                  <div class="py-1">
+                    <button
+                      @click="handleLogin"
+                      class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M11 16l-4-4m0 0l4-4m0 0H3m4 4h14"
+                        />
+                      </svg>
+                      <span class="font-medium">Đăng nhập</span>
+                    </button>
 
-                  <button
-                    @click="handleOrders"
-                    class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                      />
-                    </svg>
-                    Đơn hàng của tôi
-                  </button>
+                    <button
+                      @click="handleRegister"
+                      class="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                        />
+                      </svg>
+                      <span class="font-medium">Đăng ký</span>
+                    </button>
+                  </div>
+                </template>
 
-                  <button
-                    @click="handleLogout"
-                    class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                      />
-                    </svg>
-                    Đăng xuất
-                  </button>
-                </div>
+                <!-- ✅ GIỮ NGUYÊN: Logged In User Menu -->
+                <template v-else>
+                  <!-- User Info Header -->
+                  <div class="px-4 py-3 border-b border-gray-200">
+                    <div class="flex items-center space-x-3">
+                      <div
+                        class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center"
+                      >
+                        <span class="text-sm font-medium text-white">
+                          {{ getUserInitials() }}
+                        </span>
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold text-gray-900">
+                          {{ currentUser.firstName || currentUser.name || 'User' }}
+                        </p>
+                        <p class="text-xs text-gray-600">{{ currentUser.email }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Logged In Menu Items -->
+                  <div class="py-1">
+                    <button
+                      @click="handleProfile"
+                      class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      Thông tin cá nhân
+                    </button>
+
+                    <button
+                      @click="handleOrders"
+                      class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        />
+                      </svg>
+                      Đơn hàng của tôi
+                    </button>
+
+                    <div class="border-t border-gray-200 my-2"></div>
+
+                    <button
+                      @click="handleLogout"
+                      class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        />
+                      </svg>
+                      Đăng xuất
+                    </button>
+                  </div>
+                </template>
               </div>
             </div>
           </div>
@@ -257,7 +366,7 @@ const handleImageSearch = async () => {
     const results = res
 
     // ⭐ Lưu data vào sessionStorage
-    sessionStorage.setItem("imageSearchResults", JSON.stringify(results))
+    sessionStorage.setItem('imageSearchResults', JSON.stringify(results))
 
     // router.push({
     //   path: '/products',
@@ -265,19 +374,18 @@ const handleImageSearch = async () => {
     //     fromImageSearch: "1"
     //   }
     // })
-router.replace({
-  path: '/products',
-  query: { fromImageSearch: "1" }
-}).then(() => {
-  window.location.reload()
-})
-
+    router
+      .replace({
+        path: '/products',
+        query: { fromImageSearch: '1' },
+      })
+      .then(() => {
+        window.location.reload()
+      })
   } catch (err) {
     console.error('❌ Lỗi tìm kiếm sản phẩm theo ảnh:', err)
   }
 }
-
-
 
 const getUserInitials = () => {
   const user = currentUser.value
@@ -294,6 +402,21 @@ const getUserInitials = () => {
     return user.name.charAt(0)
   }
   return 'U'
+}
+
+const handleLogin = () => {
+  showUserMenu.value = false
+  router.push('/login')
+}
+
+const handleRegister = () => {
+  showUserMenu.value = false
+  router.push('/register')
+}
+
+const handleProducts = () => {
+  showUserMenu.value = false
+  router.push('/products')
 }
 
 const handleProfile = () => {
