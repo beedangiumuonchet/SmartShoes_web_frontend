@@ -299,27 +299,16 @@
 
           <div class="space-y-1">
             <label class="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                value="FEMALE"
-                v-model="genderDraft"
-                class="w-4 h-4"
-              />
+              <input type="checkbox" value="FEMALE" v-model="genderDraft" class="w-4 h-4" />
               Nữ (35–39)
             </label>
 
             <label class="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                value="MALE"
-                v-model="genderDraft"
-                class="w-4 h-4"
-              />
+              <input type="checkbox" value="MALE" v-model="genderDraft" class="w-4 h-4" />
               Nam (40–45)
             </label>
           </div>
         </div>
-        
 
         <!-- GIÁ -->
         <div class="border-b pb-3">
@@ -428,10 +417,9 @@
           >
             <div class="relative w-full h-[220px] overflow-hidden bg-gray-50">
               <img
-  :src="getDirectImageUrl(getMainImage(product))"
-  class="w-full h-full object-contain group-hover:scale-105 transition"
-/>
-
+                :src="getDirectImageUrl(getMainImage(product))"
+                class="w-full h-full object-contain group-hover:scale-105 transition"
+              />
             </div>
             <div class="p-4 space-y-2">
               <h3
@@ -571,7 +559,6 @@
             →
           </button>
         </div>
-
       </div>
     </div>
   </div>
@@ -618,14 +605,11 @@ const showColor = ref(false)
 const currentPage = ref(1)
 const pageSize = 8
 
-
 // gender
 type Gender = 'MALE' | 'FEMALE'
 
-const genderDraft = ref<Gender[]>([])       // checkbox đang chọn
-const appliedGenders = ref<Gender[]>([])    // đã bấm Apply
-
-
+const genderDraft = ref<Gender[]>([]) // checkbox đang chọn
+const appliedGenders = ref<Gender[]>([]) // đã bấm Apply
 
 const { getFilteredProducts, clearFilteredProducts } = useFilteredProducts()
 
@@ -668,7 +652,7 @@ const aiProductStatuses = ref<Record<string, string>>({})
 
 // AI Search Examples
 const aiSearchExamples = ref<string[]>([
-  'Giày chạy bộ màu trắng size 42 ',
+  'Giày chạy bộ giảm chấn êm chân',
   'Sneakers Nike Air Force màu đen cho nam',
   'Giày leo núi cổ thấp nhẹ nhàng',
   'Giày thể thao thoáng khí cho tập gym',
@@ -679,9 +663,9 @@ const aiSearchExamples = ref<string[]>([
 // ✅ CẬP NHẬT - fetchProducts với structure mới
 const fetchProducts = async () => {
   try {
-        // ✅ APPLY gender tại đây
+    // ✅ APPLY gender tại đây
     // appliedGenders.value = [...genderDraft.value]
-    currentPage.value = 1   // ✅ RESET PAGE
+    currentPage.value = 1 // ✅ RESET PAGE
 
     const res = await getAllProductsApi(filters.value)
     products.value = res.content ?? []
@@ -696,7 +680,6 @@ const applyFilters = () => {
   currentPage.value = 1
   fetchProducts()
 }
-
 
 // ✅ CẬP NHẬT - fetchFilters thêm colors
 const fetchFilters = async () => {
@@ -724,7 +707,6 @@ const resetFilters = () => {
   selectedSort.value = 'createdAt-desc'
   genderDraft.value = []
   appliedGenders.value = []
-
 
   clearAiSearchData() // ✅ Clear AI data nếu có
   fetchProducts()
@@ -894,7 +876,7 @@ const handleAiSearch = async (): Promise<void> => {
     const aiSearchRequest: AiSearchRequest = {
       query: query,
       threshold: 0.4,
-      max_candidates: 16,
+      max_candidates: 8,
       rerank: true,
     }
 
@@ -1049,14 +1031,14 @@ const inferGenderFromProduct = (product: Product): InferredGender => {
   const variants = product.variants || []
 
   const sizes = variants
-    .filter(v => v.stock > 0)
-    .map(v => v.size)
+    .filter((v) => v.stock > 0)
+    .map((v) => v.size)
     .filter(Boolean)
 
   if (!sizes.length) return 'UNKNOWN'
 
-  const hasFemale = sizes.some(s => s >= 35 && s <= 39)
-  const hasMale = sizes.some(s => s >= 40 && s <= 45)
+  const hasFemale = sizes.some((s) => s >= 35 && s <= 39)
+  const hasMale = sizes.some((s) => s >= 40 && s <= 45)
 
   if (hasFemale && hasMale) return 'BOTH'
   if (hasFemale) return 'FEMALE'
@@ -1068,13 +1050,13 @@ const inferGenderFromProduct = (product: Product): InferredGender => {
 const filteredProducts = computed(() => {
   if (!appliedGenders.value.length) return products.value
 
-  return products.value.filter(product => {
+  return products.value.filter((product) => {
     const gender = inferGenderFromProduct(product)
 
-    return appliedGenders.value.some(g =>
+    return appliedGenders.value.some((g) =>
       g === 'FEMALE'
         ? gender === 'FEMALE' || gender === 'BOTH'
-        : gender === 'MALE' || gender === 'BOTH'
+        : gender === 'MALE' || gender === 'BOTH',
     )
   })
 })
@@ -1088,8 +1070,6 @@ const paginatedProducts = computed(() => {
   const end = start + pageSize
   return filteredProducts.value.slice(start, end)
 })
-
-
 
 // Lấy nhãn status hiển thị
 const getProductTag = (product: Product): string => {
@@ -1168,7 +1148,6 @@ onMounted(async () => {
       : [route.query.brandId]
   }
 
-  
   // CATEGORY
   if (route.query.categoryId) {
     filters.value.categoryIds = Array.isArray(route.query.categoryId)
@@ -1184,7 +1163,6 @@ onMounted(async () => {
       appliedGenders.value = [gender]
     }
   }
-
 
   // ⭐ Còn lại → fetch bình thường
   await fetchProducts()

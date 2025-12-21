@@ -6,6 +6,7 @@ export enum OrderStatus {
   SHIPPING = 'SHIPPING',
   DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
+  RETURNED = 'RETURNED',
 }
 
 // Interface cho Order từ API
@@ -199,6 +200,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   [OrderStatus.SHIPPING]: 'Đang giao hàng',
   [OrderStatus.DELIVERED]: 'Đã giao hàng',
   [OrderStatus.CANCELLED]: 'Đã hủy',
+  [OrderStatus.RETURNED]: 'Đã trả hàng',
 }
 
 // Order status colors cho UI
@@ -209,6 +211,7 @@ export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   [OrderStatus.SHIPPING]: 'purple',
   [OrderStatus.DELIVERED]: 'green',
   [OrderStatus.CANCELLED]: 'red',
+  [OrderStatus.RETURNED]: 'brown',
 }
 
 // Helper để tạo OrderFilterRequest với các giá trị mặc định

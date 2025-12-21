@@ -1778,8 +1778,8 @@ const handleSubmitUser = async (): Promise<void> => {
     const errorMessage = error?.message || 'Có lỗi xảy ra'
     showError(
       isEditMode.value
-        ? `Không thể cập nhật người dùng: ${errorMessage}`
-        : `Không thể tạo người dùng: ${errorMessage}`,
+        ? `Không thể cập nhật người dùng. Hãy kiểm tra lại thông tin.`
+        : `Không thể tạo người dùng. Hãy kiểm tra lại thông tin.`,
     )
   } finally {
     submitting.value = false
@@ -1819,7 +1819,7 @@ const handleAssignRole = async (userId: string, roleId: string): Promise<void> =
     await loadUsers()
   } catch (error: any) {
     console.error('❌ Error assigning role:', error)
-    showError(`Không thể gán vai trò: ${error?.message}`)
+    showError(`Không thể gán vai trò. Hãy kiểm tra lại quyền truy cập`)
   }
 }
 
@@ -1837,7 +1837,7 @@ const handleRemoveRole = async (userId: string, roleId: string): Promise<void> =
     await loadUsers()
   } catch (error: any) {
     console.error('❌ Error removing role:', error)
-    showError(`Không thể gỡ vai trò: ${error?.message}`)
+    showError(`Không thể gỡ vai trò. Hãy kiểm tra lại quyền truy cập`)
   }
 }
 
@@ -1870,7 +1870,7 @@ const confirmDeleteUser = async (): Promise<void> => {
   } catch (error: any) {
     console.error('❌ Error deleting user:', error)
     const errorMessage = error?.message || 'Có lỗi xảy ra'
-    showError(`Không thể xóa người dùng: ${errorMessage}`)
+    showError(`Không thể xóa người dùng. Hãy kiểm tra lại thông tin.`)
   } finally {
     submitting.value = false
   }

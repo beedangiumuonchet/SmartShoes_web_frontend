@@ -1023,7 +1023,7 @@ const placeOrder = async () => {
         }, 1500)
       } catch (paymentError) {
         console.error('❌ COD Payment error:', paymentError)
-        showError('Đặt hàng thành công.')
+        showSuccess('Đặt hàng thành công. Hãy thanh toán khi nhận hàng')
 
         setTimeout(() => {
           router.push(`/orders/${order.id}`)
