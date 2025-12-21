@@ -3,7 +3,7 @@ export interface Brand {
   id: string
   name: string
   url: string
-  description?: string
+  description?: String
 }
 
 // Form tạo/cập nhật Brand

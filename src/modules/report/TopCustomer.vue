@@ -810,11 +810,11 @@ const nextPage = () => {
 // Helper functions
 const getRankingColor = (rank: number): string => {
   switch (rank) {
-    case 1:
+    case 0:
       return 'bg-yellow-500' // Gold
-    case 2:
+    case 1:
       return 'bg-gray-400' // Silver
-    case 3:
+    case 2:
       return 'bg-yellow-600' // Bronze
     default:
       return 'bg-blue-500' // Default blue

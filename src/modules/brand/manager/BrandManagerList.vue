@@ -330,20 +330,33 @@
                 <!-- Brand Name -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10">
-                      <div
-                        class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
-                      >
-                        <span class="text-sm font-medium text-white">
-                          {{ brand.name.substring(0, 2).toUpperCase() }}
-                        </span>
-                      </div>
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ brand.name }}</div>
-                      <div class="text-sm text-gray-500">Thương hiệu</div>
-                    </div>
-                  </div>
+  <div class="flex-shrink-0 h-10 w-10">
+    <img
+      v-if="brand.url"
+      :src="getDirectImageUrl(brand.url)"
+      alt="Brand logo"
+      class="h-10 w-10 object-cover rounded-lg border"
+    />
+
+    <!-- Fallback nếu chưa có ảnh -->
+    <div
+      v-else
+      class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
+    >
+      <span class="text-sm font-medium text-white">
+        {{ brand.name.substring(0, 2).toUpperCase() }}
+      </span>
+    </div>
+  </div>
+
+  <div class="ml-4">
+    <div class="text-sm font-medium text-gray-900">
+      {{ brand.name }}
+    </div>
+    <div class="text-sm text-gray-500">Thương hiệu</div>
+  </div>
+</div>
+
                 </td>
 
                 <!-- Description -->
@@ -588,6 +601,30 @@
               ></textarea>
             </div>
 
+            <!-- Brand Image -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Ảnh thương hiệu
+              </label>
+
+              <input
+                type="file"
+                accept="image/*"
+                @change="handleImageChange"
+                class="block w-full text-sm text-gray-700"
+              />
+
+              <!-- Preview -->
+              <div v-if="imagePreview" class="mt-3">
+                <img
+                  :src="getDirectImageUrl(imagePreview)"
+                  alt="Preview"
+                  class="h-24 w-24 object-cover rounded border"
+                />
+              </div>
+            </div>
+
+
             <!-- Form Actions -->
             <div class="flex justify-end space-x-3 pt-4">
               <button
@@ -787,6 +824,8 @@
 import { ref, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { getAllBrandsApi, createBrandApi, updateBrandApi, deleteBrandApi } from '../brand.api'
 import type { Brand, BrandForm } from '../brand.type'
+import { uploadImageApi } from '../../upfile/upfile.api' // đường dẫn đúng của bạn
+
 
 // ✅ Custom debounce function
 function debounce<T extends (...args: any[]) => any>(
@@ -798,6 +837,34 @@ function debounce<T extends (...args: any[]) => any>(
     clearTimeout(timeout)
     timeout = setTimeout(() => func(...args), wait)
   }
+}
+
+const imageFile = ref<File | null>(null)
+const imagePreview = ref<string | null>(null)
+
+  function getDirectImageUrl(driveUrl: string) {
+  // Tách ID ảnh từ link Google Drive
+  const match = driveUrl?.match(/\/d\/([^/]+)/)
+  if (!match) return driveUrl
+
+  const driveId = match[1]
+  // Gọi ảnh qua API backend (nó sẽ tự cache local)
+  return `http://localhost:8080/api/v1/images/${driveId}`
+}
+  const handleImageChange = (event: Event) => {
+  const files = (event.target as HTMLInputElement).files
+  if (!files || files.length === 0) return
+
+  const file = files[0]
+
+  // Validate đơn giản
+  if (!file.type.startsWith('image/')) {
+    showError('Vui lòng chọn file ảnh')
+    return
+  }
+
+  imageFile.value = file
+  imagePreview.value = URL.createObjectURL(file)
 }
 
 // ================================
@@ -835,7 +902,7 @@ const activeActionMenu = ref<string | null>(null)
 // ✅ FIXED: Form data - BỎ type annotation reactive<BrandForm>
 const form = reactive({
   name: '',
-  description: '',
+  description: ''
 })
 
 // Toast state management
@@ -1002,6 +1069,9 @@ const openCreateModal = (): void => {
   form.description = ''
   showModal.value = true
   activeActionMenu.value = null
+  imageFile.value = null
+  imagePreview.value = null
+
 }
 
 const openEditModal = (brand: Brand): void => {
@@ -1012,6 +1082,9 @@ const openEditModal = (brand: Brand): void => {
   form.description = brand.description || ''
   showModal.value = true
   activeActionMenu.value = null
+  imageFile.value = null
+imagePreview.value = brand.url || null
+
 }
 
 const closeModal = (): void => {
@@ -1021,37 +1094,77 @@ const closeModal = (): void => {
   selectedBrand.value = null
   form.name = ''
   form.description = ''
+  imageFile.value = null
+imagePreview.value = null
+
 }
 
 // ================================
 // FORM SUBMISSION - ✅ FIXED
 // ================================
+// const handleSubmit = async (): Promise<void> => {
+//   try {
+//     submitting.value = true
+
+//     // ✅ SỬA: Tạo object thay vì dùng BrandForm constructor
+//     const brandData = {
+//       name: form.name.trim(),
+//       description: form.description?.trim() || undefined,
+//     }
+
+//     if (isEditMode.value && selectedBrand.value) {
+//       console.log('✏️ Updating brand:', selectedBrand.value.id, brandData)
+//       await updateBrandApi(selectedBrand.value.id, brandData)
+//       showSuccess('Cập nhật thương hiệu thành công')
+//     } else {
+//       console.log('➕ Creating new brand:', brandData)
+//       await createBrandApi(brandData)
+//       showSuccess('Thêm thương hiệu mới thành công')
+//     }
+
+//     closeModal()
+//     await loadBrands() // Reload data
+//   } catch (error: any) {
+//     console.error('❌ Error submitting form:', error)
+//     const action = isEditMode.value ? 'cập nhật' : 'thêm'
+//     showError(`Không thể ${action} thương hiệu: ${error?.message || 'Có lỗi xảy ra'}`)
+//   } finally {
+//     submitting.value = false
+//   }
+// }
 const handleSubmit = async (): Promise<void> => {
   try {
     submitting.value = true
 
-    // ✅ SỬA: Tạo object thay vì dùng BrandForm constructor
+    let url: string | undefined = selectedBrand.value?.url
+
+    // 👉 1. Nếu có ảnh mới → upload
+    if (imageFile.value) {
+      console.log('📤 Uploading brand image...')
+      const uploadRes = await uploadImageApi(imageFile.value)
+
+      url = uploadRes.result // hoặc uploadRes.data.url (tùy backend)
+    }
+
+    // 👉 2. Data gửi lên backend
     const brandData = {
       name: form.name.trim(),
       description: form.description?.trim() || undefined,
+      url, // 👈 BỔ SUNG
     }
 
     if (isEditMode.value && selectedBrand.value) {
-      console.log('✏️ Updating brand:', selectedBrand.value.id, brandData)
       await updateBrandApi(selectedBrand.value.id, brandData)
       showSuccess('Cập nhật thương hiệu thành công')
     } else {
-      console.log('➕ Creating new brand:', brandData)
       await createBrandApi(brandData)
       showSuccess('Thêm thương hiệu mới thành công')
     }
 
     closeModal()
-    await loadBrands() // Reload data
+    await loadBrands()
   } catch (error: any) {
-    console.error('❌ Error submitting form:', error)
-    const action = isEditMode.value ? 'cập nhật' : 'thêm'
-    showError(`Không thể ${action} thương hiệu: ${error?.message || 'Có lỗi xảy ra'}`)
+    showError(error?.message || 'Có lỗi xảy ra')
   } finally {
     submitting.value = false
   }
