@@ -1098,7 +1098,7 @@ const deleteReview = async () => {
     }, 2000)
   } catch (err: any) {
     console.error('❌ Error deleting review:', err)
-    const message = err?.message || 'Có lỗi xảy ra khi xóa đánh giá'
+    const message = 'Có lỗi xảy ra khi xóa đánh giá'
     showError(message)
   } finally {
     deleting.value = false

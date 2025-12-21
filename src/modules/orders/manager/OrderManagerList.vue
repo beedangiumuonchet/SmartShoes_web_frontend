@@ -258,6 +258,30 @@
                 </div>
               </div>
             </div>
+
+            <!-- <div class="bg-brown-50 rounded-lg p-4 stats-card">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg
+                    class="w-8 h-8 text-brown-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M20 12H4m16 0a8 8 0 11-16 0 8 8 0 0116 0z"
+                    />
+                  </svg>
+                </div>
+                <div class="ml-4">
+                  <p class="text-sm font-medium text-brown-600">Đã trả hàng</p>
+                  <p class="text-2xl font-bold text-brown-900">{{ stats.returned }}</p>
+                </div>
+              </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -637,6 +661,7 @@
                           Xem chi tiết
                         </button>
                         <button
+                          v-if="order.status !== 'CANCELLED'"
                           @click="openStatusModal(order)"
                           class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         >
@@ -1461,7 +1486,7 @@ const statusOptions = [
   { label: 'Đã xác nhận', value: 'CONFIRMED' },
   { label: 'Đang giao hàng', value: 'SHIPPING' },
   { label: 'Đã giao hàng', value: 'DELIVERED' },
-  { label: 'Đã hủy', value: 'CANCELLED' },
+  { label: 'Đã trả hàng', value: 'RETURNED' },
 ]
 
 // ================================
@@ -1469,7 +1494,7 @@ const statusOptions = [
 // ================================
 const stats = computed(() => {
   if (!pagedData.value?.content) {
-    return { total: 0, pending: 0, shipping: 0, delivered: 0, cancelled: 0 }
+    return { total: 0, pending: 0, shipping: 0, delivered: 0, cancelled: 0, returned: 0 }
   }
 
   const orders = pagedData.value.content
@@ -1479,6 +1504,7 @@ const stats = computed(() => {
     shipping: orders.filter((o) => o.status === 'SHIPPING').length,
     delivered: orders.filter((o) => o.status === 'DELIVERED').length,
     cancelled: orders.filter((o) => o.status === 'CANCELLED').length,
+    returned: orders.filter((o) => o.status === 'RETURNED').length,
   }
 })
 
@@ -1495,6 +1521,7 @@ const getStatusClasses = (status: string): string => {
     purple: 'bg-purple-100 text-purple-800',
     green: 'bg-green-100 text-green-800',
     red: 'bg-red-100 text-red-800',
+    brown: 'bg-brown-100 text-brown-800',
     gray: 'bg-gray-100 text-gray-800',
   }
 
@@ -1681,7 +1708,7 @@ const handleUpdateStatus = async (): Promise<void> => {
     await loadOrders() // Reload data từ BE
   } catch (error: any) {
     console.error('❌ Error updating status:', error)
-    showError(`Không thể cập nhật trạng thái: ${error?.message || 'Có lỗi xảy ra'}`)
+    showError(`Không thể cập nhật trạng thái. Hãy kiểm tra lại quy trình kinh doanh!`)
   } finally {
     submitting.value = false
   }
@@ -1729,7 +1756,7 @@ const cancelOrderAction = async (orderId: string): Promise<void> => {
     await loadOrders() // Reload data từ BE
   } catch (error: any) {
     console.error('❌ Error cancelling order:', error)
-    showError(`Không thể hủy đơn hàng: ${error?.message || 'Có lỗi xảy ra'}`)
+    showError(`Không thể hủy đơn hàng. Hãy kiểm tra lại quy trình kinh doanh!`)
   }
 }
 

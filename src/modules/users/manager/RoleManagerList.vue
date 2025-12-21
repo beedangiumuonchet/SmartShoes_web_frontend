@@ -443,12 +443,6 @@
                         >
                           Chỉnh sửa
                         </button>
-                        <button
-                          @click="openDeleteModal(role)"
-                          class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
-                        >
-                          Xóa
-                        </button>
                       </div>
                     </div>
                   </div>
