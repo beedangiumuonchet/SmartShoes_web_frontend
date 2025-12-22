@@ -372,7 +372,7 @@
               </div>
 
               <!-- Wishlist Button -->
-              <button
+              <!-- <button
                 @click.stop="toggleWishlist(product)"
                 class="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
               >
@@ -390,7 +390,7 @@
                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                   />
                 </svg>
-              </button>
+              </button> -->
             </div>
 
             <!-- Product Info -->
@@ -1037,7 +1037,7 @@ const handleSlideAction = async (action: string) => {
         // Lọc sản phẩm giá cao từ 2tr
         const premiumProducts = await fetchProductsWithFilter(
           {
-            minPrice: 2000000,
+            minPrice: 2000000
           },
           'Sản phẩm cao cấp',
         )
