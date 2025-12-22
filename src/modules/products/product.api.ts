@@ -333,8 +333,8 @@ export const searchProductsWithAiApi = async (searchRequest: AiSearchRequest) =>
   // Create clean request object with defaults
   const cleanRequest: AiSearchRequest = {
     query: searchRequest.query.trim(),
-    threshold: searchRequest.threshold || 0.3,
-    max_candidates: searchRequest.max_candidates || 10,
+    threshold: searchRequest.threshold || 0.4,
+    max_candidates: searchRequest.max_candidates || 8,
     rerank: searchRequest.rerank !== undefined ? searchRequest.rerank : true,
   }
 

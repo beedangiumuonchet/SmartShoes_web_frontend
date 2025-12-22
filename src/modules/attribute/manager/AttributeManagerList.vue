@@ -152,7 +152,7 @@
             </div>
           </div>
 
-          <div class="bg-orange-50 rounded-lg p-4 stats-card">
+          <!-- <div class="bg-orange-50 rounded-lg p-4 stats-card">
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <svg
@@ -174,7 +174,7 @@
                 <p class="text-2xl font-bold text-orange-900">{{ todayAdded }}</p>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

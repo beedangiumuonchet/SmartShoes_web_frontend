@@ -300,12 +300,12 @@
           <div class="space-y-1">
             <label class="flex items-center gap-2 text-sm">
               <input type="checkbox" value="FEMALE" v-model="genderDraft" class="w-4 h-4" />
-              Nữ (35–39)
+              Nữ (size 35–39)
             </label>
 
             <label class="flex items-center gap-2 text-sm">
               <input type="checkbox" value="MALE" v-model="genderDraft" class="w-4 h-4" />
-              Nam (40–45)
+              Nam (size 40–45)
             </label>
           </div>
         </div>
@@ -405,7 +405,7 @@
         </div>
 
         <!-- Products Grid -->
-        <div
+        <!-- <div
           v-else-if="paginatedProducts.length"
           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
@@ -445,7 +445,99 @@
               </div>
             </div>
           </RouterLink>
+        </div> -->
+<div
+  v-else-if="paginatedProducts.length"
+  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+>
+  <RouterLink
+    v-for="product in paginatedProducts"
+    :key="product.id"
+    :to="`/products/slug/${product.slug}`"
+    class="group bg-white border border-gray-200 rounded-2xl shadow hover:shadow-xl overflow-hidden transition-transform hover:scale-105"
+  >
+    <!-- IMAGE -->
+    <div class="relative w-full h-[220px] overflow-hidden bg-gray-50">
+      <img
+        :src="getDirectImageUrl(getMainImage(product))"
+        class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+      />
+
+      <!-- 🔖 DISCOUNT BADGE -->
+      <div
+        v-if="hasDiscount(product)"
+        class="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md"
+      >
+        {{ getProductTag(product) }}
+      </div>
+    </div>
+
+    <!-- INFO -->
+    <div class="p-4 space-y-2">
+      <!-- NAME -->
+      <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-2">
+        {{ product.name }}
+      </h3>
+
+      <!-- BRAND + CATEGORY -->
+      <p class="text-sm text-gray-500">
+        {{ product.brand?.name || 'Không rõ thương hiệu' }} ·
+        {{ product.category?.name || 'Không rõ danh mục' }}
+      </p>
+
+      <!-- ⭐ RATING -->
+<div class="flex items-center gap-1">
+  <template
+    v-if="reviewCache[product.id]?.totalReviews > 0"
+  >
+    <div class="flex items-center">
+      <svg
+        v-for="star in 5"
+        :key="star"
+        class="w-4 h-4"
+        :class="
+          star <= Math.floor(reviewCache[product.id].averageRating)
+            ? 'text-yellow-400 fill-current'
+            : 'text-gray-300'
+        "
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+        />
+      </svg>
+    </div>
+
+    <span class="text-xs text-gray-600 ml-1">
+      {{ reviewCache[product.id].averageRating }}
+      ({{ reviewCache[product.id].totalReviews }})
+    </span>
+  </template>
+
+  <template v-else>
+    <span class="text-xs text-gray-400">Chưa có đánh giá</span>
+  </template>
+</div>
+
+
+      <!-- 💰 PRICE -->
+      <div class="flex items-center justify-between mt-2">
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-bold text-gray-900">
+            {{ formatPrice(getProductMinPrice(product)) }}
+          </span>
+
+          <span
+            v-if="hasDiscount(product)"
+            class="text-sm text-gray-400 line-through"
+          >
+            {{ formatPrice(getProductOriginalPrice(product)) }}
+          </span>
         </div>
+      </div>
+    </div>
+  </RouterLink>
+</div>
 
         <!-- Empty State -->
         <div v-else class="text-center py-20">
@@ -573,6 +665,7 @@ import {
   searchProductsWithAiApi,
   searchProductsByImageApi,
 } from '../products/product.api'
+import { getReviewsByProduct } from '../reviews/reviews.api'
 import { getAllBrandsApi } from '../brand/brand.api'
 import { getAllCategoriesApi } from '../category/category.api'
 import { getAllColorsApi } from '../color/color.api' // ✅ THÊM MỚI
@@ -588,6 +681,14 @@ import type {
 import { useRoute } from 'vue-router'
 import { useFilteredProducts } from '@/common/store/productFilter.store'
 import { fi } from '@nuxt/ui/runtime/locale/index.js'
+
+
+type ReviewSummary = {
+  averageRating: number
+  totalReviews: number
+}
+
+const reviewCache = ref<Record<string, ReviewSummary>>({})
 
 const route = useRoute()
 
@@ -810,11 +911,30 @@ function getDirectImageUrl(driveUrl: string) {
 }
 
 // ✅ THÊM MỚI - getProductMinPrice
+// const getProductMinPrice = (product: Product) => {
+//   const variants = product.variants || []
+//   if (!variants.length) return 0
+//   return Math.min(...variants.map((v) => v.priceSale || Infinity))
+// }
 const getProductMinPrice = (product: Product) => {
   const variants = product.variants || []
   if (!variants.length) return 0
-  return Math.min(...variants.map((v) => v.priceSale || Infinity))
+
+  return Math.min(
+    ...variants.map((v) =>
+      v.priceSale && v.priceSale > 0 && v.priceSale < v.price
+        ? v.priceSale
+        : v.price,
+    ),
+  )
 }
+const getProductOriginalPrice = (product: Product) => {
+  const variants = product.variants || []
+  if (!variants.length) return 0
+
+  return Math.max(...variants.map((v) => v.price || 0))
+}
+
 
 // ✅ THÊM MỚI - getStatusLabel cho AI results
 const getStatusLabel = (status: string) => {
@@ -859,6 +979,38 @@ const handleImageUpload = async (event: Event) => {
     isImageSearching.value = false
   }
 }
+
+const fetchReviewSummary = async (productId: string) => {
+  // cache rồi thì thôi
+  if (reviewCache.value[productId]) return
+
+  try {
+    const res = await getReviewsByProduct(productId, {
+      page: 0,
+      size: 1, // 🔥 chỉ cần meta
+    })
+
+    const reviews = res.content || []
+    const total = res.totalElements || 0
+
+    const avg =
+      total > 0
+        ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+        : 0
+
+    reviewCache.value[productId] = {
+      averageRating: Number(avg.toFixed(1)),
+      totalReviews: total,
+    }
+  } catch (e) {
+    console.warn('❌ Fetch review failed:', productId)
+    reviewCache.value[productId] = {
+      averageRating: 0,
+      totalReviews: 0,
+    }
+  }
+}
+
 
 // ========== AI SEARCH METHODS - GIỮ NGUYÊN ==========
 const handleAiSearch = async (): Promise<void> => {
@@ -1020,9 +1172,19 @@ const statusLabel = (status: string) => {
 }
 
 // Kiểm tra sản phẩm có đang khuyến mãi hay không
+// const hasDiscount = (product: Product): boolean => {
+//   const variants = product.variants || []
+//   return variants.some((v) => (v.price || 0) > (v.priceSale || 0))
+// }
 const hasDiscount = (product: Product): boolean => {
   const variants = product.variants || []
-  return variants.some((v) => (v.price || 0) > (v.priceSale || 0))
+
+  return variants.some(
+    (v) =>
+      v.priceSale &&
+      v.priceSale > 0 &&
+      v.priceSale < v.price,
+  )
 }
 
 type InferredGender = 'MALE' | 'FEMALE' | 'BOTH' | 'UNKNOWN'
@@ -1072,11 +1234,25 @@ const paginatedProducts = computed(() => {
 })
 
 // Lấy nhãn status hiển thị
-const getProductTag = (product: Product): string => {
-  if (hasDiscount(product)) return 'Giảm giá sốc'
+// const getProductTag = (product: Product): string => {
+//   if (hasDiscount(product)) return 'Giảm giá sốc'
 
-  return ''
+//   return ''
+// }
+const getProductTag = (product: Product): string => {
+  const variants = product.variants || []
+  let maxDiscount = 0
+
+  variants.forEach((v) => {
+    if (v.priceSale && v.priceSale < v.price) {
+      const discount = Math.round(((v.price - v.priceSale) / v.price) * 100)
+      if (discount > maxDiscount) maxDiscount = discount
+    }
+  })
+
+  return maxDiscount > 0 ? `-${maxDiscount}%` : ''
 }
+
 // ✅ THÊM - States cho filter banner
 const showFilterFromHome = ref(false)
 const filterBannerTitle = ref('')
@@ -1212,6 +1388,16 @@ watch(
   },
   { deep: true },
 )
+watch(
+  () => paginatedProducts.value,
+  (products) => {
+    products.forEach((p) => {
+      fetchReviewSummary(p.id)
+    })
+  },
+  { immediate: true },
+)
+
 
 let debounceTimer: any = null
 
