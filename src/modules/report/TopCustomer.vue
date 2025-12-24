@@ -484,7 +484,6 @@ declare module 'jspdf' {
   }
 }
 import ExcelJS from 'exceljs'
-import { saveAs } from 'file-saver'
 // State
 const topCustomers = ref<TopCustomerDTO[]>([])
 const loading = ref(false)
@@ -527,50 +526,107 @@ const paginatedCustomers = computed(() => {
   return topCustomers.value.slice(start, end)
 })
 // ✅ THAY THẾ HOÀN TOÀN - Excel export với design đẹp
-const exportToExcel = () => {
-  try {
-    const wb = XLSX.utils.book_new()
-    const ws = XLSX.utils.aoa_to_sheet([])
+const exportToExcel = async () => {
+  if (!topCustomers.value.length) {
+    alert('Không có dữ liệu để xuất!')
+    return
+  }
 
-    // ======================== TITLE SECTION ===========================
-    const titleSection = [
-      ['BÁO CÁO TOP KHÁCH HÀNG TIỀM NĂNG - SMARTSHOES'],
-      [''],
-      ['Thời gian báo cáo:', `${startDate.value} đến ${endDate.value}`],
-      ['Thời gian xuất:', new Date().toLocaleString('vi-VN')],
-      [''],
-      ['THỐNG KÊ TỔNG QUAN'],
-      ['Tổng KH:', topCustomers.value.length, '', 'Tổng đơn hàng:', totalOrders.value],
-      [
-        'Tổng doanh thu:',
-        formatCurrency(totalRevenue.value),
-        '',
-        'Trung bình/KH:',
-        formatCurrency(averageSpent.value),
-      ],
-      [''],
-      ['DANH SÁCH CHI TIẾT'],
-      [''],
-    ]
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Top Khách Hàng')
 
-    XLSX.utils.sheet_add_aoa(ws, titleSection, { origin: 'A1' })
+  // ======================= TITLE =========================
+  worksheet.mergeCells('A1:I1')
+  const titleCell = worksheet.getCell('A1')
+  titleCell.value = 'BÁO CÁO TOP KHÁCH HÀNG TIỀM NĂNG - SMARTSHOES'
+  titleCell.font = {
+    bold: true,
+    size: 16,
+    color: { argb: 'FF1F2937' },
+  }
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' }
+  titleCell.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFBFDBFE' }, // Blue 200
+  }
+  worksheet.getRow(1).height = 40
 
-    // ======================== TABLE HEADER ============================
-    const headers = [
-      'Xếp hạng',
-      'Tên khách hàng',
-      'Email',
-      'Tên đăng nhập',
-      'Số đơn hàng',
-      'Tổng chi tiêu',
-      'Trung bình/Đơn',
-      'Trạng thái',
-      'Ngày tạo',
-    ]
-    XLSX.utils.sheet_add_aoa(ws, [headers], { origin: 'A12' })
+  // ======================= INFO =========================
+  worksheet.getCell('A3').value = 'Thời gian báo cáo:'
+  worksheet.getCell('B3').value = `${startDate.value} đến ${endDate.value}`
 
-    // ======================== DATA ================================
-    const excelData = topCustomers.value.map((c, i) => [
+  worksheet.getCell('A4').value = 'Thời gian xuất:'
+  worksheet.getCell('B4').value = new Date().toLocaleString('vi-VN')
+
+  ;['A3', 'A4'].forEach((cell) => {
+    worksheet.getCell(cell).font = { bold: true, color: { argb: 'FF374151' } }
+  })
+
+  // ======================= OVERVIEW =====================
+  worksheet.mergeCells('A6:I6')
+  const overviewCell = worksheet.getCell('A6')
+  overviewCell.value = 'THỐNG KÊ TỔNG QUAN'
+  overviewCell.font = { bold: true, color: { argb: 'FF1E3A8A' } }
+  overviewCell.alignment = { horizontal: 'center' }
+  overviewCell.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFF8FAFF' }, // rất nhạt
+  }
+
+  worksheet.getCell('A7').value = 'Tổng KH:'
+  worksheet.getCell('B7').value = topCustomers.value.length
+
+  worksheet.getCell('D7').value = 'Tổng đơn hàng:'
+  worksheet.getCell('E7').value = totalOrders.value
+
+  worksheet.getCell('A8').value = 'Tổng doanh thu:'
+  worksheet.getCell('B8').value = totalRevenue.value
+  worksheet.getCell('B8').numFmt = '#,##0'
+
+  worksheet.getCell('D8').value = 'Trung bình/KH:'
+  worksheet.getCell('E8').value = averageSpent.value
+  worksheet.getCell('E8').numFmt = '#,##0'
+
+  ;['A7', 'D7', 'A8', 'D8'].forEach((cell) => {
+    worksheet.getCell(cell).font = { bold: true }
+  })
+
+  // ======================= TABLE HEADER =================
+  worksheet.addRow([])
+
+  const headerRow = worksheet.addRow([
+    'Xếp hạng',
+    'Tên khách hàng',
+    'Email',
+    'Tên đăng nhập',
+    'Số đơn hàng',
+    'Tổng chi tiêu',
+    'Trung bình/Đơn',
+    'Trạng thái',
+    'Ngày tạo',
+  ])
+
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true, color: { argb: 'FF1F2937' } }
+    cell.alignment = { horizontal: 'center', vertical: 'middle' }
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFDBEAFE' }, // Blue 100
+    }
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' },
+    }
+  })
+
+  // ======================= DATA =========================
+  topCustomers.value.forEach((c, i) => {
+    const row = worksheet.addRow([
       i + 1,
       formatCustomerName(c.customer),
       c.customer.email,
@@ -579,50 +635,48 @@ const exportToExcel = () => {
       c.totalSpent,
       c.totalOrders ? Math.round(c.totalSpent / c.totalOrders) : 0,
       getStatusLabel(c.customer.status),
-      c.customer.createdAt ? new Date(c.customer.createdAt).toLocaleDateString('vi-VN') : 'N/A',
+      c.customer.createdAt
+        ? new Date(c.customer.createdAt).toLocaleDateString('vi-VN')
+        : 'N/A',
     ])
 
-    XLSX.utils.sheet_add_aoa(ws, excelData, { origin: 'A13' })
+    row.getCell(6).numFmt = '#,##0'
+    row.getCell(7).numFmt = '#,##0'
 
-    // ======================== COLUMN WIDTH =============================
-    ws['!cols'] = [
-      { wch: 10 },
-      { wch: 25 },
-      { wch: 30 },
-      { wch: 20 },
-      { wch: 12 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 15 },
-      { wch: 12 },
-    ]
-
-    // ======================== MERGE CELLS ==============================
-    ws['!merges'] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } }, // Title
-      { s: { r: 5, c: 0 }, e: { r: 5, c: 8 } }, // Thống kê tổng quan
-      { s: { r: 9, c: 0 }, e: { r: 9, c: 8 } }, // Danh sách chi tiết
-    ]
-
-    // ======================== STYLE (SIMPLE, WORKING 100%) =============
-    Object.keys(ws).forEach((cell) => {
-      if (cell[0] === 'A' && cell === 'A1') {
-        ws[cell].s = {
-          font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' } },
-          fill: { fgColor: { rgb: '2563EB' } },
-          alignment: { horizontal: 'center', vertical: 'center' },
-        }
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
       }
     })
+  })
 
-    XLSX.utils.book_append_sheet(wb, ws, 'Top Khách Hàng')
+  // ======================= COLUMN WIDTH =================
+  worksheet.columns = [
+    { width: 10 },
+    { width: 25 },
+    { width: 30 },
+    { width: 20 },
+    { width: 15 },
+    { width: 18 },
+    { width: 18 },
+    { width: 15 },
+    { width: 15 },
+  ]
 
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '').replace('T', '_')
-    XLSX.writeFile(wb, `TopCustomers_${startDate.value}_to_${endDate.value}_${timestamp}.xlsx`)
-  } catch (e) {
-    console.error(e)
-  }
+  // ======================= FREEZE HEADER =================
+  worksheet.views = [{ state: 'frozen', ySplit: headerRow.number }]
+
+  // ======================= EXPORT =======================
+  const buffer = await workbook.xlsx.writeBuffer()
+  saveAs(
+    new Blob([buffer]),
+    `TopCustomers_${startDate.value}_to_${endDate.value}.xlsx`
+  )
 }
+
 
 const exportToPDF = () => {
   try {

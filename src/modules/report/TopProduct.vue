@@ -318,6 +318,79 @@ const getClassification = (variants: ProductVariant[]) => {
 };
 
 
+// const exportExcel = async () => {
+//   if (!topProducts.value.length) {
+//     alert("Không có dữ liệu để xuất!");
+//     return;
+//   }
+
+//   const workbook = new ExcelJS.Workbook();
+//   const worksheet = workbook.addWorksheet("TopProducts");
+
+//   // Tiêu đề
+//   const headers = [
+//     { header: "TenSanPham", key: "TenSanPham", width: 30 },
+//     { header: "Brand", key: "Brand", width: 20 },
+//     { header: "Category", key: "Category", width: 20 },
+//     { header: "SoLuongBan", key: "SoLuongBan", width: 15 },
+//     { header: "DoanhThu", key: "DoanhThu", width: 20 },
+//     { header: "TrangThai", key: "TrangThai", width: 15 },
+//   ];
+
+//   worksheet.columns = headers;
+
+//   // Tô màu header + kẻ viền + bold
+//   worksheet.getRow(1).eachCell((cell) => {
+//     cell.fill = {
+//       type: "pattern",
+//       pattern: "solid",
+//       fgColor: { argb: "FF4CAF50" }, // xanh lá
+//     };
+//     cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
+//     cell.alignment = { vertical: "middle", horizontal: "center" };
+//     cell.border = {
+//       top: { style: "thin" },
+//       left: { style: "thin" },
+//       bottom: { style: "thin" },
+//       right: { style: "thin" },
+//     };
+//   });
+
+//   // Thêm dữ liệu
+//   topProducts.value.forEach((item) => {
+//     worksheet.addRow({
+//       TenSanPham: item.product.name,
+//       Brand: item.product.brand.name,
+//       Category: item.product.category.name,
+//       SoLuongBan: item.totalQuantity,
+//       DoanhThu: item.totalRevenue,
+//       TrangThai: item.product.status,
+//     });
+//   });
+
+//   // Kẻ viền cho tất cả các ô dữ liệu
+//   worksheet.eachRow((row, rowNumber) => {
+//     row.eachCell((cell) => {
+//       cell.border = {
+//         top: { style: "thin" },
+//         left: { style: "thin" },
+//         bottom: { style: "thin" },
+//         right: { style: "thin" },
+//       };
+//     });
+//   });
+
+//   // Freeze row đầu tiên
+//   worksheet.views = [{ state: "frozen", ySplit: 1 }];
+
+//   // Định dạng số cho DoanhThu, SoLuongBan
+//   worksheet.getColumn("DoanhThu").numFmt = "#,##0";
+//   worksheet.getColumn("SoLuongBan").numFmt = "0";
+
+//   // Xuất file
+//   const buf = await workbook.xlsx.writeBuffer();
+//   saveAs(new Blob([buf]), `TopSanPham_${startDate.value}_to_${endDate.value}.xlsx`);
+// };
 const exportExcel = async () => {
   if (!topProducts.value.length) {
     alert("Không có dữ liệu để xuất!");
@@ -325,29 +398,90 @@ const exportExcel = async () => {
   }
 
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("TopProducts");
+  const worksheet = workbook.addWorksheet("Top Products");
 
-  // Tiêu đề
-  const headers = [
-    { header: "TenSanPham", key: "TenSanPham", width: 30 },
-    { header: "Brand", key: "Brand", width: 20 },
-    { header: "Category", key: "Category", width: 20 },
-    { header: "SoLuongBan", key: "SoLuongBan", width: 15 },
-    { header: "DoanhThu", key: "DoanhThu", width: 20 },
-    { header: "TrangThai", key: "TrangThai", width: 15 },
-  ];
+  // ======================= TITLE =========================
+  worksheet.mergeCells("A1:F1");
+  const titleCell = worksheet.getCell("A1");
+  titleCell.value = "BÁO CÁO TOP SẢN PHẨM BÁN CHẠY - SMARTSHOES";
+  titleCell.font = {
+    bold: true,
+    size: 16,
+    color: { argb: "FF1F2937" }, // text đậm, không trắng
+  };
+  titleCell.alignment = { vertical: "middle", horizontal: "center" };
+  titleCell.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFBFDBFE" }, // Blue 200
+  };
+  worksheet.getRow(1).height = 40;
 
-  worksheet.columns = headers;
+  // ======================= INFO =========================
+  worksheet.getCell("A3").value = "Thời gian báo cáo:";
+  worksheet.getCell("B3").value = `${startDate.value} đến ${endDate.value}`;
 
-  // Tô màu header + kẻ viền + bold
-  worksheet.getRow(1).eachCell((cell) => {
+  worksheet.getCell("A4").value = "Thời gian xuất:";
+  worksheet.getCell("B4").value = new Date().toLocaleString("vi-VN");
+
+  ["A3", "A4"].forEach((cell) => {
+    worksheet.getCell(cell).font = { bold: true, color: { argb: "FF374151" } };
+  });
+
+  // ======================= OVERVIEW =====================
+  worksheet.mergeCells("A6:F6");
+  const overviewCell = worksheet.getCell("A6");
+  overviewCell.value = "THỐNG KÊ TỔNG QUAN";
+  overviewCell.font = { bold: true, color: { argb: "FF1E3A8A" } };
+  overviewCell.alignment = { horizontal: "center" };
+  overviewCell.fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFF8FAFF" }, // rất nhạt
+  };
+
+  worksheet.getCell("A7").value = "Tổng sản phẩm:";
+  worksheet.getCell("B7").value = topProducts.value.length;
+
+  const totalQuantity = topProducts.value.reduce(
+    (sum, p) => sum + p.totalQuantity,
+    0
+  );
+  const totalRevenue = topProducts.value.reduce(
+    (sum, p) => sum + p.totalRevenue,
+    0
+  );
+
+  worksheet.getCell("D7").value = "Tổng số lượng bán:";
+  worksheet.getCell("E7").value = totalQuantity;
+
+  worksheet.getCell("A8").value = "Tổng doanh thu:";
+  worksheet.getCell("B8").value = totalRevenue;
+  worksheet.getCell("B8").numFmt = "#,##0";
+
+  ["A7", "D7", "A8"].forEach((cell) => {
+    worksheet.getCell(cell).font = { bold: true };
+  });
+
+  // ======================= TABLE HEADER =================
+  worksheet.addRow([]);
+  const headerRow = worksheet.addRow([
+    "Tên sản phẩm",
+    "Thương hiệu",
+    "Danh mục",
+    "Số lượng bán",
+    "Doanh thu",
+    "Trạng thái",
+  ]);
+
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true, color: { argb: "FF1F2937" } };
+    cell.alignment = { horizontal: "center", vertical: "middle" };
     cell.fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "FF4CAF50" }, // xanh lá
+      fgColor: { argb: "FFDBEAFE" }, // Blue 100
     };
-    cell.font = { color: { argb: "FFFFFFFF" }, bold: true };
-    cell.alignment = { vertical: "middle", horizontal: "center" };
     cell.border = {
       top: { style: "thin" },
       left: { style: "thin" },
@@ -356,20 +490,20 @@ const exportExcel = async () => {
     };
   });
 
-  // Thêm dữ liệu
+  // ======================= DATA =========================
   topProducts.value.forEach((item) => {
-    worksheet.addRow({
-      TenSanPham: item.product.name,
-      Brand: item.product.brand.name,
-      Category: item.product.category.name,
-      SoLuongBan: item.totalQuantity,
-      DoanhThu: item.totalRevenue,
-      TrangThai: item.product.status,
-    });
-  });
+    const row = worksheet.addRow([
+      item.product.name,
+      item.product.brand.name,
+      item.product.category.name,
+      item.totalQuantity,
+      item.totalRevenue,
+      item.product.status,
+    ]);
 
-  // Kẻ viền cho tất cả các ô dữ liệu
-  worksheet.eachRow((row, rowNumber) => {
+    row.getCell(4).numFmt = "0";
+    row.getCell(5).numFmt = "#,##0";
+
     row.eachCell((cell) => {
       cell.border = {
         top: { style: "thin" },
@@ -380,17 +514,28 @@ const exportExcel = async () => {
     });
   });
 
-  // Freeze row đầu tiên
-  worksheet.views = [{ state: "frozen", ySplit: 1 }];
+  // ======================= COLUMN WIDTH =================
+  worksheet.columns = [
+    { width: 30 },
+    { width: 20 },
+    { width: 20 },
+    { width: 15 },
+    { width: 18 },
+    { width: 15 },
+  ];
 
-  // Định dạng số cho DoanhThu, SoLuongBan
-  worksheet.getColumn("DoanhThu").numFmt = "#,##0";
-  worksheet.getColumn("SoLuongBan").numFmt = "0";
+  // ======================= FREEZE HEADER =================
+  worksheet.views = [{ state: "frozen", ySplit: headerRow.number }];
 
-  // Xuất file
-  const buf = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buf]), `TopSanPham_${startDate.value}_to_${endDate.value}.xlsx`);
+  // ======================= EXPORT =======================
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(
+    new Blob([buffer]),
+    `TopProducts_${startDate.value}_to_${endDate.value}.xlsx`
+  );
 };
+
+
 
 const openPrintPage = () => {
   const url = `/print-report?start=${startDate.value}&end=${endDate.value}&limit=${selectedLimit.value}`;
