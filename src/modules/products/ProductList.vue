@@ -446,98 +446,94 @@
             </div>
           </RouterLink>
         </div> -->
-<div
-  v-else-if="paginatedProducts.length"
-  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
->
-  <RouterLink
-    v-for="product in paginatedProducts"
-    :key="product.id"
-    :to="`/products/slug/${product.slug}`"
-    class="group bg-white border border-gray-200 rounded-2xl shadow hover:shadow-xl overflow-hidden transition-transform hover:scale-105"
-  >
-    <!-- IMAGE -->
-    <div class="relative w-full h-[220px] overflow-hidden bg-gray-50">
-      <img
-        :src="getDirectImageUrl(getMainImage(product))"
-        class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-      />
-
-      <!-- 🔖 DISCOUNT BADGE -->
-      <div
-        v-if="hasDiscount(product)"
-        class="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md"
-      >
-        {{ getProductTag(product) }}
-      </div>
-    </div>
-
-    <!-- INFO -->
-    <div class="p-4 space-y-2">
-      <!-- NAME -->
-      <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-2">
-        {{ product.name }}
-      </h3>
-
-      <!-- BRAND + CATEGORY -->
-      <p class="text-sm text-gray-500">
-        {{ product.brand?.name || 'Không rõ thương hiệu' }} ·
-        {{ product.category?.name || 'Không rõ danh mục' }}
-      </p>
-
-      <!-- ⭐ RATING -->
-<div class="flex items-center gap-1">
-  <template
-    v-if="reviewCache[product.id]?.totalReviews > 0"
-  >
-    <div class="flex items-center">
-      <svg
-        v-for="star in 5"
-        :key="star"
-        class="w-4 h-4"
-        :class="
-          star <= Math.floor(reviewCache[product.id].averageRating)
-            ? 'text-yellow-400 fill-current'
-            : 'text-gray-300'
-        "
-        viewBox="0 0 20 20"
-      >
-        <path
-          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-        />
-      </svg>
-    </div>
-
-    <span class="text-xs text-gray-600 ml-1">
-      {{ reviewCache[product.id].averageRating }}
-      ({{ reviewCache[product.id].totalReviews }})
-    </span>
-  </template>
-
-  <template v-else>
-    <span class="text-xs text-gray-400">Chưa có đánh giá</span>
-  </template>
-</div>
-
-
-      <!-- 💰 PRICE -->
-      <div class="flex items-center justify-between mt-2">
-        <div class="flex items-center gap-2">
-          <span class="text-lg font-bold text-gray-900">
-            {{ formatPrice(getProductMinPrice(product)) }}
-          </span>
-
-          <span
-            v-if="hasDiscount(product)"
-            class="text-sm text-gray-400 line-through"
+        <div
+          v-else-if="paginatedProducts.length"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <RouterLink
+            v-for="product in paginatedProducts"
+            :key="product.id"
+            :to="`/products/slug/${product.slug}`"
+            class="group bg-white border border-gray-200 rounded-2xl shadow hover:shadow-xl overflow-hidden transition-transform hover:scale-105"
           >
-            {{ formatPrice(getProductOriginalPrice(product)) }}
-          </span>
+            <!-- IMAGE -->
+            <div class="relative w-full h-[220px] overflow-hidden bg-gray-50">
+              <img
+                :src="getDirectImageUrl(getMainImage(product))"
+                class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+              />
+
+              <!-- 🔖 DISCOUNT BADGE -->
+              <div
+                v-if="hasDiscount(product)"
+                class="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md"
+              >
+                {{ getProductTag(product) }}
+              </div>
+            </div>
+
+            <!-- INFO -->
+            <div class="p-4 space-y-2">
+              <!-- NAME -->
+              <h3
+                class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 line-clamp-2"
+              >
+                {{ product.name }}
+              </h3>
+
+              <!-- BRAND + CATEGORY -->
+              <p class="text-sm text-gray-500">
+                {{ product.brand?.name || 'Không rõ thương hiệu' }} ·
+                {{ product.category?.name || 'Không rõ danh mục' }}
+              </p>
+
+              <!-- ⭐ RATING -->
+              <div class="flex items-center gap-1">
+                <template v-if="reviewCache[product.id]?.totalReviews > 0">
+                  <div class="flex items-center">
+                    <svg
+                      v-for="star in 5"
+                      :key="star"
+                      class="w-4 h-4"
+                      :class="
+                        star <= Math.floor(reviewCache[product.id].averageRating)
+                          ? 'text-yellow-400 fill-current'
+                          : 'text-gray-300'
+                      "
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                      />
+                    </svg>
+                  </div>
+
+                  <span class="text-xs text-gray-600 ml-1">
+                    {{ reviewCache[product.id].averageRating }}
+                    ({{ reviewCache[product.id].totalReviews }})
+                  </span>
+                </template>
+
+                <template v-else>
+                  <span class="text-xs text-gray-400">Chưa có đánh giá</span>
+                </template>
+              </div>
+
+              <!-- 💰 PRICE -->
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg font-bold text-gray-900">
+                    {{ formatPrice(getProductMinPrice(product)) }}
+                  </span>
+
+                  <span v-if="hasDiscount(product)" class="text-sm text-gray-400 line-through">
+                    {{ formatPrice(getProductOriginalPrice(product)) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </RouterLink>
         </div>
-      </div>
-    </div>
-  </RouterLink>
-</div>
 
         <!-- Empty State -->
         <div v-else class="text-center py-20">
@@ -681,7 +677,6 @@ import type {
 import { useRoute } from 'vue-router'
 import { useFilteredProducts } from '@/common/store/productFilter.store'
 import { fi } from '@nuxt/ui/runtime/locale/index.js'
-
 
 type ReviewSummary = {
   averageRating: number
@@ -922,9 +917,7 @@ const getProductMinPrice = (product: Product) => {
 
   return Math.min(
     ...variants.map((v) =>
-      v.priceSale && v.priceSale > 0 && v.priceSale < v.price
-        ? v.priceSale
-        : v.price,
+      v.priceSale && v.priceSale > 0 && v.priceSale < v.price ? v.priceSale : v.price,
     ),
   )
 }
@@ -934,7 +927,6 @@ const getProductOriginalPrice = (product: Product) => {
 
   return Math.max(...variants.map((v) => v.price || 0))
 }
-
 
 // ✅ THÊM MỚI - getStatusLabel cho AI results
 const getStatusLabel = (status: string) => {
@@ -994,9 +986,7 @@ const fetchReviewSummary = async (productId: string) => {
     const total = res.totalElements || 0
 
     const avg =
-      total > 0
-        ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
-        : 0
+      total > 0 ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length : 0
 
     reviewCache.value[productId] = {
       averageRating: Number(avg.toFixed(1)),
@@ -1010,7 +1000,6 @@ const fetchReviewSummary = async (productId: string) => {
     }
   }
 }
-
 
 // ========== AI SEARCH METHODS - GIỮ NGUYÊN ==========
 const handleAiSearch = async (): Promise<void> => {
@@ -1179,12 +1168,7 @@ const statusLabel = (status: string) => {
 const hasDiscount = (product: Product): boolean => {
   const variants = product.variants || []
 
-  return variants.some(
-    (v) =>
-      v.priceSale &&
-      v.priceSale > 0 &&
-      v.priceSale < v.price,
-  )
+  return variants.some((v) => v.priceSale && v.priceSale > 0 && v.priceSale < v.price)
 }
 
 type InferredGender = 'MALE' | 'FEMALE' | 'BOTH' | 'UNKNOWN'
@@ -1397,7 +1381,6 @@ watch(
   },
   { immediate: true },
 )
-
 
 let debounceTimer: any = null
 

@@ -16,6 +16,7 @@ export class UserDto {
   username: string
   firstName: string
   lastName: string
+  status: 'ACTIVE' | 'INACTIVE' | 'BANNED' // ✅ THÊM status field
   roles: string[]
   createdAt: string
   updatedAt: string
@@ -26,6 +27,7 @@ export class UserDto {
     username: string,
     firstName: string,
     lastName: string,
+    status: 'ACTIVE' | 'INACTIVE' | 'BANNED',
     roles: string[],
     createdAt: string,
     updatedAt: string,
@@ -35,6 +37,7 @@ export class UserDto {
     this.username = username
     this.firstName = firstName
     this.lastName = lastName
+    this.status = status
     this.roles = roles
     this.createdAt = createdAt
     this.updatedAt = updatedAt

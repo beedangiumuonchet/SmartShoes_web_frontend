@@ -328,33 +328,33 @@
               >
                 <!-- Category Name -->
                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-  <div class="flex-shrink-0 h-10 w-10">
-    <img
-      v-if="category.url"
-      :src="getDirectImageUrl(category.url)"
-      alt="Brand logo"
-      class="h-10 w-10 object-cover rounded-lg border"
-    />
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <img
+                        v-if="category.url"
+                        :src="getDirectImageUrl(category.url)"
+                        alt="Brand logo"
+                        class="h-10 w-10 object-cover rounded-lg border"
+                      />
 
-    <!-- Fallback nếu chưa có ảnh -->
-    <div
-      v-else
-      class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
-    >
-      <span class="text-sm font-medium text-white">
-        {{ category.name.substring(0, 2).toUpperCase() }}
-      </span>
-    </div>
-  </div>
+                      <!-- Fallback nếu chưa có ảnh -->
+                      <div
+                        v-else
+                        class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
+                      >
+                        <span class="text-sm font-medium text-white">
+                          {{ category.name.substring(0, 2).toUpperCase() }}
+                        </span>
+                      </div>
+                    </div>
 
-  <div class="ml-4">
-    <div class="text-sm font-medium text-gray-900">
-      {{ category.name }}
-    </div>
-    <div class="text-sm text-gray-500">Thương hiệu</div>
-  </div>
-</div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ category.name }}
+                      </div>
+                      <div class="text-sm text-gray-500">Thương hiệu</div>
+                    </div>
+                  </div>
                   <!-- <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
                       <div
@@ -621,27 +621,24 @@
             </div>
 
             <!-- Category Image -->
-<div>
-  <label class="block text-sm font-medium text-gray-700 mb-2">
-    Ảnh danh mục
-  </label>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"> Ảnh danh mục </label>
 
-  <input
-    type="file"
-    accept="image/*"
-    @change="handleImageChange"
-    class="block w-full text-sm text-gray-700"
-  />
+              <input
+                type="file"
+                accept="image/*"
+                @change="handleImageChange"
+                class="block w-full text-sm text-gray-700"
+              />
 
-  <div v-if="imagePreview" class="mt-3">
-    <img
-      :src="getDirectImageUrl(imagePreview)"
-      alt="Preview"
-      class="h-24 w-24 object-cover rounded border"
-    />
-  </div>
-</div>
-
+              <div v-if="imagePreview" class="mt-3">
+                <img
+                  :src="getDirectImageUrl(imagePreview)"
+                  alt="Preview"
+                  class="h-24 w-24 object-cover rounded border"
+                />
+              </div>
+            </div>
 
             <!-- Form Actions -->
             <div class="flex justify-end space-x-3 pt-4">
@@ -864,7 +861,7 @@ function debounce<T extends (...args: any[]) => any>(
 const imageFile = ref<File | null>(null)
 const imagePreview = ref<string | null>(null)
 
-  function getDirectImageUrl(driveUrl: string) {
+function getDirectImageUrl(driveUrl: string) {
   // Tách ID ảnh từ link Google Drive
   const match = driveUrl?.match(/\/d\/([^/]+)/)
   if (!match) return driveUrl
@@ -873,7 +870,7 @@ const imagePreview = ref<string | null>(null)
   // Gọi ảnh qua API backend (nó sẽ tự cache local)
   return `http://localhost:8080/api/v1/images/${driveId}`
 }
-  const handleImageChange = (event: Event) => {
+const handleImageChange = (event: Event) => {
   const files = (event.target as HTMLInputElement).files
   if (!files || files.length === 0) return
 
@@ -1093,7 +1090,6 @@ const openCreateModal = (): void => {
   activeActionMenu.value = null
   imageFile.value = null
   imagePreview.value = null
-
 }
 
 const openEditModal = (category: Category): void => {
@@ -1116,8 +1112,7 @@ const closeModal = (): void => {
   form.name = ''
   form.description = ''
   imageFile.value = null
-imagePreview.value = null
-
+  imagePreview.value = null
 }
 
 // ================================
@@ -1162,7 +1157,7 @@ const handleSubmit = async (): Promise<void> => {
     // 🔹 Upload ảnh nếu có ảnh mới
     if (imageFile.value) {
       const uploadRes = await uploadImageApi(imageFile.value)
-      url = uploadRes.result// hoặc uploadRes.data.url
+      url = uploadRes.result // hoặc uploadRes.data.url
     }
 
     const categoryData = {
@@ -1218,7 +1213,7 @@ const handleDelete = async (): Promise<void> => {
     await loadCategories() // Reload data
   } catch (error: any) {
     console.error('❌ Error deleting category:', error)
-    showError(`Không thể xóa danh mục: ${error?.message || 'Có lỗi xảy ra'}`)
+    showError(`Không thể xóa danh mục. Hãy kiểm tra lại.`)
   } finally {
     deleting.value = false
   }
