@@ -1237,7 +1237,6 @@ const handleDelete = async (): Promise<void> => {
 
     let errorMsg = 'Không thể xóa thuộc tính'
 
-
     showError(errorMsg)
   } finally {
     deleting.value = false

@@ -109,9 +109,44 @@
 
         <div
           v-if="error"
-          class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+          class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start space-x-3"
         >
-          {{ error }}
+          <!-- Error Icon -->
+          <svg
+            class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
+          </svg>
+
+          <!-- Error Content -->
+          <div class="flex-1">
+            <div class="font-medium mb-1">Đăng nhập thất bại</div>
+            <div>{{ error }}</div>
+
+            <!-- ✅ THÊM - Support link cho account locked -->
+            <div
+              v-if="error.includes('khóa') || error.includes('cấm')"
+              class="mt-2 pt-2 border-t border-red-200"
+            >
+              <p class="text-xs text-red-600">
+                💡 <strong>Cần hỗ trợ?</strong>
+                Liên hệ:
+                <a href="mailto:dinbeedymc@gmail.com" class="underline hover:no-underline">
+                  dinbeedymc@gmail.com
+                </a>
+                hoặc hotline:
+                <a href="tel:0374274604" class="underline hover:no-underline"> 0374.274.604 </a>
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- ✅ THÊM: Footer links -->
@@ -234,10 +269,48 @@ const login = async () => {
     if (!response.result?.token) {
       throw new Error('Token not found in response')
     }
+    if (!response.result?.user) {
+      throw new Error('User information not found in response')
+    }
+    const user = response.result.user
+    const userRoles = response.result?.roles || response.result?.user?.roles || []
+    console.log('User info from response:', {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      status: user.status || 'UNKNOWN',
+      roles: userRoles,
+    })
+    // ✅ THÊM - Check user status TRƯỚC KHI setToken
+    if (user.status && !canUserLogin(user.status)) {
+      let statusMessage = ''
+
+      switch (user.status) {
+        case 'INACTIVE':
+          statusMessage =
+            'Tài khoản của bạn đã bị tạm khóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.'
+          break
+        case 'BANNED':
+          statusMessage =
+            'Tài khoản của bạn đã bị cấm vĩnh viễn do vi phạm chính sách. Vui lòng liên hệ quản trị viên để được hỗ trợ.'
+          break
+        default:
+          statusMessage = `Tài khoản của bạn ở trạng thái "${getUserStatusMessage(user.status)}" và không thể đăng nhập. Vui lòng liên hệ quản trị viên để được hỗ trợ.`
+      }
+
+      console.log(`❌ Login blocked - User status: ${user.status}`)
+
+      // ✅ KHÔNG setToken nếu user bị khóa/cấm
+      error.value = statusMessage
+      return // ✅ Return sớm, không setToken và không redirect
+    }
+
+    // ✅ CHỈ KHI user ACTIVE mới setToken và redirect
+    console.log('✅ User status is ACTIVE - proceeding with login')
+
     // Use rememberMe to determine storage type (session vs local)
     setToken(response.result?.token ?? '')
     // Get user roles from response
-    const userRoles = response.result?.roles || response.result?.user?.roles || []
 
     console.log('User roles for redirect:', userRoles)
 
@@ -262,7 +335,28 @@ const login = async () => {
     isLoading.value = false
   }
 }
+// ✅ THÊM MỚI - Helper functions trong LoginView.vue
+const getUserStatusMessage = (status: string): string => {
+  const statusMessages: Record<string, string> = {
+    ACTIVE: 'Hoạt động',
+    INACTIVE: 'Tạm khóa',
+    BANNED: 'Đã cấm',
+  }
+  return statusMessages[status] || status
+}
 
+const getUserStatusColor = (status: string): string => {
+  const statusColors: Record<string, string> = {
+    ACTIVE: 'text-green-600',
+    INACTIVE: 'text-yellow-600',
+    BANNED: 'text-red-600',
+  }
+  return statusColors[status] || 'text-gray-600'
+}
+
+const canUserLogin = (status: string): boolean => {
+  return status === 'ACTIVE'
+}
 const routerRegister = () => {
   router.push('/register')
 }

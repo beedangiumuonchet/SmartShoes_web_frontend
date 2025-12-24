@@ -330,33 +330,32 @@
                 <!-- Brand Name -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-  <div class="flex-shrink-0 h-10 w-10">
-    <img
-      v-if="brand.url"
-      :src="getDirectImageUrl(brand.url)"
-      alt="Brand logo"
-      class="h-10 w-10 object-cover rounded-lg border"
-    />
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <img
+                        v-if="brand.url"
+                        :src="getDirectImageUrl(brand.url)"
+                        alt="Brand logo"
+                        class="h-10 w-10 object-cover rounded-lg border"
+                      />
 
-    <!-- Fallback nếu chưa có ảnh -->
-    <div
-      v-else
-      class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
-    >
-      <span class="text-sm font-medium text-white">
-        {{ brand.name.substring(0, 2).toUpperCase() }}
-      </span>
-    </div>
-  </div>
+                      <!-- Fallback nếu chưa có ảnh -->
+                      <div
+                        v-else
+                        class="h-10 w-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center"
+                      >
+                        <span class="text-sm font-medium text-white">
+                          {{ brand.name.substring(0, 2).toUpperCase() }}
+                        </span>
+                      </div>
+                    </div>
 
-  <div class="ml-4">
-    <div class="text-sm font-medium text-gray-900">
-      {{ brand.name }}
-    </div>
-    <div class="text-sm text-gray-500">Thương hiệu</div>
-  </div>
-</div>
-
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ brand.name }}
+                      </div>
+                      <div class="text-sm text-gray-500">Thương hiệu</div>
+                    </div>
+                  </div>
                 </td>
 
                 <!-- Description -->
@@ -603,9 +602,7 @@
 
             <!-- Brand Image -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Ảnh thương hiệu
-              </label>
+              <label class="block text-sm font-medium text-gray-700 mb-2"> Ảnh thương hiệu </label>
 
               <input
                 type="file"
@@ -623,7 +620,6 @@
                 />
               </div>
             </div>
-
 
             <!-- Form Actions -->
             <div class="flex justify-end space-x-3 pt-4">
@@ -826,7 +822,6 @@ import { getAllBrandsApi, createBrandApi, updateBrandApi, deleteBrandApi } from 
 import type { Brand, BrandForm } from '../brand.type'
 import { uploadImageApi } from '../../upfile/upfile.api' // đường dẫn đúng của bạn
 
-
 // ✅ Custom debounce function
 function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -842,7 +837,7 @@ function debounce<T extends (...args: any[]) => any>(
 const imageFile = ref<File | null>(null)
 const imagePreview = ref<string | null>(null)
 
-  function getDirectImageUrl(driveUrl: string) {
+function getDirectImageUrl(driveUrl: string) {
   // Tách ID ảnh từ link Google Drive
   const match = driveUrl?.match(/\/d\/([^/]+)/)
   if (!match) return driveUrl
@@ -851,7 +846,7 @@ const imagePreview = ref<string | null>(null)
   // Gọi ảnh qua API backend (nó sẽ tự cache local)
   return `http://localhost:8080/api/v1/images/${driveId}`
 }
-  const handleImageChange = (event: Event) => {
+const handleImageChange = (event: Event) => {
   const files = (event.target as HTMLInputElement).files
   if (!files || files.length === 0) return
 
@@ -902,7 +897,7 @@ const activeActionMenu = ref<string | null>(null)
 // ✅ FIXED: Form data - BỎ type annotation reactive<BrandForm>
 const form = reactive({
   name: '',
-  description: ''
+  description: '',
 })
 
 // Toast state management
@@ -1071,7 +1066,6 @@ const openCreateModal = (): void => {
   activeActionMenu.value = null
   imageFile.value = null
   imagePreview.value = null
-
 }
 
 const openEditModal = (brand: Brand): void => {
@@ -1083,8 +1077,7 @@ const openEditModal = (brand: Brand): void => {
   showModal.value = true
   activeActionMenu.value = null
   imageFile.value = null
-imagePreview.value = brand.url || null
-
+  imagePreview.value = brand.url || null
 }
 
 const closeModal = (): void => {
@@ -1095,8 +1088,7 @@ const closeModal = (): void => {
   form.name = ''
   form.description = ''
   imageFile.value = null
-imagePreview.value = null
-
+  imagePreview.value = null
 }
 
 // ================================
@@ -1200,7 +1192,7 @@ const handleDelete = async (): Promise<void> => {
     await loadBrands() // Reload data
   } catch (error: any) {
     console.error('❌ Error deleting brand:', error)
-    showError(`Không thể xóa thương hiệu: ${error?.message || 'Có lỗi xảy ra'}`)
+    showError(`Không thể xóa thương hiệu. Hãy kiểm tra lại.`)
   } finally {
     deleting.value = false
   }

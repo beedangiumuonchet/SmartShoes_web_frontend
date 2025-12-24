@@ -910,7 +910,7 @@ export const formatRoleName = (name: string): string => {
   const roleNameMap: Record<string, string> = {
     ADMIN: 'Quản trị viên',
     MANAGER: 'Quản lý',
-    USER: 'Người dùng',
+    CLIENT: 'Khách hàng',
     CUSTOMER: 'Khách hàng',
     STAFF: 'Nhân viên',
   }
