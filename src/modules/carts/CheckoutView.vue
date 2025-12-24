@@ -235,14 +235,14 @@
                 :key="item.cartDetailId"
                 class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
               >
-                <!-- Product Image -->
+                <!-- Product Image
                 <div class="flex-shrink-0">
                   <img
                     :src="item.productImage"
                     :alt="item.productName"
                     class="w-16 h-16 object-cover rounded-lg border border-gray-200"
                   />
-                </div>
+                </div> -->
 
                 <!-- Product Info -->
                 <div class="flex-1 min-w-0">
@@ -1016,6 +1016,9 @@ const placeOrder = async () => {
 
         // Success handling
         localStorage.removeItem('selectedCartItems')
+        window.dispatchEvent(new CustomEvent('cart-updated'))
+        console.log('📢 Cart-updated event dispatched after COD payment')
+
         showSuccess('Đặt hàng thành công! Bạn sẽ thanh toán khi nhận hàng.')
 
         setTimeout(() => {
@@ -1023,7 +1026,9 @@ const placeOrder = async () => {
         }, 1500)
       } catch (paymentError) {
         console.error('❌ COD Payment error:', paymentError)
-        showSuccess('Đặt hàng thành công. Hãy thanh toán khi nhận hàng')
+
+        localStorage.removeItem('selectedCartItems')
+        showSuccess('Đặt hàng thành công. Hãy thanh toán khi nhận hàng.')
 
         setTimeout(() => {
           router.push(`/orders/${order.id}`)
@@ -1046,6 +1051,10 @@ const placeOrder = async () => {
         }, 1000)
       } catch (paymentError) {
         console.error('❌ MoMo Payment error:', paymentError)
+        localStorage.removeItem('selectedCartItems')
+
+        // ✅ DISPATCH cart-updated event
+        window.dispatchEvent(new CustomEvent('cart-updated'))
         showError('Đặt hàng thành công nhưng có lỗi tạo thanh toán MoMo. Vui lòng thử lại.')
 
         setTimeout(() => {

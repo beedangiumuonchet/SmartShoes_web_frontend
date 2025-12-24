@@ -132,6 +132,20 @@ export function getCurrentUser(): any | null {
 
   try {
     const decodedToken = getJWTPayload(token) as any // Cast to any để tránh type error
+    // ✅ THÊM - Check user status trong token
+    if (decodedToken.user && decodedToken.user.status && decodedToken.user.status !== 'ACTIVE') {
+      console.warn('⚠️ Current user has non-active status:', decodedToken.user.status)
+      // Clear token nếu user không còn ACTIVE
+      removeToken()
+      return null
+    }
+
+    // ✅ THÊM - Check status từ root level token (nếu BE đặt status ở đó)
+    if (decodedToken.status && decodedToken.status !== 'ACTIVE') {
+      console.warn('⚠️ Token has non-active status:', decodedToken.status)
+      removeToken()
+      return null
+    }
     console.log('Raw decoded token:', decodedToken) // Debug để xem structure
 
     if (!decodedToken) {
@@ -146,6 +160,7 @@ export function getCurrentUser(): any | null {
       email: decodedToken.email,
       firstName: decodedToken.firstName,
       lastName: decodedToken.lastName,
+      status: decodedToken.status || decodedToken.user?.status, // ✅ THÊM status
       role: decodedToken.roles || [],
       roles: decodedToken.roles || [],
       userId: decodedToken.userId,
@@ -158,6 +173,7 @@ export function getCurrentUser(): any | null {
           userId: user.id,
           userName: user.name,
           userEmail: user.email,
+          userStatus: user.status,
           userRoles: user.roles,
           hasUser: !!user,
         },

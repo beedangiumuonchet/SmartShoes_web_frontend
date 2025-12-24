@@ -1,7 +1,6 @@
 // Enum cho Order Status
 export enum OrderStatus {
   PENDING = 'PENDING',
-  PAID = 'PAID',
   CONFIRMED = 'CONFIRMED',
   SHIPPING = 'SHIPPING',
   DELIVERED = 'DELIVERED',
@@ -195,7 +194,6 @@ export interface OrderSummary {
 // Order status mapping cho hiển thị
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   [OrderStatus.PENDING]: 'Chờ xác nhận',
-  [OrderStatus.PAID]: 'Đã thanh toán',
   [OrderStatus.CONFIRMED]: 'Đã xác nhận',
   [OrderStatus.SHIPPING]: 'Đang giao hàng',
   [OrderStatus.DELIVERED]: 'Đã giao hàng',
@@ -206,7 +204,6 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 // Order status colors cho UI
 export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   [OrderStatus.PENDING]: 'yellow',
-  [OrderStatus.PAID]: 'orange',
   [OrderStatus.CONFIRMED]: 'blue',
   [OrderStatus.SHIPPING]: 'purple',
   [OrderStatus.DELIVERED]: 'green',

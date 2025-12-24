@@ -595,7 +595,6 @@ const variantCache = ref<Map<string, ProductVariantWithProduct>>(new Map())
 // Status options for filter
 const statusOptions = [
   { value: OrderStatus.PENDING, label: 'Chờ xác nhận' },
-  { value: OrderStatus.PAID, label: 'Đã thanh toán' },
   { value: OrderStatus.CONFIRMED, label: 'Đã xác nhận' },
   { value: OrderStatus.SHIPPING, label: 'Đang giao hàng' },
   { value: OrderStatus.DELIVERED, label: 'Đã giao hàng' },
@@ -701,7 +700,6 @@ const getStatusLabel = (status: OrderStatus) => {
 const getStatusColor = (status: OrderStatus) => {
   const colors: Record<OrderStatus, string> = {
     [OrderStatus.PENDING]: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-    [OrderStatus.PAID]: 'bg-orange-100 text-orange-800 border border-orange-200',
     [OrderStatus.CONFIRMED]: 'bg-blue-100 text-blue-800 border border-blue-200',
     [OrderStatus.SHIPPING]: 'bg-purple-100 text-purple-800 border border-purple-200',
     [OrderStatus.DELIVERED]: 'bg-green-100 text-green-800 border border-green-200',
@@ -891,7 +889,7 @@ const getPreviewItems = (orderDetails: OrderDetail[]) => {
 }
 
 const canCancelOrder = (order: Order) => {
-  return [OrderStatus.PENDING, OrderStatus.PAID, OrderStatus.CONFIRMED].includes(order.status)
+  return [OrderStatus.PENDING, OrderStatus.CONFIRMED].includes(order.status)
 }
 
 // ✅ Load thông tin variant từ API cho tất cả order details

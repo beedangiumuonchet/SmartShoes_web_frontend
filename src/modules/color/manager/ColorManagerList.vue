@@ -1153,7 +1153,7 @@ const handleDelete = async (): Promise<void> => {
     await loadColors() // Reload data
   } catch (error: any) {
     console.error('❌ Error deleting color:', error)
-    showError(`Không thể xóa màu sắc: ${error?.message || 'Có lỗi xảy ra'}`)
+    showError(`Không thể xóa màu sắc. Hãy kiểm tra lại.`)
   } finally {
     deleting.value = false
   }

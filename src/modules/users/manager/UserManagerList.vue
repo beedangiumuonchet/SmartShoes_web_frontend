@@ -670,7 +670,7 @@
 
             <form @submit.prevent="handleSubmitUser" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div v-if="isEditMode">
                   <label class="block text-sm font-medium text-gray-700">Họ *</label>
                   <input
                     v-model="userForm.firstName"
@@ -1525,18 +1525,18 @@ const getRoleClasses = (role: string): string => {
     ROLE_ADMIN: 'bg-red-100 text-red-800',
     MANAGER: 'bg-blue-100 text-blue-800',
     ROLE_MANAGER: 'bg-blue-100 text-blue-800',
-    USER: 'bg-green-100 text-green-800',
-    ROLE_USER: 'bg-green-100 text-green-800',
+    CLIENT: 'bg-green-100 text-green-800',
+    ROLE_CLIENT: 'bg-green-100 text-green-800',
   }
   return classes[role] || 'bg-gray-100 text-gray-800'
 }
 
 const formatRoleName = (role: string): string => {
   const names: Record<string, string> = {
-    ADMIN: 'Admin',
-    ROLE_ADMIN: 'Admin',
-    USER: 'User',
-    ROLE_USER: 'User',
+    ADMIN: 'Quản trị viên',
+    ROLE_ADMIN: 'Quản trị viên',
+    CLIENT: 'Khách hàng',
+    ROLE_CLIENT: 'Khách hàng',
   }
   return names[role] || role
 }

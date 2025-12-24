@@ -911,7 +911,7 @@ const getRoleIconClasses = (name: string): string => {
   const classes: Record<string, string> = {
     ADMIN: 'bg-red-500',
     MANAGER: 'bg-blue-500',
-    USER: 'bg-green-500',
+    CLIENT: 'bg-green-500',
     CUSTOMER: 'bg-purple-500',
     STAFF: 'bg-yellow-500',
   }

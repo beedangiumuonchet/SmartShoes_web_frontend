@@ -394,7 +394,7 @@
               </div>
             </div>
 
-            <!-- Status Notice cho PENDING/PAID -->
+            <!-- Status Notice cho PENDING-->
             <div
               v-if="canEditShipping"
               class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
@@ -1045,7 +1045,7 @@ const currentUser = computed(() => getCurrentUser())
 
 const canCancelOrder = computed(() => {
   if (!order.value) return false
-  return [OrderStatus.PENDING, OrderStatus.PAID, OrderStatus.CONFIRMED].includes(order.value.status)
+  return [OrderStatus.PENDING, OrderStatus.CONFIRMED].includes(order.value.status)
 })
 
 const orderSteps = computed(() => {
@@ -1053,7 +1053,6 @@ const orderSteps = computed(() => {
 
   const steps = [
     { status: OrderStatus.PENDING, label: 'Chờ xác nhận', completed: false, current: false },
-    { status: OrderStatus.PAID, label: 'Đã thanh toán', completed: false, current: false },
     { status: OrderStatus.CONFIRMED, label: 'Đã xác nhận', completed: false, current: false },
     { status: OrderStatus.SHIPPING, label: 'Đang giao hàng', completed: false, current: false },
     { status: OrderStatus.DELIVERED, label: 'Đã giao hàng', completed: false, current: false },
@@ -1061,7 +1060,6 @@ const orderSteps = computed(() => {
 
   const statusOrder = [
     OrderStatus.PENDING,
-    OrderStatus.PAID,
     OrderStatus.CONFIRMED,
     OrderStatus.SHIPPING,
     OrderStatus.DELIVERED,
@@ -1111,8 +1109,8 @@ const canEditShipping = computed(() => {
   // Kiểm tra order có phải của user hiện tại không
   const isOwner = order.value.userId === currentUser.value.userId
 
-  // Kiểm tra status có phải PENDING hoặc PAID không
-  const canEditStatus = [OrderStatus.PENDING, OrderStatus.PAID].includes(order.value.status)
+  // Kiểm tra status có phải PENDING không
+  const canEditStatus = [OrderStatus.PENDING].includes(order.value.status)
 
   return isOwner && canEditStatus
 })
@@ -1230,7 +1228,6 @@ const paymentStatusLabel = computed(() => {
       switch (order.value?.status) {
         case OrderStatus.PENDING:
           return 'Chờ thanh toán'
-        case OrderStatus.PAID:
         case OrderStatus.CONFIRMED:
         case OrderStatus.SHIPPING:
         case OrderStatus.DELIVERED:
@@ -1256,7 +1253,6 @@ const paymentStatusColor = computed(() => {
       switch (order.value?.status) {
         case OrderStatus.PENDING:
           return 'bg-yellow-100 text-yellow-800'
-        case OrderStatus.PAID:
         case OrderStatus.CONFIRMED:
         case OrderStatus.SHIPPING:
         case OrderStatus.DELIVERED:
@@ -1268,6 +1264,17 @@ const paymentStatusColor = computed(() => {
       }
   }
 })
+
+const isPaymentSuccessful = computed(() => {
+  if (paymentMethodInfo.value === PaymentMethod.MOMO) {
+    return paymentStatusInfo.value === PaymentStatus.SUCCESS
+  } else if (paymentMethodInfo.value === PaymentMethod.CASH) {
+    // CASH payment được coi là successful khi order DELIVERED
+    return order.value?.status === OrderStatus.DELIVERED
+  }
+  return false
+})
+
 // ✅ THÊM MỚI - Retry MoMo payment function
 const retryMomoPayment = async () => {
   if (!order.value || !canRetryPayment.value) return
@@ -1465,7 +1472,6 @@ const getStatusLabel = (status: OrderStatus) => {
 const getStatusColor = (status: OrderStatus) => {
   const colors: Record<OrderStatus, string> = {
     [OrderStatus.PENDING]: 'bg-yellow-100 text-yellow-800',
-    [OrderStatus.PAID]: 'bg-orange-100 text-orange-800',
     [OrderStatus.CONFIRMED]: 'bg-blue-100 text-blue-800',
     [OrderStatus.SHIPPING]: 'bg-purple-100 text-purple-800',
     [OrderStatus.DELIVERED]: 'bg-green-100 text-green-800',
@@ -1477,7 +1483,6 @@ const getStatusColor = (status: OrderStatus) => {
 const getStatusBgColor = (status: OrderStatus) => {
   const colors: Record<OrderStatus, string> = {
     [OrderStatus.PENDING]: 'bg-yellow-500',
-    [OrderStatus.PAID]: 'bg-orange-500',
     [OrderStatus.CONFIRMED]: 'bg-blue-500',
     [OrderStatus.SHIPPING]: 'bg-purple-500',
     [OrderStatus.DELIVERED]: 'bg-green-500',

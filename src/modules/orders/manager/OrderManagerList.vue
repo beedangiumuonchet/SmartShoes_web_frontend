@@ -668,7 +668,7 @@
                           Cập nhật trạng thái
                         </button>
                         <button
-                          v-if="['PENDING', 'PAID', 'CONFIRMED'].includes(order.status)"
+                          v-if="['PENDING', 'CONFIRMED'].includes(order.status)"
                           @click="cancelOrderAction(order.id)"
                           class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                         >
@@ -1482,7 +1482,6 @@ const loadVariantInfoForOrders = async () => {
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: '' },
   { label: 'Chờ xác nhận', value: 'PENDING' },
-  { label: 'Đã thanh toán', value: 'PAID' },
   { label: 'Đã xác nhận', value: 'CONFIRMED' },
   { label: 'Đang giao hàng', value: 'SHIPPING' },
   { label: 'Đã giao hàng', value: 'DELIVERED' },
@@ -1722,18 +1721,15 @@ const cancelOrderAction = async (orderId: string): Promise<void> => {
       return
     }
 
-    // ✅ CẬP NHẬT: Kiểm tra trạng thái có thể hủy - PENDING, PAID, CONFIRMED
-    const cancellableStatuses = ['PENDING', 'PAID', 'CONFIRMED']
+    // ✅ CẬP NHẬT: Kiểm tra trạng thái có thể hủy - PENDING, CONFIRMED
+    const cancellableStatuses = ['PENDING', 'CONFIRMED']
     if (!cancellableStatuses.includes(order.status)) {
-      showError(
-        'Chỉ có thể hủy đơn hàng ở trạng thái "Chờ xác nhận", "Đã thanh toán", hoặc "Đã xác nhận"',
-      )
+      showError('Chỉ có thể hủy đơn hàng ở trạng thái "Chờ xác nhận", "Đã xác nhận"')
       return
     }
 
     const statusLabels: Record<string, string> = {
       PENDING: 'Chờ xác nhận',
-      PAID: 'Đã thanh toán',
       CONFIRMED: 'Đã xác nhận',
     }
 
