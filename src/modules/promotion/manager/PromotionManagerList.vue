@@ -208,13 +208,14 @@
                           Xem chi tiết
                         </button>
                         <button
+                          v-if="canAddProduct(promo)"
                           @click="openSelectProductsModal(promo)"
                           class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
                         >
                           Thêm sản phẩm
                         </button>
 
-                        <button @click="openEditModal(promo)" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <button v-if="canEditPromotion(promo)" @click="openEditModal(promo)" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           Chỉnh sửa
                         </button>
                         <button @click="confirmDeletePromotion(promo)" class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50">
@@ -313,19 +314,21 @@
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">% Giảm <span class="text-red-500">*</span></label>
-                <input v-model.number="form.percent" type="number" required min="0" max="100"
+                <input v-model.number="form.percent" type="number" required min="0" max="100" :disabled="isReadonlyBaseFields"
                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"/>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Ngày bắt đầu <span class="text-red-500">*</span></label>
-                <input v-model="form.startDate" type="date" required
+                <input v-model="form.startDate" type="date" required :disabled="isReadonlyBaseFields"
                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none sm:text-sm"/>
               </div>
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Ngày kết thúc <span class="text-red-500">*</span></label>
-                <input v-model="form.endDate" type="date" required
+                <input v-model="form.endDate" type="date" required 
+                      :min="form.status === 'ACTIVE' ? new Date().toISOString().split('T')[0] : undefined"
+                      :disabled="isEditMode && form.status === 'INACTIVE'"
                        class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none sm:text-sm"/>
               </div>
             </div>
@@ -432,12 +435,21 @@
                     <div class="flex items-center space-x-1">
                       <span class="text-sm text-gray-900">{{ variant.colorName || variant.color?.name || '—' }} / {{ variant.size || '' }}</span>
                       <!-- Tag status -->
-                      <span 
-                        v-if="getVariantStatus(variant) === 'UPCOMING'" 
-                        class="text-xs px-1 py-0.5 bg-yellow-100 text-yellow-800 rounded"
-                      >
-                        Upcoming
-                      </span>
+                      <!-- Tag status -->
+<span
+  v-if="getVariantStatus(variant) === 'UPCOMING'"
+  class="text-xs px-1 py-0.5 bg-yellow-100 text-yellow-800 rounded"
+>
+  Upcoming
+</span>
+
+<span
+  v-else-if="getVariantStatus(variant) === 'ACTIVE'"
+  class="text-xs px-1 py-0.5 bg-green-100 text-green-700 rounded"
+>
+  Active
+</span>
+
                     </div>
                     <div class="text-xs text-gray-500">Giá: {{ variant.price }} VNĐ</div>
                   </div>
@@ -513,6 +525,7 @@
               <div class="flex items-center space-x-2">
                 <div class="text-sm">{{ pp.productVariant?.price }} VNĐ</div>
                 <button
+                v-if="canRemoveVariantFromPromotion"
                   @click="removePromotionProduct(pp)"
                   class="px-2 py-1 text-xs text-red-600 border rounded"
                 >
@@ -589,8 +602,22 @@ const submitting = ref(false)
 const deleting = ref(false)
 const promotionProductsLoading = ref(false)
 const allPromotionProducts = ref<PromotionProductVariant[]>([])
+const selectedPromotion = ref<Promotion | null>(null)
+
 
 const activeActionMenu = ref<string | null>(null)
+
+const canEditPromotion = (promo: Promotion) => {
+  return promo.status === 'UPCOMING' || promo.status === 'ACTIVE' || promo.status === 'INACTIVE'
+}
+
+const canAddProduct = (promo: Promotion) => {
+  return promo.status !== 'EXPIRED'
+}
+const isReadonlyBaseFields = computed(() => {
+  return isEditMode.value && (form.status === 'ACTIVE' || form.status === 'INACTIVE')
+})
+
 
 // Filters and search
 const searchQuery = ref('')
@@ -729,6 +756,18 @@ async function handleSubmit() {
     return
   }
 
+  if (isEditMode.value && form.status === 'ACTIVE') {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  if (new Date(form.endDate) <= today) {
+    showToast('Ngày kết thúc phải lớn hơn ngày hiện tại', 'error')
+    submitting.value = false
+    return
+  }
+}
+
+
   submitting.value = true
   try {
     if (isEditMode.value) {
@@ -802,6 +841,7 @@ function openEditModal(promo: Promotion) {
 // select products modal
 async function openSelectProductsModal(promotion: Promotion) {
   selectedPromotionForSelection.value = promotion
+  currentPromotionId.value = promotion.id  
   await fetchPromotionProductsForPromotion(promotion.id) 
   selectedVariantIds.value = new Set() // reset selection
   // load products if not yet
@@ -983,10 +1023,16 @@ const countVariants = (promo) => {
 
 
 async function openDetailModal(promo: Promotion) {
+  selectedPromotion.value = promo
   detailPromotion.value = promo
   showDetail.value = true
   if (promo?.id) await fetchPromotionProductsForPromotion(promo.id)
 }
+const canRemoveVariantFromPromotion = computed(() => {
+  console.log('Checking if can remove variant from promotion:', selectedPromotion.value)
+  if (!selectedPromotion.value) return false
+  return selectedPromotion.value.status !== 'EXPIRED'
+})
 
 function closeDetail() {
   showDetail.value = false
@@ -1081,14 +1127,37 @@ const totalPagesCount = computed(() => Math.max(1, Math.ceil(filteredPromotions.
 // const promotionVariantIds = computed(() =>
 //   new Set(promotionProducts.value.map(pp => pp.productVariant?.id))
 // )
+// const promotionVariantIds = computed(() => {
+//   if (!currentPromotionId.value) return new Set()
+
+//   return new Set(
+//     allPromotionProducts.value
+//       .filter(pp => pp.promotion?.id === currentPromotionId.value)
+//       .map(pp => pp.productVariant?.id)
+//       .filter(Boolean)
+//   )
+// })
 const promotionVariantIds = computed(() => {
   return new Set(
-    allPromotionProducts.value
-      .filter(pp => pp?.status === 'ACTIVE') // giả sử promotion có field `status`
+    promotionProducts.value
       .map(pp => pp.productVariant?.id)
-      .filter(Boolean) // loại bỏ undefined
+      .filter(Boolean)
   )
 })
+
+
+// const promotionVariantIds = computed(() => {
+//   return new Set(
+//     allPromotionProducts.value
+//       // .filter(pp => pp?.status === 'ACTIVE') // giả sử promotion có field `status`
+//       .map(pp => pp.productVariant?.id)
+//       .filter(Boolean) // loại bỏ undefined
+//   )
+// })
+
+const currentPromotionId = ref<string | null>(null) 
+// id promotion đang xem / chỉnh sửa
+
 const filteredProducts = computed(() => {
   const q = productSearchQuery.value?.toLowerCase() || ''
 
