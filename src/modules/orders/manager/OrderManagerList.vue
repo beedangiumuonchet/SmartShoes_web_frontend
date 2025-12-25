@@ -355,38 +355,7 @@
                   >
                     <span>Mã đơn hàng</span>
                     <div class="flex flex-col">
-                      <svg
-                        :class="[
-                          'w-3 h-3 transition-colors',
-                          sortConfig.sortBy === 'id' && sortConfig.sortDirection === 'asc'
-                            ? 'text-indigo-600'
-                            : 'text-gray-400',
-                        ]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                      <svg
-                        :class="[
-                          'w-3 h-3 -mt-1 transition-colors',
-                          sortConfig.sortBy === 'id' && sortConfig.sortDirection === 'desc'
-                            ? 'text-indigo-600'
-                            : 'text-gray-400',
-                        ]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
+                      <!-- Sort icons here -->
                     </div>
                   </button>
                 </th>
@@ -414,44 +383,18 @@
                     class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
                   >
                     <span>Tổng tiền</span>
-                    <div class="flex flex-col">
-                      <svg
-                        :class="[
-                          'w-3 h-3 transition-colors',
-                          sortConfig.sortBy === 'totalAmount' && sortConfig.sortDirection === 'asc'
-                            ? 'text-indigo-600'
-                            : 'text-gray-400',
-                        ]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                      <svg
-                        :class="[
-                          'w-3 h-3 -mt-1 transition-colors',
-                          sortConfig.sortBy === 'totalAmount' && sortConfig.sortDirection === 'desc'
-                            ? 'text-indigo-600'
-                            : 'text-gray-400',
-                        ]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                    <!-- Sort icons here -->
                   </button>
                 </th>
 
-                <!-- Status Column -->
+                <!-- ✅ THÊM MỚI - Payment Status Column -->
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Thanh toán
+                </th>
+
+                <!-- Order Status Column -->
                 <th
                   class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
@@ -459,41 +402,8 @@
                     @click="handleSort('status')"
                     class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
                   >
-                    <span>Trạng thái</span>
-                    <div class="flex flex-col">
-                      <svg
-                        :class="[
-                          'w-3 h-3 transition-colors',
-                          sortConfig.sortBy === 'status' && sortConfig.sortDirection === 'asc'
-                            ? 'text-indigo-600'
-                            : 'text-gray-400',
-                        ]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                      <svg
-                        :class="[
-                          'w-3 h-3 -mt-1 transition-colors',
-                          sortConfig.sortBy === 'status' && sortConfig.sortDirection === 'desc'
-                            ? 'text-indigo-600'
-                            : 'text-gray-400',
-                        ]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                    <span>Trạng thái đơn hàng</span>
+                    <!-- Sort icons here -->
                   </button>
                 </th>
 
@@ -506,40 +416,7 @@
                     class="flex items-center space-x-1 hover:text-gray-700 transition-colors"
                   >
                     <span>Ngày tạo</span>
-                    <div class="flex flex-col">
-                      <svg
-                        :class="[
-                          'w-3 h-3 transition-colors',
-                          sortConfig.sortBy === 'createdAt' && sortConfig.sortDirection === 'asc'
-                            ? 'text-indigo-600'
-                            : 'text-gray-400',
-                        ]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                      <svg
-                        :class="[
-                          'w-3 h-3 -mt-1 transition-colors',
-                          sortConfig.sortBy === 'createdAt' && sortConfig.sortDirection === 'desc'
-                            ? 'text-indigo-600'
-                            : 'text-gray-400',
-                        ]"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                    <!-- Sort icons here -->
                   </button>
                 </th>
 
@@ -593,7 +470,6 @@
                         :key="index"
                         class="text-sm text-gray-900 truncate"
                       >
-                        <!-- ✅ SỬA: Sử dụng getProductName helper function -->
                         {{ getProductName(item) }}
                         <span class="text-gray-500">x{{ item.quantity }}</span>
                       </div>
@@ -615,7 +491,93 @@
                   </div>
                 </td>
 
-                <!-- Status -->
+                <!-- ✅ THÊM MỚI - Payment Status -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div v-if="loadingPaymentInfo.has(order.id)" class="flex items-center space-x-2">
+                    <svg
+                      class="w-4 h-4 animate-spin text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    <span class="text-xs text-gray-500">Loading...</span>
+                  </div>
+                  <div v-else class="space-y-1">
+                    <!-- Payment Method -->
+                    <div class="flex items-center space-x-1">
+                      <!-- MoMo Icon -->
+                      <div
+                        v-if="orderPaymentInfo.get(order.id)?.paymentMethod === 'MOMO'"
+                        class="w-4 h-4 bg-pink-500 rounded flex items-center justify-center"
+                      >
+                        <span class="text-white text-xs font-bold">M</span>
+                      </div>
+                      <!-- Cash Icon -->
+                      <div
+                        v-else-if="orderPaymentInfo.get(order.id)?.paymentMethod === 'CASH'"
+                        class="w-4 h-4 bg-green-500 rounded flex items-center justify-center"
+                      >
+                        <svg
+                          class="w-3 h-3 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <!-- Unknown Icon -->
+                      <div
+                        v-else
+                        class="w-4 h-4 bg-gray-400 rounded flex items-center justify-center"
+                      >
+                        <span class="text-white text-xs">?</span>
+                      </div>
+                      <span class="text-xs text-gray-600">
+                        {{ getPaymentMethodLabel(orderPaymentInfo.get(order.id)?.paymentMethod) }}
+                      </span>
+                    </div>
+
+                    <!-- Payment Status (chỉ hiển thị cho MoMo) -->
+                    <div v-if="orderPaymentInfo.get(order.id)?.paymentMethod === 'MOMO'">
+                      <span
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        :class="
+                          getPaymentStatusClasses(orderPaymentInfo.get(order.id)?.paymentStatus)
+                        "
+                      >
+                        {{ getPaymentStatusLabel(orderPaymentInfo.get(order.id)?.paymentStatus) }}
+                      </span>
+                    </div>
+
+                    <!-- CASH Payment Info -->
+                    <div v-else-if="orderPaymentInfo.get(order.id)?.paymentMethod === 'CASH'">
+                      <span
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        :class="getCashPaymentStatusClasses(order.status)"
+                      >
+                        {{ getCashPaymentStatusLabel(order.status) }}
+                      </span>
+                    </div>
+
+                    <!-- No Payment Info -->
+                    <div v-else class="text-xs text-gray-400 italic">Chưa có thông tin</div>
+                  </div>
+                </td>
+
+                <!-- Order Status -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
                     :class="[
@@ -976,10 +938,10 @@
           <div v-else-if="selectedOrderForDetail" class="p-6 space-y-6">
             <!-- Order Status & Info -->
             <div class="bg-gray-50 rounded-xl p-6">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Status -->
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- Order Status -->
                 <div class="text-center">
-                  <h3 class="text-sm font-medium text-gray-500 mb-2">Trạng thái</h3>
+                  <h3 class="text-sm font-medium text-gray-500 mb-2">Trạng thái đơn hàng</h3>
                   <span
                     class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
                     :class="getStatusClasses(selectedOrderForDetail.status)"
@@ -988,12 +950,76 @@
                   </span>
                 </div>
 
-                <!-- Order Date -->
+                <!-- ✅ THÊM MỚI - Payment Method -->
                 <div class="text-center">
-                  <h3 class="text-sm font-medium text-gray-500 mb-2">Ngày đặt hàng</h3>
-                  <p class="text-gray-900 font-medium">
-                    {{ formatDate(selectedOrderForDetail.createdAt) }}
-                  </p>
+                  <h3 class="text-sm font-medium text-gray-500 mb-2">Phương thức thanh toán</h3>
+                  <div class="flex items-center justify-center space-x-2">
+                    <div
+                      v-if="
+                        orderPaymentInfo.get(selectedOrderForDetail.id)?.paymentMethod === 'MOMO'
+                      "
+                      class="w-6 h-6 bg-pink-500 rounded flex items-center justify-center"
+                    >
+                      <span class="text-white text-xs font-bold">M</span>
+                    </div>
+                    <div
+                      v-else-if="
+                        orderPaymentInfo.get(selectedOrderForDetail.id)?.paymentMethod === 'CASH'
+                      "
+                      class="w-6 h-6 bg-green-500 rounded flex items-center justify-center"
+                    >
+                      <svg
+                        class="w-4 h-4 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">
+                      {{
+                        getPaymentMethodLabel(
+                          orderPaymentInfo.get(selectedOrderForDetail.id)?.paymentMethod,
+                        )
+                      }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- ✅ THÊM MỚI - Payment Status -->
+                <div class="text-center">
+                  <h3 class="text-sm font-medium text-gray-500 mb-2">Trạng thái thanh toán</h3>
+                  <span
+                    v-if="orderPaymentInfo.get(selectedOrderForDetail.id)?.paymentMethod === 'MOMO'"
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    :class="
+                      getPaymentStatusClasses(
+                        orderPaymentInfo.get(selectedOrderForDetail.id)?.paymentStatus,
+                      )
+                    "
+                  >
+                    {{
+                      getPaymentStatusLabel(
+                        orderPaymentInfo.get(selectedOrderForDetail.id)?.paymentStatus,
+                      )
+                    }}
+                  </span>
+                  <span
+                    v-else-if="
+                      orderPaymentInfo.get(selectedOrderForDetail.id)?.paymentMethod === 'CASH'
+                    "
+                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    :class="getCashPaymentStatusClasses(selectedOrderForDetail.status)"
+                  >
+                    {{ getCashPaymentStatusLabel(selectedOrderForDetail.status) }}
+                  </span>
+                  <span v-else class="text-sm text-gray-500 italic"> Chưa có thông tin </span>
                 </div>
 
                 <!-- Total Amount -->
@@ -1238,6 +1264,9 @@ import type {
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, createOrderFilter } from '../orders.type'
 import { getVariantWithProductByIdApi } from '@/modules/products/product.api'
 import type { ProductVariantWithProduct } from '@/modules/products/product.type'
+// Import payment API
+import { getPaymentsByOrderId, getOrderPaymentInfo } from '@/modules/payments/payments.api'
+import { PaymentMethod, PaymentStatus } from '@/modules/payments/payments.type'
 
 // ✅ Custom debounce function
 function debounce<T extends (...args: any[]) => any>(
@@ -1250,6 +1279,9 @@ function debounce<T extends (...args: any[]) => any>(
     timeout = setTimeout(() => func(...args), wait)
   }
 }
+// ✅ THÊM MỚI - State management cho payment info
+const orderPaymentInfo = ref<Map<string, any>>(new Map())
+const loadingPaymentInfo = ref<Set<string>>(new Set())
 
 // ================================
 // COMPOSABLES & UTILS
@@ -1506,7 +1538,94 @@ const stats = computed(() => {
     returned: orders.filter((o) => o.status === 'RETURNED').length,
   }
 })
+// ✅ THÊM MỚI - Payment helper functions
+const getPaymentMethodLabel = (method?: string): string => {
+  const labels: Record<string, string> = {
+    MOMO: 'MoMo',
+    CASH: 'Tiền mặt',
+  }
+  return labels[method || ''] || 'N/A'
+}
 
+const getPaymentStatusLabel = (status?: string): string => {
+  const labels: Record<string, string> = {
+    PENDING: 'Chờ thanh toán',
+    SUCCESS: 'Đã thanh toán',
+    FAILED: 'Thanh toán thất bại',
+  }
+  return labels[status || ''] || 'N/A'
+}
+
+const getPaymentStatusClasses = (status?: string): string => {
+  const classes: Record<string, string> = {
+    PENDING: 'bg-yellow-100 text-yellow-800',
+    SUCCESS: 'bg-green-100 text-green-800',
+    FAILED: 'bg-red-100 text-red-800',
+  }
+  return classes[status || ''] || 'bg-gray-100 text-gray-600'
+}
+
+const getCashPaymentStatusLabel = (orderStatus?: string): string => {
+  const labels: Record<string, string> = {
+    PENDING: 'Chờ xác nhận',
+    CONFIRMED: 'COD khi nhận hàng',
+    SHIPPING: 'COD khi giao hàng',
+    DELIVERED: 'Đã thanh toán COD',
+    CANCELLED: 'Đã hủy',
+    RETURNED: 'Đã trả hàng',
+  }
+  return labels[orderStatus || ''] || 'N/A'
+}
+
+const getCashPaymentStatusClasses = (orderStatus?: string): string => {
+  const classes: Record<string, string> = {
+    PENDING: 'bg-yellow-100 text-yellow-800',
+    CONFIRMED: 'bg-blue-100 text-blue-800',
+    SHIPPING: 'bg-purple-100 text-purple-800',
+    DELIVERED: 'bg-green-100 text-green-800',
+    CANCELLED: 'bg-red-100 text-red-800',
+    RETURNED: 'bg-orange-100 text-orange-800',
+  }
+  return classes[orderStatus || ''] || 'bg-gray-100 text-gray-600'
+}
+// ✅ THÊM MỚI - Load payment info cho tất cả orders
+const loadPaymentInfoForOrders = async () => {
+  if (!pagedData.value?.content) return
+
+  console.log('🔄 Loading payment info for all orders...')
+
+  const promises = pagedData.value.content.map(async (order) => {
+    if (!orderPaymentInfo.value.has(order.id)) {
+      try {
+        loadingPaymentInfo.value.add(order.id)
+        console.log(`💳 Loading payment info for order: ${order.id}`)
+
+        const paymentInfo = await getOrderPaymentInfo(order.id)
+        orderPaymentInfo.value.set(order.id, paymentInfo)
+
+        console.log(`✅ Payment info loaded for ${order.id}:`, {
+          method: paymentInfo.paymentMethod,
+          status: paymentInfo.paymentStatus,
+          hasMultiple: paymentInfo.hasMultiplePayments,
+        })
+      } catch (error) {
+        console.error(`❌ Error loading payment info for ${order.id}:`, error)
+        // Set fallback info để avoid lỗi UI
+        orderPaymentInfo.value.set(order.id, {
+          paymentMethod: null,
+          paymentStatus: null,
+          latestPayment: null,
+          hasMultiplePayments: false,
+        })
+      } finally {
+        loadingPaymentInfo.value.delete(order.id)
+      }
+    }
+  })
+
+  await Promise.all(promises)
+  console.log('✅ All payment info loaded for orders')
+}
 // ================================
 // UTILITY FUNCTIONS
 // ================================
@@ -1578,7 +1697,10 @@ const loadOrders = async (): Promise<void> => {
 
     // ✅ THÊM: Load variant info cho tất cả orders sau khi load xong
     if (response.content && response.content.length > 0) {
-      await loadVariantInfoForOrders()
+      await Promise.all([
+        loadVariantInfoForOrders(),
+        loadPaymentInfoForOrders(), // ✅ THÊM MỚI
+      ])
     }
   } catch (error: any) {
     console.error('❌ Error loading orders:', error)
@@ -1772,7 +1894,10 @@ const viewOrderDetails = async (order: Order): Promise<void> => {
 
     // Load variant info cho order details
     if (fullOrderData?.orderDetails) {
-      await loadVariantInfoForOrderDetail(fullOrderData)
+      await Promise.all([
+        loadVariantInfoForOrderDetail(fullOrderData),
+        loadPaymentInfoForOrderDetail(fullOrderData), // ✅ THÊM MỚI
+      ])
     }
   } catch (error: any) {
     console.error('❌ Error loading order detail:', error)
@@ -1782,7 +1907,19 @@ const viewOrderDetails = async (order: Order): Promise<void> => {
     loadingOrderDetail.value = false
   }
 }
-
+// ✅ THÊM MỚI - Load payment info cho order detail modal
+const loadPaymentInfoForOrderDetail = async (order: Order) => {
+  if (!orderPaymentInfo.value.has(order.id)) {
+    try {
+      console.log(`💳 Loading payment info for order detail: ${order.id}`)
+      const paymentInfo = await getOrderPaymentInfo(order.id)
+      orderPaymentInfo.value.set(order.id, paymentInfo)
+      console.log(`✅ Payment info loaded for order detail:`, paymentInfo)
+    } catch (error) {
+      console.error(`❌ Error loading payment info for order detail:`, error)
+    }
+  }
+}
 const closeOrderDetailModal = (): void => {
   showOrderDetailModal.value = false
   selectedOrderForDetail.value = null
