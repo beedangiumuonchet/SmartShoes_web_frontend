@@ -82,7 +82,7 @@
                 </svg>
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-blue-600">Tổng Promotion</p>
+                <p class="text-sm font-medium text-blue-600">Tổng khuyến mãi</p>
                 <p class="text-2xl font-bold text-blue-900">{{ promotions.length }}</p>
               </div>
             </div>
@@ -97,7 +97,7 @@
                 </svg>
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-green-600">Đang ACTIVE</p>
+                <p class="text-sm font-medium text-green-600">Đang hoạt động</p>
                 <p class="text-2xl font-bold text-green-900">{{ activeCount }}</p>
               </div>
             </div>
@@ -112,7 +112,7 @@
                 </svg>
               </div>
               <div class="ml-4">
-                <p class="text-sm font-medium text-purple-600">Sắp diễn ra (UPCOMING)</p>
+                <p class="text-sm font-medium text-purple-600">Sắp diễn ra</p>
                 <p class="text-2xl font-bold text-purple-900">{{ upcomingCount }}</p>
               </div>
             </div>
