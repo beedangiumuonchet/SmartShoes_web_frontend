@@ -101,7 +101,7 @@
       </div>
 
       <!-- Revenue -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 stats-card">
+      <!-- <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 stats-card">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -131,7 +131,7 @@
             </p>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Pending Orders -->
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 stats-card">
