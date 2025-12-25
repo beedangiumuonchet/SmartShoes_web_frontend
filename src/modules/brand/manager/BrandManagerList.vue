@@ -1156,7 +1156,7 @@ const handleSubmit = async (): Promise<void> => {
     closeModal()
     await loadBrands()
   } catch (error: any) {
-    showError(error?.message || 'Có lỗi xảy ra')
+    showError('Trùng tên thương hiệu hoặc có lỗi xảy ra. Vui lòng thử lại.')
   } finally {
     submitting.value = false
   }
